@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Node / Next.js (step 0 이후 사용)
+node_modules/
+.next/
+out/
+dist/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
