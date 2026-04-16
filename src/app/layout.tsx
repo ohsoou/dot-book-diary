@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export const metadata: Metadata = {
   title: { default: '도트 북 다이어리', template: '%s · 도트 북 다이어리' },
@@ -15,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" data-theme="night">
-      <body className="min-h-screen bg-[#2a1f17] text-[#d7c199]">{children}</body>
+      <body className="min-h-screen bg-[#2a1f17] text-[#d7c199]">
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   )
 }
