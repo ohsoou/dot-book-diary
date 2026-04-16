@@ -1,30 +1,45 @@
-# Step 8: diary
+# Step 8: bookshelf
 
 ## 읽어야 할 파일
 
-- `/docs/PRD.md` (핵심 기능 5번)
-- 이전 step: `src/lib/storage/*`, `src/types/index.ts`
+- `/docs/PRD.md` (핵심 기능 3번, 빈 상태 카피)
+- `/docs/ARCHITECTURE.md` ("혼합 렌더링 패턴", revalidatePath 표)
+- `/docs/UI_GUIDE.md` (책 표지 이미지 규칙, Skeleton)
+- 이전 step: `src/lib/storage/*`, `src/components/book/AddBookTabs.tsx`, `src/components/ui/*`
 
 ## 작업
 
-`/diary`, `/diary/new`, `/diary/[id]` 세 라우트를 구현한다.
+`/bookshelf`를 member/server + guest/client hydrator 패턴의 첫 적용 사례로 구현한다.
 
-1. **`src/app/diary/page.tsx`**
-   - `listDiaryEntries()` → 최신순 정렬.
-   - 필터 탭: 전체 / quote / review.
-   - 각 엔트리는 카드로, 클릭 → `/diary/[id]`.
-2. **`src/app/diary/new/page.tsx`** (`'use client'` 또는 Client 래퍼)
-   - 쿼리스트링 `bookId`, `type`을 기본값으로 폼 프리필.
-   - 입력: `entryType`(quote|review), `body`(textarea), `page`(optional), `bookId`(optional — 등록한 책 중 선택).
-   - 제출 → `Store.addDiaryEntry` → `/diary`로 이동.
-3. **`src/app/diary/[id]/page.tsx`**
-   - `getDiaryEntry(id)` → 없으면 `notFound()`.
-   - "편집" 모드 토글 → `updateDiaryEntry`.
-   - "삭제" → confirm 후 `deleteDiaryEntry` → `/diary`.
-4. **공통 폼 컴포넌트** `src/components/diary/DiaryEntryForm.tsx` — 신규/편집에서 재사용.
+1. **`src/app/bookshelf/page.tsx`**
+   - Server Component 셸. 세션만 판단.
+   - 회원: server 경로에서 `getStore().listBooks()` → `<BookGrid>` 렌더.
+   - 비회원: `<BookGridHydrator>` (Client Component, LocalStore 읽기).
+   - `loading.tsx`: 표지 크기 Skeleton(`h-36 w-24`) 6개 그리드.
+
+2. **`src/components/book/BookGrid.tsx`**
+   - 표지 그리드 (`grid grid-cols-3 md:grid-cols-4 gap-4`).
+   - 각 아이템: `<BookCover>` + 제목 한 줄.
+   - 클릭 → `href="/reading/{book.id}"` (`<Link>`).
+   - 빈 배열: `<EmptyState message="아직 책장이 비어 있어요" cta={{ label: '첫 책 등록하기', href: '/add-book' }} />`.
+
+3. **`src/components/book/BookCover.tsx`**
+   - `coverUrl`이 있으면 `<Image>` (next/image). `image-rendering: auto`. 실패(`onError`) 시 이니셜 플레이스홀더.
+   - 이니셜 플레이스홀더: `bg-[#3a2a1a] border border-[#1a100a] text-[#a08866] text-xs` + 제목 첫 글자.
+   - 크기 고정: `w-24 h-36`.
+   - `alt={book.title}` 필수.
+
+4. **`src/lib/actions/books.ts`** — Server Action
+   - `addBookAction(prevState, formData): Promise<ActionResult<Book>>`
+   - `deleteBookAction(bookId: string): Promise<ActionResult<void>>`
+     - 이 액션은 `/reading/[bookId]`의 [책 삭제] 버튼에서 호출한다.
+     - 성공 후 `revalidatePath('/bookshelf')` + `revalidatePath('/')`.
+   - `updateBookAction(bookId: string, patch, formData): Promise<ActionResult<Book>>`
+
 5. **테스트**
-   - `DiaryEntryForm.test.tsx`: 입력/제출/Store 호출.
-   - `diary/page` 렌더에서 필터 탭 클릭 시 보이는 리스트가 달라지는지(Client 분기라면).
+   - `src/components/book/BookGrid.test.tsx`: 리스트 렌더, 빈 상태, 링크 href.
+   - `src/app/bookshelf/bookshelf-page.test.tsx`: member 데이터 렌더, guest hydrator 분기.
+   - `src/components/book/BookCover.test.tsx`: 이미지 렌더, 오류 시 이니셜 플레이스홀더.
 
 ## Acceptance Criteria
 
@@ -37,12 +52,14 @@ bun test
 
 1. AC 실행.
 2. 체크리스트:
-   - `entryType`은 type union(`'quote' | 'review'`) 그대로 보존(문자열 허용 금지).
-   - 삭제는 반드시 사용자 확인(`confirm` 또는 커스텀 모달).
+   - `page.tsx` 전체를 client로 올리지 않았는가?
+   - 회원/비회원 모두 동일한 빈 상태 카피를 쓰는가?
+   - 책 표지 `<Image>`에 `image-rendering: auto`가 적용됐는가 (pixelated 금지)?
+   - `deleteBookAction`이 `revalidatePath`를 올바른 경로로 호출하는가?
 3. `phases/0-mvp/index.json` 업데이트.
 
 ## 금지사항
 
-- 편집 중 저장하지 않은 상태를 lost 시킬 수 있는 라우팅 금지(새로고침 시 경고 또는 autosave 중 하나). 이유: 사용자 데이터 보호.
-- 마크다운 에디터 라이브러리 도입 금지. 이유: 스코프. 단순 textarea만.
+- `page.tsx`를 통째로 `"use client"`로 바꾸지 마라.
+- 표지 이미지를 blur/gradient placeholder로 만들지 마라.
 - 기존 테스트를 깨뜨리지 마라.

@@ -2,16 +2,19 @@
   "project": "dot-book-diary",
   "phase": "0-mvp",
   "steps": [
-    { "step": 0, "name": "project-setup", "status": "pending" },
-    { "step": 1, "name": "core-types-and-local-store", "status": "pending" },
-    { "step": 2, "name": "supabase-remote-store", "status": "pending" },
-    { "step": 3, "name": "aladin-service", "status": "pending" },
-    { "step": 4, "name": "room-scene", "status": "pending" },
-    { "step": 5, "name": "add-book", "status": "pending" },
-    { "step": 6, "name": "bookshelf", "status": "pending" },
-    { "step": 7, "name": "reading-session", "status": "pending" },
-    { "step": 8, "name": "diary", "status": "pending" },
-    { "step": 9, "name": "book-calendar", "status": "pending" },
-    { "step": 10, "name": "settings-and-auth", "status": "pending" }
+    { "step": 0, "name": "scaffold-and-quality-gates", "status": "pending" },
+    { "step": 1, "name": "domain-foundations", "status": "pending" },
+    { "step": 2, "name": "guest-persistence", "status": "pending" },
+    { "step": 3, "name": "supabase-and-auth-backbone", "status": "pending" },
+    { "step": 4, "name": "aladin-service", "status": "pending" },
+    { "step": 5, "name": "shared-ui-infrastructure", "status": "pending" },
+    { "step": 6, "name": "room-scene", "status": "pending" },
+    { "step": 7, "name": "add-book", "status": "pending" },
+    { "step": 8, "name": "bookshelf", "status": "pending" },
+    { "step": 9, "name": "reading-session", "status": "pending" },
+    { "step": 10, "name": "diary", "status": "pending" },
+    { "step": 11, "name": "book-calendar", "status": "pending" },
+    { "step": 12, "name": "settings-and-login", "status": "pending" },
+    { "step": 13, "name": "release-hardening", "status": "pending" }
   ]
 }

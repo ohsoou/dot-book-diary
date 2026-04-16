@@ -1,55 +1,65 @@
-# Step 4: room-scene
+# Step 4: aladin-service
 
 ## 읽어야 할 파일
 
-- `/docs/PRD.md` (핵심 기능 1번 — 도트 방 메인)
-- `/docs/UI_GUIDE.md` (픽셀/색상/애니메이션 규칙)
-- `/docs/ADR.md` (ADR-005: PNG 스프라이트)
-- 이전 step: `src/app/page.tsx`, `src/app/globals.css`
+- `/docs/ARCHITECTURE.md` ("데이터 흐름 - 책 검색", "HTTP 매핑", "캐싱·재검증")
+- `/docs/ADR.md` (ADR-004, ADR-012)
+- `/CLAUDE.md`
+- 이전 step: `src/types/index.ts`, `src/lib/isbn.ts`, `src/lib/errors.ts`, `src/lib/env.ts`
 
 ## 작업
 
-메인 페이지 `/`에 도트 방 씬을 구현한다. 실제 아트 에셋은 자리표시자(단색 PNG 또는 CSS 박스)로 시작하되, 레이어 구조와 hitbox 네비게이션은 최종 형태로 만든다.
+알라딘 Open API를 감싸는 서버 전용 서비스와 Next.js 라우트 핸들러 2개를 구현한다.
 
-1. **`src/components/room/RoomScene.tsx`** (`'use client'`)
-   - 고정 아트 보드 `640 × 400` px, 부모에서 `scale`로 확대.
-   - 절대 위치 레이어: 방 배경 → 창문 → 러그 → 책더미(곰 오른쪽) → 다이어리(곰 왼쪽) → 곰 → 램프.
-   - 각 인터랙티브 요소는 투명 `<button>` hitbox로 오버레이:
-     - 다이어리 hitbox → `router.push('/diary')`
-     - 책더미 hitbox → `router.push('/bookshelf')`
-     - 창문 hitbox → `router.push('/book-calendar')`
-     - 곰 hitbox → `router.push('/add-book')`
-     - 우상단 톱니 hitbox → `router.push('/settings')`
-   - hover 시 `aria-label`을 가진 tooltip 노출(간단한 `<span>` + `group-hover:inline`).
-2. **에셋 자리표시자**
-   - `public/sprites/{room,window,rug,books,diary,bear,lamp}.png` 파일을 각 단색 픽셀 블록(PNG)으로 만들어 둔다. 실제 아트는 수동 교체 가능하도록 파일명을 고정.
-   - 대체 경로: 에셋이 없을 때 `bg-[#5c3d28]` 등 CSS 박스로 폴백해 시각적으로 영역이 보이게 한다.
-3. **`src/app/page.tsx`** — Server Component는 제목/메타만, `<RoomScene />`을 렌더(Client).
-4. **`src/app/globals.css`** — `img { image-rendering: pixelated; }` 전역(사진은 개별 덮어쓰기).
-5. **테스트** (`src/components/room/RoomScene.test.tsx`)
-   - 렌더 시 5개 hitbox의 `aria-label`("다이어리", "책장", "캘린더", "책 등록", "설정")이 DOM에 있다.
-   - 각 hitbox 클릭 시 `useRouter().push`가 해당 경로로 호출된다(`vi.mock('next/navigation')`).
+1. **`src/lib/aladin.ts`** — 서버 전용
+   - 파일 상단에 `import 'server-only'`.
+   - `searchByKeyword(query: string): Promise<BookSearchResult[]>`
+   - `fetchByIsbn(isbn: string): Promise<BookSearchResult | null>`
+   - **타임아웃**: `AbortController` 5초. 실패 시 1회 재시도(총 2회 시도). 재시도 후에도 실패 → `AppError('UPSTREAM_FAILED', ...)`.
+   - **ISBN 변환**: 입력이 ISBN-10이면 `lib/isbn.ts`로 13자리로 변환 후 조회.
+   - **응답 정규화**: 알라딘 응답 → `BookSearchResult`. `title` 없는 항목 필터. `subInfo.itemPage`는 없어도 무시.
+   - **rate limit**: 알라딘이 429 반환 시 `AppError('RATE_LIMITED', ...)` — 재시도 하지 않음.
+   - **캐싱**: 외부 `fetch`에 `{ next: { revalidate: 60 } }` 옵션.
+
+2. **`src/app/api/books/search/route.ts`** — `GET ?q=<query>`
+   - `q` 없거나 빈 문자열 → 400 `{ error: { code: 'VALIDATION_FAILED', message: '검색어를 입력해 주세요' } }`
+   - `q` 최대 100자 초과 → 400.
+   - `RATE_LIMITED` → 429.
+   - `UPSTREAM_FAILED` → 502.
+   - 성공 → 200 `{ data: BookSearchResult[] }`.
+
+3. **`src/app/api/books/isbn/route.ts`** — `GET ?isbn=<isbn>`
+   - `isbn` 없거나 빈 문자열 → 400.
+   - 결과 없음 → 404 `{ error: { code: 'NOT_FOUND', message: '책을 찾을 수 없어요' } }`.
+   - `RATE_LIMITED` → 429.
+   - `UPSTREAM_FAILED` → 502.
+   - 성공 → 200 `{ data: BookSearchResult }`.
+
+4. **테스트**
+   - `src/lib/aladin.test.ts`: `fetch` mock. happy path, 타임아웃(2회 모두 실패), rate limit, title 없는 항목 필터, ISBN-10 입력 처리.
+   - `src/app/api/books/search/route.test.ts`: 빈 쿼리, 정상 응답, 429 매핑.
+   - `src/app/api/books/isbn/route.test.ts`: 결과 없음 404, 정상 응답.
 
 ## Acceptance Criteria
 
 ```bash
 bun run build
 bun test
-bun dev   # 수동: localhost:3000 에 방이 보이고 5개 영역 클릭 가능
 ```
 
 ## 검증 절차
 
-1. AC 실행. `bun dev`는 확인만 하고 종료.
+1. AC 실행.
 2. 체크리스트:
-   - hitbox가 `<button>`이며 `aria-label`을 가진다(키보드/스크린리더 접근성).
-   - UI_GUIDE 금지사항: `rounded`, `backdrop-blur`, `gradient`, duration>100ms 없음.
-   - RoomScene은 Client Component이고, page.tsx는 Server Component.
+   - `src/lib/aladin.ts` 상단에 `import 'server-only'`가 있는가?
+   - 클라이언트에서 `aladin.co.kr`로 직접 fetch하지 않는가?
+   - 5초 timeout + 1회 재시도(rate limit 제외)가 코드/테스트로 고정됐는가?
+   - 응답이 `BookSearchResult`로 정규화됐는가 (원본 그대로 노출 금지)?
 3. `phases/0-mvp/index.json` 업데이트.
 
 ## 금지사항
 
-- hitbox를 `<div onClick>`으로 만들지 마라. 이유: 접근성·포커스·키보드 탐색.
-- 방 아트를 `<div>` + Tailwind gradient로 그리지 마라. 이유: ADR-005.
-- 곰 애니메이션에 blur/소프트 트랜지션을 쓰지 마라. 이유: UI_GUIDE.
+- 응답을 원본 그대로 반환하지 마라. 반드시 `BookSearchResult`로 정규화.
+- TTB 키를 하드코드하지 마라 (`env.ts`의 `ALADIN_TTB_KEY` 사용).
+- 클라이언트 컴포넌트에서 `/api/books/*` 외 알라딘 URL을 직접 fetch하지 마라.
 - 기존 테스트를 깨뜨리지 마라.
