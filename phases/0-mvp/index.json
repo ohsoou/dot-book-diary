@@ -2,7 +2,7 @@
   "project": "dot-book-diary",
   "phase": "0-mvp",
   "steps": [
-    { "step": 0, "name": "scaffold-and-quality-gates", "status": "pending" },
+    { "step": 0, "name": "scaffold-and-quality-gates", "status": "completed", "summary": "Next.js 15.5 + Bun + TS strict + Tailwind v4 + Vitest + @/ alias + 보안 헤더 5종(X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP) + CSS 변수 토큰 18개 + smoke test 통과 기반 스캐폴딩 완료" },
     { "step": 1, "name": "domain-foundations", "status": "pending" },
     { "step": 2, "name": "guest-persistence", "status": "pending" },
     { "step": 3, "name": "supabase-and-auth-backbone", "status": "pending" },
