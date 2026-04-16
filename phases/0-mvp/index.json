@@ -3,7 +3,7 @@
   "phase": "0-mvp",
   "steps": [
     { "step": 0, "name": "scaffold-and-quality-gates", "status": "completed", "summary": "Next.js 15.5 + Bun + TS strict + Tailwind v4 + Vitest + @/ alias + 보안 헤더 5종(X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP) + CSS 변수 토큰 18개 + smoke test 통과 기반 스캐폴딩 완료" },
-    { "step": 1, "name": "domain-foundations", "status": "pending" },
+    { "step": 1, "name": "domain-foundations", "status": "completed", "summary": "src/types/index.ts(Book/ReadingSession/DiaryEntry/BookSearchResult/Profile/DiaryDraft/GuestPreferences), src/lib/storage/Store.ts(Store 인터페이스), src/lib/storage/keys.ts(KEYS 상수 + CURRENT_SCHEMA_VERSION), src/lib/errors.ts(AppError + AppErrorCode + ActionResult), src/lib/env.ts(serverEnv + clientEnv zod parse), src/lib/validation.ts(6개 zod 스키마 + toValidationError + parseOrThrow), src/lib/date.ts(formatLocalYmd + getMonthMatrix), src/lib/isbn.ts(isValidIsbn13 + convertIsbn10to13), src/lib/escape.ts(escapeHtml) 생성. 테스트 74개 통과, 빌드 성공." },
     { "step": 2, "name": "guest-persistence", "status": "pending" },
     { "step": 3, "name": "supabase-and-auth-backbone", "status": "pending" },
     { "step": 4, "name": "aladin-service", "status": "pending" },
