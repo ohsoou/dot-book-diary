@@ -122,6 +122,7 @@ npm test        # 테스트 통과
     - 성공 → `"status": "completed"`, `"summary": "산출물 한 줄 요약"`
     - 수정 3회 시도 후에도 실패 → `"status": "error"`, `"error_message": "구체적 에러 내용"`
     - 사용자 개입 필요 (API 키, 외부 인증, 수동 설정 등) → `"status": "blocked"`, `"blocked_reason": "구체적 사유"` 후 즉시 중단
+4.  커밋 — 코드 변경과 메타데이터(`chore`)를 분리 커밋
 
 ## 금지사항
 
