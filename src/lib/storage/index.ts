@@ -3,14 +3,39 @@ import type { Store } from './Store';
 
 export type { Store };
 
-// 현재는 항상 LocalStore(비회원) 반환. step 3에서 RemoteStore로 교체.
-export function getStore(): Store {
+/**
+ * 서버 경로(Server Component / Server Action / Route Handler)에서 사용.
+ * Supabase 세션이 있으면 RemoteStore, 없으면 LocalStore(비회원 서버 셸 경로)를 반환한다.
+ *
+ * 비회원 서버 경로에서는 실제 LocalStore 메서드를 호출하지 않는다.
+ * 데이터 읽기는 Client 컴포넌트에서 useStore()를 통해 수행한다.
+ */
+export async function getStore(): Promise<Store> {
+  // server-only import를 동적으로 처리해 Client 번들에 포함되지 않도록 한다.
+  const { createClient } = await import('@/lib/supabase/server');
+  const { RemoteStore } = await import('./RemoteStore');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    return new RemoteStore(supabase);
+  }
+
   return new LocalStore();
 }
 
-// step 3에서 완성될 client hook stub
+/**
+ * Client 컴포넌트에서 비회원 LocalStore에 접근할 때 사용.
+ * Context + Provider 패턴으로 루트 layout에서 주입한다.
+ *
+ * 현재는 항상 LocalStore를 반환한다.
+ * 회원 데이터 읽기는 서버 경로(Server Component, Server Action)를 통해서만 수행한다.
+ */
 export function useStore(): Store {
-  return getStore();
+  return new LocalStore();
 }
 
 export {

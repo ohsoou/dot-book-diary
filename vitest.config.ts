@@ -12,6 +12,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      // server-only는 테스트 환경에서 no-op으로 대체한다.
+      'server-only': resolve(__dirname, './__mocks__/server-only.js'),
     },
   },
 })

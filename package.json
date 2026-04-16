@@ -12,6 +12,8 @@
     "db:types": "supabase gen types typescript --linked > src/types/supabase.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.2",
     "idb-keyval": "^6.2.2",
     "next": "^15.3.0",
     "react": "^19.0.0",
