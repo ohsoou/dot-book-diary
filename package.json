@@ -12,6 +12,7 @@
     "db:types": "supabase gen types typescript --linked > src/types/supabase.ts"
   },
   "dependencies": {
+    "idb-keyval": "^6.2.2",
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -29,6 +30,7 @@
     "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.25.1",
     "eslint-config-next": "^15.3.0",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^26.1.0",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
