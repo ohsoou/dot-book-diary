@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface RoomSceneProps {
@@ -114,6 +114,14 @@ interface SpriteImageProps {
 
 function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImageProps) {
   const [error, setError] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  // preload로 이미 캐시된 이미지는 onLoad가 발화하지 않으므로 마운트 후 직접 확인
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      onSettled()
+    }
+  }, [onSettled])
 
   if (error) {
     return (
@@ -129,6 +137,7 @@ function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImagePr
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={imgRef}
       src={src}
       alt=""
       aria-hidden="true"
