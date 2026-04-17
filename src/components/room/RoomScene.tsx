@@ -11,15 +11,108 @@ interface RoomSceneProps {
   settingsHref?: string
 }
 
+interface SpriteConfig {
+  src: string
+  label: string
+  z: number
+  style: React.CSSProperties
+  animClass?: 'bear-idle' | 'lamp-flicker'
+}
+
+// 뒤 → 앞 레이어 순서로 정렬
+const SPRITE_DEFS: SpriteConfig[] = [
+  {
+    src: '/sprites/day/Background.png',
+    label: '배경',
+    z: 0,
+    style: { top: 0, left: 0, width: 640, height: 400, objectFit: 'cover' },
+  },
+  // 창문: 바깥 풍경을 먼저 깔고 프레임으로 덮는다
+  {
+    src: '/sprites/day/Outside_view.png',
+    label: '창밖',
+    z: 5,
+    style: { top: 46, left: 58, width: 120, height: 85 },
+  },
+  {
+    src: '/sprites/day/Window.png',
+    label: '창문',
+    z: 10,
+    style: { top: 28, left: 28, width: 178, height: 116 },
+  },
+  // 벽 장식
+  {
+    src: '/sprites/day/Hanging_plant.png',
+    label: '식물',
+    z: 12,
+    style: { top: -8, right: 18, width: 72, height: 96 },
+  },
+  {
+    src: '/sprites/day/Wall_shelf.png',
+    label: '벽선반',
+    z: 12,
+    style: { top: 155, right: 48, width: 138, height: 69 },
+  },
+  // 바닥 (뒤에서 앞으로)
+  {
+    src: '/sprites/day/Rug.png',
+    label: '러그',
+    z: 15,
+    style: { bottom: 18, left: 175, width: 290, height: 117 },
+  },
+  {
+    src: '/sprites/day/Bed.png',
+    label: '침대',
+    z: 20,
+    style: { bottom: 35, left: -8, width: 185, height: 94 },
+  },
+  {
+    src: '/sprites/day/Bed_Table.png',
+    label: '침대 테이블',
+    z: 22,
+    style: { bottom: 90, left: 150, width: 105, height: 100 },
+  },
+  {
+    src: '/sprites/day/Table_Lamp.png',
+    label: '램프',
+    z: 25,
+    style: { bottom: 75, right: 38, width: 127, height: 124 },
+    animClass: 'lamp-flicker',
+  },
+  // 곰 주변 소품
+  {
+    src: '/sprites/day/Bookstack.png',
+    label: '책더미',
+    z: 30,
+    style: { bottom: 158, right: 158, width: 112, height: 76 },
+  },
+  {
+    src: '/sprites/day/Diary.png',
+    label: '다이어리',
+    z: 30,
+    style: { bottom: 152, left: 148, width: 104, height: 72 },
+  },
+  // 주인공
+  {
+    src: '/sprites/day/Bear.png',
+    label: '곰',
+    z: 35,
+    style: { bottom: 38, left: 215, width: 210, height: 169 },
+    animClass: 'bear-idle',
+  },
+]
+
+const TOTAL_SPRITES = SPRITE_DEFS.length
+
 interface SpriteImageProps {
   src: string
   label: string
   style: React.CSSProperties
-  extraClass?: string
+  extraClass: string
   onSettled: () => void
 }
 
-function SpriteImage({ src, label, style, extraClass = '', onSettled }: SpriteImageProps) {
+function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImageProps) {
   const [error, setError] = useState(false)
 
   if (error) {
@@ -34,6 +127,7 @@ function SpriteImage({ src, label, style, extraClass = '', onSettled }: SpriteIm
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt=""
@@ -48,8 +142,6 @@ function SpriteImage({ src, label, style, extraClass = '', onSettled }: SpriteIm
     />
   )
 }
-
-const TOTAL_SPRITES = 7
 
 export function RoomScene({
   diaryHref = '/diary',
@@ -99,88 +191,43 @@ export function RoomScene({
         transformOrigin: 'top center',
       }}
     >
-      {/* z-0: 방 배경 */}
-      <SpriteImage
-        src="/sprites/night/room.png"
-        label="방"
-        style={{ zIndex: 0, top: 0, left: 0, width: '100%', height: '100%' }}
-        onSettled={handleSettled}
-      />
-
-      {/* z-10: 창문 */}
-      <SpriteImage
-        src="/sprites/night/window.png"
-        label="창문"
-        style={{ zIndex: 10, top: 40, left: 80 }}
-        onSettled={handleSettled}
-      />
-
-      {/* z-10: 러그 */}
-      <SpriteImage
-        src="/sprites/night/rug.png"
-        label="러그"
-        style={{ zIndex: 10, bottom: 20, left: 160 }}
-        onSettled={handleSettled}
-      />
-
-      {/* z-20: 책더미 (곰 오른쪽) */}
-      <SpriteImage
-        src="/sprites/night/books.png"
-        label="책더미"
-        style={{ zIndex: 20, bottom: 60, right: 120 }}
-        onSettled={handleSettled}
-      />
-
-      {/* z-20: 다이어리 (곰 왼쪽) */}
-      <SpriteImage
-        src="/sprites/night/diary.png"
-        label="다이어리"
-        style={{ zIndex: 20, bottom: 60, left: 120 }}
-        onSettled={handleSettled}
-      />
-
-      {/* z-30: 곰 (중앙, idle 애니메이션) */}
-      <SpriteImage
-        src="/sprites/night/bear.png"
-        label="곰"
-        style={{ zIndex: 30, bottom: 40, left: '50%', transform: 'translateX(-50%)' }}
-        extraClass={reducedMotion ? '' : 'bear-idle'}
-        onSettled={handleSettled}
-      />
-
-      {/* z-40: 램프 (flicker 애니메이션) */}
-      <SpriteImage
-        src="/sprites/night/lamp.png"
-        label="램프"
-        style={{ zIndex: 40, top: 180, right: 100 }}
-        extraClass={reducedMotion ? '' : 'lamp-flicker'}
-        onSettled={handleSettled}
-      />
+      {SPRITE_DEFS.map((def) => (
+        <SpriteImage
+          key={def.src}
+          src={def.src}
+          label={def.label}
+          style={{ zIndex: def.z, ...def.style }}
+          extraClass={
+            def.animClass && !reducedMotion ? def.animClass : ''
+          }
+          onSettled={handleSettled}
+        />
+      ))}
 
       {/* Hitbox buttons — Tab 순서: 다이어리 → 책장 → 캘린더 → 책 등록 → 설정 */}
       <button
         aria-label="다이어리"
         onClick={() => router.push(diaryHref as never)}
         className="absolute bg-transparent"
-        style={{ zIndex: 50, bottom: 60, left: 80, width: 80, height: 60 }}
+        style={{ zIndex: 50, bottom: 152, left: 148, width: 104, height: 72 }}
       />
       <button
         aria-label="책장"
         onClick={() => router.push(bookshelfHref as never)}
         className="absolute bg-transparent"
-        style={{ zIndex: 50, bottom: 60, right: 80, width: 80, height: 60 }}
+        style={{ zIndex: 50, top: 155, right: 48, width: 138, height: 69 }}
       />
       <button
         aria-label="캘린더"
         onClick={() => router.push(calendarHref as never)}
         className="absolute bg-transparent"
-        style={{ zIndex: 50, top: 40, left: 80, width: 100, height: 80 }}
+        style={{ zIndex: 50, top: 28, left: 28, width: 178, height: 116 }}
       />
       <button
         aria-label="책 등록"
         onClick={() => router.push(addBookHref as never)}
         className="absolute bg-transparent"
-        style={{ zIndex: 50, bottom: 40, left: '50%', transform: 'translateX(-50%)', width: 80, height: 80 }}
+        style={{ zIndex: 50, bottom: 38, left: 215, width: 210, height: 169 }}
       />
       <button
         aria-label="설정"

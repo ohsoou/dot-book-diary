@@ -78,8 +78,8 @@ describe('RoomScene', () => {
     mockMatchMedia(true)
     const { container } = render(<RoomScene />)
 
-    const bearImg = container.querySelector('img[src="/sprites/night/bear.png"]')
-    const lampImg = container.querySelector('img[src="/sprites/night/lamp.png"]')
+    const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]')
+    const lampImg = container.querySelector('img[src="/sprites/day/Table_Lamp.png"]')
 
     expect(bearImg?.className).not.toContain('bear-idle')
     expect(lampImg?.className).not.toContain('lamp-flicker')
@@ -89,8 +89,8 @@ describe('RoomScene', () => {
     mockMatchMedia(false)
     const { container } = render(<RoomScene />)
 
-    const bearImg = container.querySelector('img[src="/sprites/night/bear.png"]')
-    const lampImg = container.querySelector('img[src="/sprites/night/lamp.png"]')
+    const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]')
+    const lampImg = container.querySelector('img[src="/sprites/day/Table_Lamp.png"]')
 
     expect(bearImg?.className).toContain('bear-idle')
     expect(lampImg?.className).toContain('lamp-flicker')
