@@ -1,9 +1,9 @@
+import Link from 'next/link'
 import { Button } from './Button'
 
-interface EmptyStateCTA {
-  label: string
-  onClick: () => void
-}
+type EmptyStateCTA =
+  | { label: string; onClick: () => void; href?: never }
+  | { label: string; href: string; onClick?: never }
 
 interface EmptyStateProps {
   message: string
@@ -28,9 +28,18 @@ export function EmptyState({ message, cta }: EmptyStateProps) {
       </svg>
       <p className="text-sm text-[#a08866]">{message}</p>
       {cta && (
-        <Button variant="primary" onClick={cta.onClick}>
-          {cta.label}
-        </Button>
+        cta.href ? (
+          <Link
+            href={cta.href as never}
+            className="text-sm px-3 py-2 bg-[#e89b5e] border border-[#1a100a] text-[#2a1f17] hover:bg-[#f0a96c] transition-colors duration-100 ease-linear"
+          >
+            {cta.label}
+          </Link>
+        ) : (
+          <Button variant="primary" onClick={cta.onClick}>
+            {cta.label}
+          </Button>
+        )
       )}
     </div>
   )
