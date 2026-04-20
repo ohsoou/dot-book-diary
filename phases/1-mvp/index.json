@@ -7,7 +7,8 @@
       "name": "theme-docs-and-tokens",
       "status": "completed",
       "started_at": "2026-04-21T08:48:35+0900",
-      "summary": "globals.css에 :root(야간 폴백), [data-theme=\"night\"], [data-theme=\"day\"] 세 블록으로 낮/밤 CSS 변수 체계 도입"
+      "summary": "globals.css에 :root(야간 폴백), [data-theme=\"night\"], [data-theme=\"day\"] 세 블록으로 낮/밤 CSS 변수 체계 도입",
+      "completed_at": "2026-04-21T08:49:56+0900"
     },
     {
       "step": 1,
