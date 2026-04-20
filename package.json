@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.103.2",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "idb-keyval": "^6.2.2",

@@ -78,11 +78,17 @@ src/
 │           └── isbn/route.ts
 ├── components/
 │   ├── room/
-│   │   ├── RoomScene.tsx           # Client
+│   │   ├── RoomScene.tsx           # Client, theme prop(day|night)
 │   │   ├── Bear.tsx                # 장식 sprite
 │   │   ├── Hitbox.tsx              # 접근성 처리된 <button>
 │   │   ├── Lamp.tsx
 │   │   └── Window.tsx
+│   ├── theme/
+│   │   └── ThemeHydrator.tsx       # Client, preference 로드 후 <html data-theme> 교체
+│   ├── settings/
+│   │   ├── NicknameForm.tsx
+│   │   ├── LogoutButton.tsx
+│   │   └── ThemeSelector.tsx       # MVP1, 3택 토글
 │   ├── ui/
 │   │   ├── Button.tsx
 │   │   ├── Card.tsx
@@ -107,7 +113,9 @@ src/
 │       ├── AddBookTabs.tsx
 │       ├── BarcodeScanner.tsx
 │       ├── BookSearchForm.tsx
-│       └── ReadingSessionForm.tsx
+│       ├── ReadingSessionForm.tsx
+│       ├── ReadingTimer.tsx        # MVP1, localStorage 지속 타이머
+│       └── GoalProgress.tsx        # MVP1, target_date 기반 진행률
 ├── lib/
 │   ├── supabase/
 │   │   ├── server.ts               # createServerClient + cookies()
@@ -128,6 +136,8 @@ src/
 │   ├── aladin.ts                   # server-only
 │   ├── date.ts                     # YYYY-MM-DD, 로컬 타임존
 │   ├── escape.ts                   # HTML 이스케이프
+│   ├── theme.ts                    # MVP1, resolveTheme(pref, now) → 'day' | 'night'
+│   ├── reading-timer.ts            # MVP1, localStorage 기반 단일 활성 타이머
 │   ├── actions/                    # Server Actions
 │   │   ├── books.ts
 │   │   ├── reading-sessions.ts
@@ -146,7 +156,8 @@ public/
 
 supabase/
 └── migrations/
-    └── 0001_init.sql               # tables + indexes + CHECK + updated_at 트리거 + RLS + profiles + handle_new_user
+    ├── 0001_init.sql               # tables + indexes + CHECK + updated_at 트리거 + RLS + profiles + handle_new_user
+    └── 0002_theme_goal.sql         # MVP1: profiles.theme_preference + books.target_date
 ```
 
 ## 3. 모듈 의존성 규칙
@@ -483,6 +494,7 @@ export type GuestPreferences = {
   nickname?: string;
   localArchived?: boolean;
   guestBannerDismissed?: boolean;
+  themePreference?: 'system' | 'day' | 'night'; // MVP1, 기본 'system'
 };
 
 export interface GuestPreferencesStore {
@@ -716,6 +728,43 @@ export default function AddBookForm({ book }: Props) {
 - 비교: 문자열 사전식 비교 가능(ISO 특성).
 - 캘린더: `getMonthMatrix(year, month, weekStartsOn=0)` → 6주 2D 배열(앞/뒤 빈칸 포함).
 - 외부 라이브러리(date-fns/dayjs/luxon) 도입 금지.
+
+## 22.1 독서 타이머 지속성 (MVP1, `lib/reading-timer.ts`)
+
+- 저장소: `localStorage` 키 `dbd:reading_timer`. 값: `{ bookId, startedAt(ms), pausedAt?(ms), accumulatedMs, status: 'running'|'paused'|'stopped' }`.
+- API: `read()`, `start(bookId)`, `pause()`, `resume()`, `stop() → { seconds, bookId }`, `clear()`. 모두 동기.
+- 단일 활성 타이머: `start(bookId)` 호출 시 다른 책의 running/paused 상태가 있으면 `AppError('VALIDATION_FAILED')` 또는 caller가 확인 후 `stop()` 호출.
+- UI는 1초 `setInterval`로 재렌더. 상태 진실원은 localStorage.
+- 탭 간 동기화: `window.addEventListener('storage', ...)`로 다른 탭 변경 반영.
+- `stop()` 결과를 `ReadingSessionForm`이 받아서 `durationMinutes = Math.round(seconds/60)`로 프리필한다. 자동 저장하지 않는다.
+- SSR에서 접근하지 않는다(전부 `'use client'` 컴포넌트에서만 사용).
+
+## 22.2 테마 결정 (MVP1, `lib/theme.ts`)
+
+```ts
+export type ThemePreference = 'system' | 'day' | 'night';
+export type Theme = 'day' | 'night';
+
+export function resolveTheme(pref: ThemePreference, now: Date = new Date()): Theme {
+  if (pref === 'day') return 'day';
+  if (pref === 'night') return 'night';
+  const h = now.getHours();
+  return (h >= 18 || h < 6) ? 'night' : 'day';
+}
+```
+
+- 서버 컴포넌트: `createServerClient()`로 세션 조회 → `profiles.theme_preference` → `resolveTheme` → `<html data-theme>`.
+- 비회원 SSR: 기본 `night` 렌더 → `ThemeHydrator`가 mount 시 `preferences.ts.getPreferences().themePreference`로 재계산하여 `document.documentElement.dataset.theme` 교체.
+- 교체 순간 깜빡임을 줄이기 위해 `<html>` 자체는 항상 CSS 변수로 색을 받는다(테마별 variable set만 교체).
+
+## 22.3 책 목표 진행률 (MVP1)
+
+- 모델: `books.target_date date` (nullable). 검증: `target_date ≥ book.createdAt(로컬 ymd)`.
+- 계산(순수 함수, `GoalProgress` 안 또는 별도 유틸):
+  - `pageProgress = maxEndPage / totalPages` (둘 다 있을 때)
+  - `dateProgress = (today - createdAt) / (targetDate - createdAt)` (targetDate 있을 때, 0 이하 clamp)
+  - 상태: `page ≥ date` → `'on-track'`, `date - page ≥ 0.1` → `'behind'`, `today > targetDate && pageProgress < 1` → `'overdue'`.
+- revalidate: `updateBook(target_date)` 성공 후 `/bookshelf`, `/reading/[bookId]`.
 
 ## 23. 관측·로깅 (`lib/log.ts`)
 ```ts

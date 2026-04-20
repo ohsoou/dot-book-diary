@@ -62,6 +62,33 @@
 > CSS 변수로 정의한 뒤 `text-[var(--color-text-primary)]` 방식을 권장한다. 단, 개발
 > 초기에는 하드코드 허용하고 리팩터링.
 
+### 낮 테마 팔레트 (`[data-theme="day"]`, MVP1)
+
+야간 토큰과 동일 키를 오버라이드한다. `<html data-theme="day">` 상태에서만 적용. 신규 컴포넌트는 반드시 CSS 변수를 통해 색을 읽는다.
+
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--color-bg` | `#f4e3c1` | 페이지 기본 (주간 크림) |
+| `--color-bg-card` | `#e8d0a3` | 카드 배경 |
+| `--color-bg-input` | `#f4e3c1` | 입력 필드 배경 |
+| `--color-bg-overlay` | `rgba(0,0,0,0.4)` | 모달 오버레이 |
+| `--color-wall` | `#d4a574` | 방 벽지 (주간 나무결) |
+| `--color-border` | `#5c3d28` | 기본 테두리 |
+| `--color-border-focus` | `#c25e1d` | 포커스 링 |
+| `--color-border-error` | `#a63d38` | 에러 필드 테두리 |
+| `--color-text-primary` | `#2a1f17` | 주 텍스트 |
+| `--color-text-body` | `#4a3828` | 본문 |
+| `--color-text-secondary` | `#6b5540` | 보조/메타 |
+| `--color-text-disabled` | `#a08866` | 비활성 |
+| `--color-accent` | `#c25e1d` | 포인트 (CTA) |
+| `--color-success` | `#4a7a3f` | 성공 |
+| `--color-error` | `#a63d38` | 에러/위험 |
+| `--color-neutral` | `#8b6f4a` | 중립 |
+
+- 전환 애니메이션 없음(즉시 스왑). `transition: background-color` 전역 추가 금지.
+- 테마가 바뀌어도 버튼/카드/입력 등 컴포넌트의 className은 동일해야 한다(변수만 교체).
+- 기존 하드코드 `text-[#d7c199]` 류는 MVP1 범위에서 점진적 치환. 신규 코드는 `text-[var(--color-text-body)]` 필수.
+
 ---
 
 ## 스페이싱 시스템
@@ -299,6 +326,50 @@ bg-[#3a2a1a] border border-[#8b6f4a] px-4 py-3
 - IndexedDB / `crypto.randomUUID` / `getUserMedia` 미지원 감지 시 노출.
 - 로그인해서 서버 저장으로 우회하도록 로그인 버튼 제공.
 
+### ThemeSelector (MVP1, `/settings`)
+
+```
+레이아웃: ToggleTabs 3칸 (system / day / night)
+라벨: "자동", "낮", "밤"
+Selected: bg-[var(--color-accent)] text-[var(--color-bg)]
+Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color-text-primary)]
+```
+
+- 변경 즉시 `<html data-theme>`을 업데이트하고 preference를 저장한다(optimistic).
+- 회원 실패 시 이전 값으로 롤백 + 토스트.
+- 보조 텍스트: "밤에는 어둡게, 낮에는 밝게 보여요".
+
+### ReadingTimer (MVP1, `/reading/[bookId]` 상단)
+
+```
+컨테이너: border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3
+시간 표시: text-2xl tabular-nums text-[var(--color-text-primary)] (HH:MM:SS)
+버튼 그룹: 시작 / 일시정지(재개) / 정지
+색: Primary=시작/재개, Secondary=일시정지, Danger=정지
+```
+
+- 상태별 버튼:
+  - `stopped`: [시작] 만 노출
+  - `running`: [일시정지] [정지]
+  - `paused`: [재개] [정지]
+- 다른 책의 타이머가 실행 중이면 [시작] 클릭 시 `ConfirmDialog`로 "다른 책의 타이머가 실행 중이에요. 정지하고 시작할까요?"
+- 정지 시 경과 초를 분 반올림하여 폼 `durationMinutes`에 프리필하고 해당 필드로 포커스. 자동 저장 금지.
+- 숫자 갱신은 1초 간격 `setInterval`. 상태 진실원은 `localStorage['dbd:reading_timer']`.
+
+### GoalProgress (MVP1)
+
+```
+컨테이너: border border-[var(--color-border)] px-3 py-2 flex items-center gap-3
+진행 막대: h-2 flex-1 bg-[var(--color-bg-input)] border border-[var(--color-border)]
+채움:      bg-[var(--color-accent)] (너비 = 진행률 %)
+라벨:      text-xs text-[var(--color-text-secondary)] tabular-nums
+상태 뱃지: 순항="순항" / 밀림="조금 밀림" / 지연="며칠 더 필요해요"
+```
+
+- `total_pages` 없음 → 페이지 막대 숨김, 날짜 정보만.
+- `target_date` 없음 → "목표 완독일을 정해 볼까요?" CTA.
+- `/bookshelf` 카드에서는 소형 버전(막대 + 잔여 일수)만 노출.
+
 ---
 
 ## 포커스 스타일
@@ -323,6 +394,26 @@ bg-[#3a2a1a] border border-[#8b6f4a] px-4 py-3
 - 램프 불빛: 2프레임 깜빡, 4s loop.
 - 버튼/링크 트랜지션: `transition-colors duration-100 ease-linear`만 허용.
 - 페이지 전환: 기본 Next.js 전환 사용, 커스텀 fade/slide 금지.
+
+### 구현 스펙 (globals.css)
+
+```css
+@keyframes bear-idle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(1px); }
+}
+@keyframes lamp-flicker {
+  0%, 45%, 55%, 100% { opacity: 1; }
+  50%                { opacity: 0.92; }
+}
+
+.bear-idle   { animation: bear-idle 2s steps(2) infinite; }
+.lamp-flicker { animation: lamp-flicker 4s steps(2) infinite; }
+```
+
+- `translate` 허용 범위: 1px 이내. 초과 금지(§AI 슬롭 표).
+- `steps(2)`로 픽셀 스텝 느낌 유지. `ease-in-out` / `linear` 금지.
+- `prefers-reduced-motion: reduce` 시 `animation: none`(기존 규칙 유지).
 
 **금지**:
 - `duration-150` 초과 transition
