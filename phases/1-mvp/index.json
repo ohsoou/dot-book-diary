@@ -24,7 +24,7 @@
       "status": "completed",
       "started_at": "2026-04-21T08:54:36+0900",
       "summary": "lib/theme.ts: resolveTheme() 순수 함수(system 18:00~06:00 night); layout.tsx SSR에서 profiles.theme_preference 조회→<html data-theme> 확정; ThemeHydrator.tsx 마운트 시 IndexedDB preferences로 data-theme 교체+15분 재평가; 테스트 275개 통과",
-      "completed_at": "2026-04-21T08:58:00+0900"
+      "completed_at": "2026-04-21T08:57:31+0900"
     },
     {
       "step": 3,
