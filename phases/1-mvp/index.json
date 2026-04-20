@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-04-21T08:49:57+0900",
       "summary": "0002_theme_goal.sql 마이그레이션 작성(profiles.theme_preference, books.target_date); Profile/Book/GuestPreferences 타입 확장; themePreferenceSchema·bookSchema.targetDate 추가; RemoteStore BookRow 매핑 및 profile.ts·settings/page.tsx Profile 생성부 수정; 테스트 82개 전부 통과",
-      "completed_at": "2026-04-21T09:10:00+0900"
+      "completed_at": "2026-04-21T08:54:36+0900"
     },
     {
       "step": 2,
