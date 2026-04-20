@@ -19,7 +19,7 @@
 | 모든 카드에 동일한 `rounded-2xl` | 균일한 둥근 모서리는 템플릿 느낌. 본 프로젝트는 `rounded-*` 자체 금지 |
 | 배경 gradient orb (`blur-3xl` 원형) | 모든 AI 랜딩 페이지에 있는 장식 |
 | 부드러운 fade/slide (duration 300ms+) | 픽셀 아트는 step easing. `transition` ≤ 100ms `ease-linear` |
-| Heroicons / Lucide 아이콘 | 벡터 곡선이 픽셀 아이덴티티와 충돌. 도트 아이콘만 사용 |
+| Heroicons / Lucide 아이콘 | 벡터 곡선이 픽셀 아이덴티티와 충돌. SVG <rect> 조합 도트 아이콘만 사용 |
 | shadcn / Radix UI 컴포넌트 | 외부 UI 라이브러리 전면 금지. 모든 컴포넌트 직접 구현 |
 
 ---
@@ -90,16 +90,10 @@
 
 - **모바일 우선**: 기본은 320px 기준으로 작성, `md:` / `lg:` 확장.
 - 최대 콘텐츠 너비: `max-w-2xl` (672px). 메인 방 제외.
-- 메인 방(RoomScene): 아트보드 640×400 고정, 뷰포트 너비에 따라 정수배 scale만 사용.
-
-### 스프라이트 정수배 스케일
-```
-뷰포트 너비 < 640px  → scale(1)   — 640×400 그대로 (가로 스크롤 없이 fit)
-640px ~ 1279px       → scale(1.5) — 선택적, 비정수라 픽셀 깨짐 주의. 가능하면 2x 사용
-≥ 1280px             → scale(2)   — 1280×800
-```
-비정수 scale 시 `image-rendering: pixelated`가 있어도 픽셀이 번질 수 있다.
-실제 scale 값은 뷰포트를 관찰해 정수로만 보정할 것.
+- **메인 방(RoomScene) 반응형 전략**: 가로모드(landscape) 전용 레터박스.
+  - `aspect-ratio: 8/5` + `width: 100%`. 가로로 넓어지면 `max-width: calc((100dvh - 64px) * 1.6)` 까지 비율 유지 확대.
+  - 세로로 길어지면 `max-height: calc(100dvh - 64px)` 제한 + `flex items-center`로 아트보드 가운데 정렬. 위아래 여백은 `--color-border`(#1a100a) 레터박스 배경으로 채움.
+  - 스프라이트/hitbox: 컨테이너 대비 **백분율(%)** 좌표, `image-rendering: pixelated`로 픽셀 앨리어싱 보존. 64px = 하단 `BottomNav` 높이.
 
 ---
 
@@ -108,11 +102,12 @@
 | 레이어 | 값 | 용도 |
 |---|---|---|
 | 기본 콘텐츠 | 0 | 카드, 리스트 |
-| 스티키 헤더/네비 | 10 | 상단 네비바 |
+| 스티키 헤더/네비 | 10 | 상단 네비바, 하단 네비바 |
 | 드롭다운/툴팁 | 20 | 선택 메뉴 |
 | 모달 오버레이 | 30 | 배경 dimmer |
 | 모달 컨텐츠 | 40 | 다이얼로그 박스 |
 | 토스트 | 50 | 최상위 알림 |
+| RoomScene Hitbox | 50 | 방 내 인터랙션 버튼 |
 
 ---
 
@@ -165,6 +160,33 @@ Text:      text-[#d7c199] hover:text-[#f4e4c1] underline-offset-2 hover:underlin
 - `transition-colors duration-100 ease-linear` 적용.
 - `rounded-*` 금지.
 - `pending` 상태: 텍스트 변경 ("저장 중...") + `disabled`.
+
+### BottomNav (Global)
+
+```
+위치: fixed bottom-0 inset-x-0 h-[64px] z-10
+배경: bg-[#3a2a1a] border-t border-[#1a100a] grid-cols-5
+아이템: flex flex-col items-center justify-center gap-1 text-xs
+Active: text-[var(--color-accent)]
+Inactive: text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]
+```
+
+### PixelFrame
+
+```tsx
+<div className="outline outline-1 outline-[#1a100a] outline-offset-2">
+  {children}
+</div>
+```
+
+### ToggleTabs
+
+```
+테두리: border border-[#1a100a] flex
+버튼: flex-1 px-3 py-2 text-sm
+Selected: bg-[#e89b5e] text-[#2a1f17]
+Unselected: bg-transparent text-[#d7c199] hover:text-[#f4e4c1]
+```
 
 ### Card
 
@@ -326,9 +348,10 @@ bg-[#3a2a1a] border border-[#8b6f4a] px-4 py-3
 
 ## 아이콘
 
-- SVG 인라인, 픽셀 그리드(16×16 또는 8×8)에 맞춘 도트 아이콘. `strokeWidth` 1.
+- SVG 인라인, 픽셀 그리드(16×16)에 맞춘 도트 아이콘.
+- **SVG `<rect>` 요소의 조합**으로 픽셀을 직접 그려 구현한다. `shape-rendering="crispEdges"` 필수.
+- Heroicons / Lucide 같은 벡터 아이콘 세트 사용 전면 금지 — 벡터 곡선은 픽셀 아이덴티티와 충돌한다.
 - 아이콘 컨테이너(둥근 배경 박스)로 감싸지 않는다.
-- Heroicons / Lucide 같은 벡터 아이콘 세트 사용 금지 — 벡터 곡선이 픽셀 아이덴티티와 충돌.
 - 아이콘에는 `aria-hidden="true"` + 주변 텍스트 또는 `aria-label` 제공.
 
 ---

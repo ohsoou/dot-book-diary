@@ -8,7 +8,7 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
-function mockMatchMedia(reducedMotion: boolean) {
+function mockMatchMedia({ reducedMotion = false } = {}) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
@@ -24,7 +24,7 @@ function mockMatchMedia(reducedMotion: boolean) {
 
 beforeEach(() => {
   mockPush.mockReset()
-  mockMatchMedia(false)
+  mockMatchMedia()
 })
 
 describe('RoomScene', () => {
@@ -75,7 +75,7 @@ describe('RoomScene', () => {
   })
 
   it('removes bear-idle and lamp-flicker classes when prefers-reduced-motion is set', () => {
-    mockMatchMedia(true)
+    mockMatchMedia({ reducedMotion: true })
     const { container } = render(<RoomScene />)
 
     const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]')
@@ -86,7 +86,7 @@ describe('RoomScene', () => {
   })
 
   it('applies bear-idle and lamp-flicker classes when motion is allowed', () => {
-    mockMatchMedia(false)
+    mockMatchMedia({ reducedMotion: false })
     const { container } = render(<RoomScene />)
 
     const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]')
@@ -99,5 +99,14 @@ describe('RoomScene', () => {
   it('has role=img with aria-label on the scene container', () => {
     render(<RoomScene />)
     expect(screen.getByRole('img', { name: '곰이 책을 읽는 따뜻한 방' })).toBeInTheDocument()
+  })
+
+  it('applies correct coordinates to bear sprite', () => {
+    const { container } = render(<RoomScene />)
+
+    const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]') as HTMLElement | null
+    expect(bearImg).not.toBeNull()
+    expect(bearImg?.style.bottom).toBe('1.25%')
+    expect(bearImg?.style.left).toBe('42.0313%')
   })
 })

@@ -16,9 +16,9 @@ export default async function HomePage() {
   const isGuest = !user
 
   return (
-    <main className="min-h-screen bg-[#2a1f17] flex flex-col items-center">
+    <main className="fixed inset-0 bg-[var(--color-border)] flex flex-col">
       {isGuest && <GuestBanner />}
-      <div className="pt-6 flex justify-center">
+      <div className="flex-1 flex items-center justify-center overflow-hidden">
         <RoomScene />
       </div>
     </main>
