@@ -6,6 +6,7 @@ export type Book = {
   publisher?: string;
   coverUrl?: string;
   totalPages?: number;
+  targetDate?: string; // YYYY-MM-DD
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 };
@@ -43,6 +44,7 @@ export type BookSearchResult = {
 export type Profile = {
   userId: string;
   nickname?: string;
+  themePreference: 'system' | 'day' | 'night';
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 };
@@ -58,4 +60,5 @@ export type GuestPreferences = {
   nickname?: string;
   localArchived?: boolean;
   guestBannerDismissed?: boolean;
+  themePreference?: 'system' | 'day' | 'night';
 };

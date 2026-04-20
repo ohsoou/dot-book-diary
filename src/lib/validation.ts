@@ -4,6 +4,8 @@ import { formatLocalYmd } from './date';
 
 // ── 도메인 스키마 ────────────────────────────────────────────────────────────
 
+export const themePreferenceSchema = z.enum(['system', 'day', 'night']);
+
 export const bookSchema = z.object({
   isbn: z.string().optional(),
   title: z.string().min(1, { message: '제목을 입력해 주세요' }).max(500, { message: '제목은 500자 이내로 입력해 주세요' }),
@@ -11,6 +13,7 @@ export const bookSchema = z.object({
   publisher: z.string().max(300, { message: '출판사는 300자 이내로 입력해 주세요' }).optional(),
   coverUrl: z.string().url({ message: '올바른 URL을 입력해 주세요' }).optional(),
   totalPages: z.number().int().min(1, { message: '총 페이지는 1 이상이어야 합니다' }).optional(),
+  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: '목표 완독일은 YYYY-MM-DD 형식이어야 합니다' }).optional(),
 });
 
 export const readingSessionSchema = z
@@ -76,6 +79,7 @@ export type DiaryEntryInput = z.infer<typeof diaryEntrySchema>;
 export type SearchQueryInput = z.infer<typeof searchQuerySchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type DiaryDraftInput = z.infer<typeof diaryDraftSchema>;
+export type ThemePreference = z.infer<typeof themePreferenceSchema>;
 
 // ── 헬퍼: zod 에러 → AppError 변환 ─────────────────────────────────────────
 

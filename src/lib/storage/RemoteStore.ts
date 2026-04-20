@@ -85,6 +85,7 @@ export class RemoteStore implements Store {
         publisher: parsed.data.publisher ?? null,
         cover_url: parsed.data.coverUrl ?? null,
         total_pages: parsed.data.totalPages ?? null,
+        target_date: parsed.data.targetDate ?? null,
       })
       .select()
       .single();
@@ -112,6 +113,7 @@ export class RemoteStore implements Store {
         ...(patch.publisher !== undefined && { publisher: patch.publisher ?? null }),
         ...(patch.coverUrl !== undefined && { cover_url: patch.coverUrl ?? null }),
         ...(patch.totalPages !== undefined && { total_pages: patch.totalPages ?? null }),
+        ...(patch.targetDate !== undefined && { target_date: patch.targetDate ?? null }),
       })
       .eq('id', id)
       .eq('user_id', userId)
@@ -348,6 +350,7 @@ type BookRow = {
   publisher: string | null;
   cover_url: string | null;
   total_pages: number | null;
+  target_date: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -361,6 +364,7 @@ function rowToBook(row: BookRow): Book {
     publisher: row.publisher ?? undefined,
     coverUrl: row.cover_url ?? undefined,
     totalPages: row.total_pages ?? undefined,
+    targetDate: row.target_date ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -47,6 +47,7 @@ export async function updateProfileAction(
     const profile: Profile = {
       userId: data.user_id as string,
       nickname: (data.nickname as string | null) ?? undefined,
+      themePreference: ((data.theme_preference as string | null) ?? 'system') as 'system' | 'day' | 'night',
       createdAt: data.created_at as string,
       updatedAt: data.updated_at as string,
     }
