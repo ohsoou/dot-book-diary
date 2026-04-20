@@ -8,6 +8,7 @@
   font-display: swap;
 }
 
+/* SSR 폴백: data-theme 속성 없을 때 야간 팔레트 기본 적용 */
 :root {
   /* Background */
   --color-bg: #2a1f17;
@@ -31,6 +32,58 @@
   --color-accent: #e89b5e;
   --color-success: #7ca972;
   --color-error: #c85a54;
+  --color-neutral: #8b6f4a;
+}
+
+[data-theme="night"] {
+  /* Background */
+  --color-bg: #2a1f17;
+  --color-bg-card: #3a2a1a;
+  --color-bg-input: #2a1f17;
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-wall: #5c3d28;
+
+  /* Border */
+  --color-border: #1a100a;
+  --color-border-focus: #e89b5e;
+  --color-border-error: #c85a54;
+
+  /* Text */
+  --color-text-primary: #f4e4c1;
+  --color-text-body: #d7c199;
+  --color-text-secondary: #a08866;
+  --color-text-disabled: #6b5540;
+
+  /* Semantic */
+  --color-accent: #e89b5e;
+  --color-success: #7ca972;
+  --color-error: #c85a54;
+  --color-neutral: #8b6f4a;
+}
+
+[data-theme="day"] {
+  /* Background */
+  --color-bg: #f4e3c1;
+  --color-bg-card: #e8d0a3;
+  --color-bg-input: #f4e3c1;
+  --color-bg-overlay: rgba(0, 0, 0, 0.4);
+  --color-wall: #d4a574;
+
+  /* Border */
+  --color-border: #5c3d28;
+  --color-border-focus: #c25e1d;
+  --color-border-error: #a63d38;
+
+  /* Text */
+  --color-text-primary: #2a1f17;
+  --color-text-body: #4a3828;
+  --color-text-secondary: #6b5540;
+  --color-text-disabled: #a08866;
+
+  /* Semantic */
+  --color-accent: #c25e1d;
+  --color-success: #4a7a3f;
+  --color-error: #a63d38;
   --color-neutral: #8b6f4a;
 }
 
