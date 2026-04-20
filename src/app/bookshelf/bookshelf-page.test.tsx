@@ -32,6 +32,16 @@ vi.mock('@/lib/storage', () => ({
   useStore: vi.fn().mockReturnValue({ listBooks: mockListBooks }),
 }))
 
+vi.mock('@/lib/storage/LocalStore', () => ({
+  LocalStore: class {
+    listBooks() { return Promise.resolve([]) }
+  },
+}))
+
+vi.mock('@/lib/storage/preferences', () => ({
+  getPreferences: vi.fn().mockResolvedValue({ localArchived: false }),
+}))
+
 async function renderPage() {
   const { default: BookshelfPage } = await import('./page')
   const jsx = await BookshelfPage()
