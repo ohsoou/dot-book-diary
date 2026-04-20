@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { DiaryEntry } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
+import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { DiaryList } from './DiaryList'
 
@@ -10,11 +11,17 @@ export function DiaryListHydrator() {
   const [entries, setEntries] = useState<DiaryEntry[] | undefined>(undefined)
 
   useEffect(() => {
-    const store = new LocalStore()
-    store
-      .listDiaryEntries()
-      .then((list) => setEntries(list.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))))
-      .catch(() => setEntries([]))
+    getPreferences().then((prefs) => {
+      if (prefs.localArchived) {
+        setEntries([])
+        return
+      }
+      const store = new LocalStore()
+      store
+        .listDiaryEntries()
+        .then((list) => setEntries(list.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))))
+        .catch(() => setEntries([]))
+    })
   }, [])
 
   if (entries === undefined) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { DiaryEntry } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
+import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { DiaryEntryDetail } from './DiaryEntryDetail'
 
@@ -14,8 +15,14 @@ export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) 
   const [entry, setEntry] = useState<DiaryEntry | null | undefined>(undefined)
 
   useEffect(() => {
-    const store = new LocalStore()
-    store.getDiaryEntry(id).then(setEntry).catch(() => setEntry(null))
+    getPreferences().then((prefs) => {
+      if (prefs.localArchived) {
+        setEntry(null)
+        return
+      }
+      const store = new LocalStore()
+      store.getDiaryEntry(id).then(setEntry).catch(() => setEntry(null))
+    })
   }, [id])
 
   if (entry === undefined) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { Book, ReadingSession } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
+import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { ReadingPageContent } from './ReadingPageContent'
 
@@ -15,16 +16,23 @@ export function ReadingPageHydrator({ bookId }: ReadingPageHydratorProps) {
   const [sessions, setSessions] = useState<ReadingSession[]>([])
 
   useEffect(() => {
-    const store = new LocalStore()
-    Promise.all([store.getBook(bookId), store.listReadingSessions({ bookId })])
-      .then(([b, s]) => {
-        setBook(b)
-        setSessions(s)
-      })
-      .catch(() => {
+    getPreferences().then((prefs) => {
+      if (prefs.localArchived) {
         setBook(null)
         setSessions([])
-      })
+        return
+      }
+      const store = new LocalStore()
+      Promise.all([store.getBook(bookId), store.listReadingSessions({ bookId })])
+        .then(([b, s]) => {
+          setBook(b)
+          setSessions(s)
+        })
+        .catch(() => {
+          setBook(null)
+          setSessions([])
+        })
+    })
   }, [bookId])
 
   if (book === undefined) {

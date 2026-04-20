@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { Book, ReadingSession } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
+import { getPreferences } from '@/lib/storage/preferences'
 import { getMonthMatrix, formatLocalYmd } from '@/lib/date'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { MonthGrid } from './MonthGrid'
@@ -21,18 +22,24 @@ export function CalendarHydrator({ year, month }: CalendarHydratorProps) {
   const [data, setData] = useState<CalendarData | undefined>(undefined)
 
   useEffect(() => {
-    const store = new LocalStore()
-    const matrix = getMonthMatrix(year, month, 0)
-    const firstCell = matrix[0]?.[0]
-    const lastCell = matrix[5]?.[6]
-    if (!firstCell || !lastCell) {
-      setData({ sessionsByDate: {}, booksById: {} })
-      return
-    }
-    const from = formatLocalYmd(firstCell)
-    const to = formatLocalYmd(lastCell)
+    getPreferences().then((prefs) => {
+      if (prefs.localArchived) {
+        setData({ sessionsByDate: {}, booksById: {} })
+        return
+      }
 
-    Promise.all([store.listReadingSessions(), store.listBooks()])
+      const store = new LocalStore()
+      const matrix = getMonthMatrix(year, month, 0)
+      const firstCell = matrix[0]?.[0]
+      const lastCell = matrix[5]?.[6]
+      if (!firstCell || !lastCell) {
+        setData({ sessionsByDate: {}, booksById: {} })
+        return
+      }
+      const from = formatLocalYmd(firstCell)
+      const to = formatLocalYmd(lastCell)
+
+      Promise.all([store.listReadingSessions(), store.listBooks()])
       .then(([allSessions, allBooks]) => {
         const filtered = allSessions.filter(
           (s) => s.readDate >= from && s.readDate <= to,
@@ -57,6 +64,7 @@ export function CalendarHydrator({ year, month }: CalendarHydratorProps) {
         setData({ sessionsByDate, booksById })
       })
       .catch(() => setData({ sessionsByDate: {}, booksById: {} }))
+    })
   }, [year, month])
 
   if (data === undefined) {
