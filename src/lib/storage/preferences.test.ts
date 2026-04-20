@@ -30,6 +30,38 @@ describe('preferences', () => {
     expect(prefs.localArchived).toBe(true);
   });
 
+  it('themePreference 기본값은 undefined(미설정)다', async () => {
+    const prefs = await getPreferences(idbStore);
+    expect(prefs.themePreference).toBeUndefined();
+  });
+
+  it('themePreference를 "day"로 업데이트할 수 있다', async () => {
+    await updatePreferences({ themePreference: 'day' }, idbStore);
+    const prefs = await getPreferences(idbStore);
+    expect(prefs.themePreference).toBe('day');
+  });
+
+  it('themePreference를 "night"로 업데이트할 수 있다', async () => {
+    await updatePreferences({ themePreference: 'night' }, idbStore);
+    const prefs = await getPreferences(idbStore);
+    expect(prefs.themePreference).toBe('night');
+  });
+
+  it('themePreference를 "system"으로 업데이트할 수 있다', async () => {
+    await updatePreferences({ themePreference: 'day' }, idbStore);
+    await updatePreferences({ themePreference: 'system' }, idbStore);
+    const prefs = await getPreferences(idbStore);
+    expect(prefs.themePreference).toBe('system');
+  });
+
+  it('themePreference 변경이 다른 필드를 덮어쓰지 않는다', async () => {
+    await updatePreferences({ nickname: '곰', themePreference: 'night' }, idbStore);
+    await updatePreferences({ themePreference: 'day' }, idbStore);
+    const prefs = await getPreferences(idbStore);
+    expect(prefs.nickname).toBe('곰');
+    expect(prefs.themePreference).toBe('day');
+  });
+
   it('updatePreferences는 기존 필드를 유지한 채 병합한다', async () => {
     await updatePreferences({ nickname: '독서왕' }, idbStore);
     await updatePreferences({ guestBannerDismissed: true }, idbStore);

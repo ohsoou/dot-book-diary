@@ -64,6 +64,32 @@ describe('LocalStore - Books', () => {
   it('addBook 시 title이 비어있으면 VALIDATION_FAILED 에러가 발생한다', async () => {
     await expect(store.addBook({ title: '' })).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
   });
+
+  it('addBook 시 targetDate가 저장되고 조회된다', async () => {
+    const book = await store.addBook({ title: '완독 목표 책', targetDate: '2026-12-31' });
+    expect(book.targetDate).toBe('2026-12-31');
+    const found = await store.getBook(book.id);
+    expect(found?.targetDate).toBe('2026-12-31');
+  });
+
+  it('addBook 시 targetDate 없이 저장하면 undefined다', async () => {
+    const book = await store.addBook({ title: '목표 없는 책' });
+    expect(book.targetDate).toBeUndefined();
+  });
+
+  it('updateBook으로 targetDate를 설정할 수 있다', async () => {
+    const book = await store.addBook({ title: '책' });
+    const updated = await store.updateBook(book.id, { targetDate: '2026-06-30' });
+    expect(updated.targetDate).toBe('2026-06-30');
+    const found = await store.getBook(book.id);
+    expect(found?.targetDate).toBe('2026-06-30');
+  });
+
+  it('updateBook으로 targetDate를 제거할 수 있다', async () => {
+    const book = await store.addBook({ title: '책', targetDate: '2026-12-31' });
+    const updated = await store.updateBook(book.id, { targetDate: undefined });
+    expect(updated.targetDate).toBeUndefined();
+  });
 });
 
 describe('LocalStore - findBookByIsbn', () => {

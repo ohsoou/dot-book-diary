@@ -6,6 +6,7 @@ import {
   diaryEntrySchema,
   searchQuerySchema,
   profileSchema,
+  themePreferenceSchema,
   toValidationError,
   parseOrThrow,
 } from './validation';
@@ -39,6 +40,55 @@ describe('bookSchema', () => {
 
   it('should reject totalPages less than 1', () => {
     const result = bookSchema.safeParse({ title: '책', totalPages: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept a valid targetDate in YYYY-MM-DD format', () => {
+    const result = bookSchema.safeParse({ title: '책', targetDate: '2026-12-31' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.targetDate).toBe('2026-12-31');
+  });
+
+  it('should accept a book without targetDate (optional)', () => {
+    const result = bookSchema.safeParse({ title: '책' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.targetDate).toBeUndefined();
+  });
+
+  it('should reject an invalid targetDate format', () => {
+    const result = bookSchema.safeParse({ title: '책', targetDate: '2026/12/31' });
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject a targetDate with wrong length', () => {
+    const result = bookSchema.safeParse({ title: '책', targetDate: '26-12-31' });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('themePreferenceSchema', () => {
+  it('should accept "system"', () => {
+    const result = themePreferenceSchema.safeParse('system');
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept "day"', () => {
+    const result = themePreferenceSchema.safeParse('day');
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept "night"', () => {
+    const result = themePreferenceSchema.safeParse('night');
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject an invalid value', () => {
+    const result = themePreferenceSchema.safeParse('dark');
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject an empty string', () => {
+    const result = themePreferenceSchema.safeParse('');
     expect(result.success).toBe(false);
   });
 });
