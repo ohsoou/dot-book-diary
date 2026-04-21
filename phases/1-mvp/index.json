@@ -48,7 +48,7 @@
       "status": "completed",
       "started_at": "2026-04-21T09:08:34+0900",
       "summary": "globals.css에 @keyframes bear-idle(translateY 1px, steps(2), 2s)·lamp-flicker(opacity 0.92, steps(2), 4s)와 .bear-idle·.lamp-flicker 클래스 추가; RoomScene.tsx 코드 변경 없음(animClass 이미 적용); 테스트 296개 전체 통과",
-      "completed_at": "2026-04-21T09:10:00+0900"
+      "completed_at": "2026-04-21T09:10:23+0900"
     },
     {
       "step": 6,
