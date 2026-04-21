@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { Book } from '@/types'
+import type { Book, ReadingSession } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
 import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -9,6 +9,7 @@ import { BookGrid } from './BookGrid'
 
 export function BookGridHydrator() {
   const [books, setBooks] = useState<Book[] | null>(null)
+  const [sessionsByBookId, setSessionsByBookId] = useState<Record<string, ReadingSession[]>>({})
 
   useEffect(() => {
     getPreferences().then((prefs) => {
@@ -17,7 +18,16 @@ export function BookGridHydrator() {
         return
       }
       const store = new LocalStore()
-      store.listBooks().then(setBooks).catch(() => setBooks([]))
+      Promise.all([store.listBooks(), store.listReadingSessions()])
+        .then(([loadedBooks, allSessions]) => {
+          const byBookId = allSessions.reduce<Record<string, ReadingSession[]>>((acc, s) => {
+            acc[s.bookId] = [...(acc[s.bookId] ?? []), s]
+            return acc
+          }, {})
+          setBooks(loadedBooks)
+          setSessionsByBookId(byBookId)
+        })
+        .catch(() => setBooks([]))
     })
   }, [])
 
@@ -31,5 +41,5 @@ export function BookGridHydrator() {
     )
   }
 
-  return <BookGrid books={books} />
+  return <BookGrid books={books} sessionsByBookId={sessionsByBookId} />
 }

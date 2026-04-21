@@ -8,6 +8,7 @@ import { formatLocalYmd } from '@/lib/date'
 import { readingSessionSchema } from '@/lib/validation'
 import { BookCover } from './BookCover'
 import { ReadingTimer } from './ReadingTimer'
+import { GoalProgress } from './GoalProgress'
 import { Button } from '@/components/ui/Button'
 import { FieldError } from '@/components/ui/FieldError'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -16,7 +17,7 @@ import {
   updateReadingSessionAction,
   deleteReadingSessionAction,
 } from '@/lib/actions/reading-sessions'
-import { deleteBookAction } from '@/lib/actions/books'
+import { deleteBookAction, updateBookAction } from '@/lib/actions/books'
 import { LocalStore } from '@/lib/storage/LocalStore'
 import type { ActionResult } from '@/lib/errors'
 
@@ -75,16 +76,41 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
   const today = formatLocalYmd(new Date())
 
   const [sessions, setSessions] = useState<ReadingSession[]>(initialSessions)
+  const [currentBook, setCurrentBook] = useState<Book>(book)
+  const [targetDateInput, setTargetDateInput] = useState(book.targetDate ?? '')
   const [fields, setFields] = useState<FormFields>(emptyFields(today))
   const [editingId, setEditingId] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null)
   const [showBookDeleteDialog, setShowBookDeleteDialog] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [isTargetDatePending, startTargetDateTransition] = useTransition()
 
   useEffect(() => {
     setSessions(initialSessions)
   }, [initialSessions])
+
+  const handleTargetDateSave = useCallback(() => {
+    const newTargetDate = targetDateInput.trim() || undefined
+    startTargetDateTransition(async () => {
+      let result: ActionResult<Book>
+      if (isLoggedIn) {
+        result = await updateBookAction(currentBook.id, { targetDate: newTargetDate })
+      } else {
+        const store = new LocalStore()
+        try {
+          const updated = await store.updateBook(currentBook.id, { targetDate: newTargetDate })
+          result = { ok: true, data: updated }
+        } catch {
+          result = { ok: false, error: { code: 'UPSTREAM_FAILED', message: '저장에 실패했어요' } }
+        }
+      }
+      if (result.ok) {
+        setCurrentBook(result.data)
+        setTargetDateInput(result.data.targetDate ?? '')
+      }
+    })
+  }, [currentBook.id, isLoggedIn, targetDateInput])
 
   const handleFieldChange = useCallback((key: keyof FormFields, value: string) => {
     setFields((prev) => ({ ...prev, [key]: value }))
@@ -281,6 +307,39 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
           독후감 작성
         </Link>
       </div>
+
+      {/* 책 설정: 목표 완독일 */}
+      <section>
+        <h2 className="text-sm text-[var(--color-text-body)] mb-3">책 설정</h2>
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="targetDate">
+              목표 완독일
+            </label>
+            <input
+              id="targetDate"
+              type="date"
+              value={targetDateInput}
+              min={formatLocalYmd(new Date(currentBook.createdAt))}
+              onChange={(e) => setTargetDateInput(e.target.value)}
+              className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)]"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            pending={isTargetDatePending}
+            pendingLabel="저장 중..."
+            onClick={handleTargetDateSave}
+          >
+            저장
+          </Button>
+        </div>
+        <div className="mt-3">
+          <GoalProgress book={currentBook} sessions={sessions} />
+        </div>
+      </section>
 
       {/* 세션 추가/수정 폼 */}
       <section>

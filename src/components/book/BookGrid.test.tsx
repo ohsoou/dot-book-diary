@@ -23,11 +23,12 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-const makeBook = (id: string, title: string): Book => ({
+const makeBook = (id: string, title: string, extra: Partial<Book> = {}): Book => ({
   id,
   title,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
+  ...extra,
 })
 
 describe('BookGrid', () => {
@@ -55,5 +56,19 @@ describe('BookGrid', () => {
     render(<BookGrid books={[]} />)
     const link = screen.getByRole('link', { name: '첫 책 등록하기' })
     expect(link.getAttribute('href')).toBe('/add-book')
+  })
+
+  it('targetDate 있는 책은 compact GoalProgress(D- 뱃지)를 렌더한다', () => {
+    const books = [makeBook('1', '책 A', { targetDate: '2099-12-31' })]
+    render(<BookGrid books={books} />)
+    const text = document.body.textContent ?? ''
+    expect(text).toMatch(/D-\d+/)
+  })
+
+  it('targetDate 없는 책은 compact GoalProgress를 렌더하지 않는다', () => {
+    const books = [makeBook('1', '책 A')]
+    render(<BookGrid books={books} />)
+    const text = document.body.textContent ?? ''
+    expect(text).not.toMatch(/D-/)
   })
 })

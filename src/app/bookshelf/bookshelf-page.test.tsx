@@ -27,14 +27,22 @@ vi.mock('next/navigation', () => ({
 }))
 
 const mockListBooks = vi.fn()
+const mockListReadingSessions = vi.fn().mockResolvedValue([])
 vi.mock('@/lib/storage', () => ({
-  getStore: vi.fn().mockResolvedValue({ listBooks: mockListBooks }),
-  useStore: vi.fn().mockReturnValue({ listBooks: mockListBooks }),
+  getStore: vi.fn().mockResolvedValue({
+    listBooks: mockListBooks,
+    listReadingSessions: mockListReadingSessions,
+  }),
+  useStore: vi.fn().mockReturnValue({
+    listBooks: mockListBooks,
+    listReadingSessions: mockListReadingSessions,
+  }),
 }))
 
 vi.mock('@/lib/storage/LocalStore', () => ({
   LocalStore: class {
     listBooks() { return Promise.resolve([]) }
+    listReadingSessions() { return Promise.resolve([]) }
   },
 }))
 

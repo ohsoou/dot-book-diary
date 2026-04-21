@@ -26,6 +26,7 @@ const mockAddSession = vi.fn()
 const mockUpdateSession = vi.fn()
 const mockDeleteSession = vi.fn()
 const mockDeleteBook = vi.fn()
+const mockUpdateBook = vi.fn()
 
 vi.mock('@/lib/actions/reading-sessions', () => ({
   addReadingSessionAction: (...args: unknown[]) => mockAddSession(...args),
@@ -35,6 +36,7 @@ vi.mock('@/lib/actions/reading-sessions', () => ({
 
 vi.mock('@/lib/actions/books', () => ({
   deleteBookAction: (...args: unknown[]) => mockDeleteBook(...args),
+  updateBookAction: (...args: unknown[]) => mockUpdateBook(...args),
 }))
 
 // date mock: 고정된 날짜 반환
@@ -71,6 +73,7 @@ beforeEach(() => {
   mockUpdateSession.mockResolvedValue({ ok: true, data: successSession } satisfies ActionResult<ReadingSession>)
   mockDeleteSession.mockResolvedValue({ ok: true, data: undefined } satisfies ActionResult<void>)
   mockDeleteBook.mockResolvedValue({ ok: true, data: undefined } satisfies ActionResult<void>)
+  mockUpdateBook.mockResolvedValue({ ok: true, data: makeBook({ targetDate: '2026-05-01' }) } satisfies ActionResult<Book>)
 })
 
 describe('ReadingSessionForm', () => {
@@ -167,5 +170,33 @@ describe('ReadingSessionForm', () => {
       expect(mockDeleteBook).toHaveBeenCalledWith('book-1')
       expect(mockPush).toHaveBeenCalledWith('/bookshelf')
     })
+  })
+
+  it('목표 완독일 입력 필드가 렌더된다', () => {
+    render(<ReadingSessionForm book={makeBook()} sessions={[]} isLoggedIn={true} />)
+    expect(screen.getByLabelText('목표 완독일')).toBeDefined()
+  })
+
+  it('회원: 목표 완독일 저장 시 updateBookAction을 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook()} sessions={[]} isLoggedIn={true} />)
+
+    const input = screen.getByLabelText('목표 완독일')
+    await user.clear(input)
+    await user.type(input, '2026-05-01')
+
+    await user.click(screen.getByRole('button', { name: '저장' }))
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith('book-1', { targetDate: '2026-05-01' })
+    })
+  })
+
+  it('GoalProgress가 렌더된다', () => {
+    const book = makeBook({ targetDate: '2026-05-01', totalPages: 300 })
+    render(<ReadingSessionForm book={book} sessions={[makeSession({ endPage: 150 })]} isLoggedIn={true} />)
+    // 일수 라벨 또는 상태 라벨이 있어야 함
+    const text = document.body.textContent ?? ''
+    expect(text).toMatch(/일 남음|오늘까지|일 지남|순항|조금 밀림|며칠 더 필요해요/)
   })
 })
