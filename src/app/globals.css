@@ -104,6 +104,18 @@ img.pixel {
   outline-offset: 2px;
 }
 
+@keyframes bear-idle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(1px); }
+}
+@keyframes lamp-flicker {
+  0%, 45%, 55%, 100% { opacity: 1; }
+  50%                { opacity: 0.92; }
+}
+
+.bear-idle    { animation: bear-idle 2s steps(2) infinite; }
+.lamp-flicker { animation: lamp-flicker 4s steps(2) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .bear-idle,
   .lamp-flicker {
