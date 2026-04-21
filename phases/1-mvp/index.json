@@ -29,7 +29,9 @@
     {
       "step": 3,
       "name": "room-scene-theme-switch",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-21T08:57:31+0900",
+      "summary": "RoomScene에 theme 필수 prop 추가; SPRITE_FILES 맵으로 day/night 파일명 불일치(Bookstack vs BookStack) 흡수; useEffect로 테마 변경 시 settledCount 리셋; page.tsx SSR에서 profile.theme_preference → resolveTheme → theme prop 전달; 테스트 11개 추가(day/night 경로 검증, rerender 시 src 변경, 파일명 불일치 케이스) 포함 279개 전체 통과"
     },
     {
       "step": 4,
