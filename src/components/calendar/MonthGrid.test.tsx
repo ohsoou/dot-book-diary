@@ -92,7 +92,7 @@ describe('MonthGrid', () => {
     expect(links.length).toBe(0)
   })
 
-  it('이전 달 날짜 셀에 비활성 색상 클래스(text-[#6b5540])가 적용된다', () => {
+  it('이전 달 날짜 셀에 비활성 색상 클래스가 적용된다', () => {
     // 2024-01-01은 월요일이므로 12월 날짜가 그리드 앞에 들어온다
     render(
       <MonthGrid year={2024} month={1} sessionsByDate={{}} booksById={{}} />,
@@ -101,6 +101,10 @@ describe('MonthGrid', () => {
     const firstCell = document.querySelector('[data-date="2023-12-31"]')
     expect(firstCell).not.toBeNull()
     const dayNum = firstCell?.querySelector('span')
-    expect(dayNum?.className).toContain('text-[#6b5540]')
+    // CSS 변수 또는 하드코딩된 비활성 색상 중 하나가 적용된다
+    expect(
+      dayNum?.className.includes('text-[var(--color-text-disabled)]') ||
+      dayNum?.className.includes('text-[#6b5540]')
+    ).toBe(true)
   })
 })

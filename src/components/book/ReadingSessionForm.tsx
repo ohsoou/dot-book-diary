@@ -7,6 +7,7 @@ import type { Book, ReadingSession } from '@/types'
 import { formatLocalYmd } from '@/lib/date'
 import { readingSessionSchema } from '@/lib/validation'
 import { BookCover } from './BookCover'
+import { ReadingTimer } from './ReadingTimer'
 import { Button } from '@/components/ui/Button'
 import { FieldError } from '@/components/ui/FieldError'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -255,17 +256,27 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
         </div>
       </div>
 
+      {/* 독서 타이머 */}
+      <ReadingTimer
+        bookId={book.id}
+        onStop={(seconds) => {
+          const minutes = Math.round(seconds / 60)
+          setFields((prev) => ({ ...prev, durationMinutes: String(minutes) }))
+          document.getElementById('durationMinutes')?.focus()
+        }}
+      />
+
       {/* diary 딥링크 */}
       <div className="flex gap-2">
         <Link
           href={`/diary/new?bookId=${book.id}&type=quote` as never}
-          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors"
+          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors duration-100 ease-linear"
         >
           이 책으로 문장 기록
         </Link>
         <Link
           href={`/diary/new?bookId=${book.id}&type=review` as never}
-          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors"
+          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors duration-100 ease-linear"
         >
           독후감 작성
         </Link>
