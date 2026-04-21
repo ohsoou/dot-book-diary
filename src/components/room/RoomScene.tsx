@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface RoomSceneProps {
+  theme: 'day' | 'night'
   diaryHref?: string
   bookshelfHref?: string
   calendarHref?: string
@@ -12,7 +13,7 @@ interface RoomSceneProps {
 }
 
 interface SpriteConfig {
-  src: string
+  fileKey: string
   label: string
   z: number
   animClass?: 'bear-idle' | 'lamp-flicker'
@@ -27,65 +28,79 @@ interface HitboxConfig {
   style: React.CSSProperties
 }
 
+// Per-sprite filename map — handles day/night filename mismatches (e.g. Bookstack vs BookStack)
+const SPRITE_FILES: Record<string, { day: string; night: string }> = {
+  background:   { day: 'Background.png',    night: 'Background.png' },
+  outsideView:  { day: 'Outside_view.png',  night: 'Outside_view.png' },
+  window:       { day: 'Window.png',        night: 'Window.png' },
+  hangingPlant: { day: 'Hanging_plant.png', night: 'Hanging_plant.png' },
+  wallShelf:    { day: 'Wall_shelf.png',    night: 'Wall_shelf.png' },
+  bedTable:     { day: 'Bed_Table.png',     night: 'Bed_Table.png' },
+  tableLamp:    { day: 'Table_Lamp.png',    night: 'Table_Lamp.png' },
+  bookstack:    { day: 'Bookstack.png',     night: 'BookStack.png' },
+  diary:        { day: 'Diary.png',         night: 'Diary.png' },
+  bear:         { day: 'Bear.png',          night: 'Bear.png' },
+}
+
 // 640×400 캔버스(aspect-ratio 8/5) 기준 퍼센트 좌표.
 const SPRITE_DEFS: SpriteConfig[] = [
   {
-    src: '/sprites/day/Background.png',
+    fileKey: 'background',
     label: '배경',
     z: 0,
     style: { top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' },
   },
   {
-    src: '/sprites/day/Outside_view.png',
+    fileKey: 'outsideView',
     label: '창밖',
     z: 5,
     style: { top: '22.5%', left: '42.1875%', width: '18.75%', height: '25%' },
   },
   {
-    src: '/sprites/day/Window.png',
+    fileKey: 'window',
     label: '창문',
     z: 10,
     style: { top: '17.5%', left: '32.8125%', width: '35.1563%', height: '33.75%' },
   },
   {
-    src: '/sprites/day/Hanging_plant.png',
+    fileKey: 'hangingPlant',
     label: '식물',
     z: 12,
     style: { top: '11.25%', left: '10.3125%', width: '14.0625%', height: '26%' },
   },
   {
-    src: '/sprites/day/Wall_shelf.png',
+    fileKey: 'wallShelf',
     label: '벽선반',
     z: 12,
     style: { top: '17.25%', right: '3.125%', width: '21.5625%', height: '17.25%' },
   },
   {
-    src: '/sprites/day/Bed_Table.png',
+    fileKey: 'bedTable',
     label: '침대 테이블',
     z: 22,
     style: { bottom: '17.25%', left: '28.125%', width: '16.4063%', height: '25%' },
   },
   {
-    src: '/sprites/day/Table_Lamp.png',
+    fileKey: 'tableLamp',
     label: '램프',
     z: 25,
     style: { bottom: '19%', right: '-0.1563%', width: '19.8438%', height: '31%' },
     animClass: 'lamp-flicker',
   },
   {
-    src: '/sprites/day/Bookstack.png',
+    fileKey: 'bookstack',
     label: '책더미',
     z: 30,
     style: { bottom: '6.25%', right: '14.0625%', width: '17.5%', height: '19%' },
   },
   {
-    src: '/sprites/day/Diary.png',
+    fileKey: 'diary',
     label: '다이어리',
     z: 30,
     style: { bottom: '4.25%', left: '32.3438%', width: '14.0625%', height: '18%' },
   },
   {
-    src: '/sprites/day/Bear.png',
+    fileKey: 'bear',
     label: '곰',
     z: 25,
     style: { bottom: '1.25%', left: '42.0313%', width: '32.8125%', height: '42.25%' },
@@ -199,6 +214,7 @@ function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImagePr
 }
 
 export function RoomScene({
+  theme,
   diaryHref = '/diary',
   bookshelfHref = '/bookshelf',
   calendarHref = '/book-calendar',
@@ -212,6 +228,11 @@ export function RoomScene({
   const handleSettled = useCallback(() => {
     setSettledCount((prev) => prev + 1)
   }, [])
+
+  // Reset settled counter when theme changes so remounted sprites re-trigger visibility
+  useEffect(() => {
+    setSettledCount(0)
+  }, [theme])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -231,6 +252,8 @@ export function RoomScene({
     settingsHref,
   }
 
+  const SPRITE_BASE = theme === 'day' ? '/sprites/day' : '/sprites/night'
+
   return (
     <div
       role="img"
@@ -238,16 +261,20 @@ export function RoomScene({
       className={isVisible ? 'opacity-100 transition-opacity duration-300' : 'opacity-0'}
       style={SCENE_STYLE}
     >
-      {SPRITE_DEFS.map((def) => (
-        <SpriteImage
-          key={def.src}
-          src={def.src}
-          label={def.label}
-          style={{ zIndex: def.z, ...def.style }}
-          extraClass={def.animClass && !reducedMotion ? def.animClass : ''}
-          onSettled={handleSettled}
-        />
-      ))}
+      {SPRITE_DEFS.map((def) => {
+        const filename = SPRITE_FILES[def.fileKey]![theme]
+        const src = `${SPRITE_BASE}/${filename}`
+        return (
+          <SpriteImage
+            key={`${theme}-${def.fileKey}`}
+            src={src}
+            label={def.label}
+            style={{ zIndex: def.z, ...def.style }}
+            extraClass={def.animClass && !reducedMotion ? def.animClass : ''}
+            onSettled={handleSettled}
+          />
+        )
+      })}
 
       {HITBOX_DEFS.map((def) => (
         <button
