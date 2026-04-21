@@ -13,7 +13,7 @@ export default async function AddBookPage() {
   } = await supabase.auth.getUser()
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <h1 className="text-base text-[#f4e4c1] mb-6">책 추가</h1>
       <AddBookTabs isLoggedIn={!!user} />
     </main>

@@ -33,8 +33,7 @@ export async function updateProfileAction(
 
     const { data, error } = await supabase
       .from('profiles')
-      .update({ nickname: parsed.data.nickname })
-      .eq('user_id', user.id)
+      .upsert({ user_id: user.id, nickname: parsed.data.nickname }, { onConflict: 'user_id' })
       .select()
       .single()
 
@@ -80,8 +79,7 @@ export async function updateThemePreferenceAction(
 
     const { error } = await supabase
       .from('profiles')
-      .update({ theme_preference: parsed.data })
-      .eq('user_id', user.id)
+      .upsert({ user_id: user.id, theme_preference: parsed.data }, { onConflict: 'user_id' })
 
     if (error) {
       return { ok: false, error: { code: 'UPSTREAM_FAILED', message: '테마를 저장하지 못했어요' } }

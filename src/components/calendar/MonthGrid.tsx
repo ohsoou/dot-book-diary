@@ -16,11 +16,11 @@ export function MonthGrid({ year, month, sessionsByDate, booksById }: MonthGridP
 
   return (
     <div>
-      <div className="grid grid-cols-7 border-l border-t border-[#1a100a]">
+      <div className="grid grid-cols-7 border-l border-t border-[var(--color-border)]">
         {WEEK_HEADERS.map((label) => (
           <div
             key={label}
-            className="border-r border-b border-[#1a100a] py-1 text-center text-xs text-[#a08866]"
+            className="border-r border-b border-[var(--color-border)] py-1 text-center text-xs text-[var(--color-text-secondary)]"
           >
             {label}
           </div>

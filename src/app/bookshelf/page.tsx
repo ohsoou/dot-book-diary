@@ -18,7 +18,7 @@ export default async function BookshelfPage() {
     const store = await getStore()
     const books = await store.listBooks()
     return (
-      <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+      <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
         <h1 className="text-base text-[#f4e4c1] mb-6">책장</h1>
         <BookGrid books={books} />
       </main>
@@ -26,7 +26,7 @@ export default async function BookshelfPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <h1 className="text-base text-[#f4e4c1] mb-6">책장</h1>
       <BookGridHydrator />
     </main>

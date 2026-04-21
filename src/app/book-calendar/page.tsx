@@ -28,21 +28,21 @@ export default async function BookCalendarPage({ searchParams }: PageProps) {
   } = await supabase.auth.getUser()
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <Link
           href={`?year=${prev.year}&month=${prev.month}` as never}
-          className="px-2 py-1 text-sm text-[#f4e4c1] border border-[#1a100a] hover:bg-[#3a2a1a] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[#e89b5e] focus-visible:outline-offset-[2px]"
+          className="px-2 py-1 text-sm text-[var(--color-text-primary)] border border-[var(--color-border)] hover:bg-[var(--color-bg-card)] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[var(--color-border-focus)] focus-visible:outline-offset-[2px]"
           aria-label="이전 달"
         >
           ←
         </Link>
-        <h1 className="text-base text-[#f4e4c1]">
+        <h1 className="text-base text-[var(--color-text-primary)]">
           {year}년 {month}월
         </h1>
         <Link
           href={`?year=${next.year}&month=${next.month}` as never}
-          className="px-2 py-1 text-sm text-[#f4e4c1] border border-[#1a100a] hover:bg-[#3a2a1a] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[#e89b5e] focus-visible:outline-offset-[2px]"
+          className="px-2 py-1 text-sm text-[var(--color-text-primary)] border border-[var(--color-border)] hover:bg-[var(--color-bg-card)] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[var(--color-border-focus)] focus-visible:outline-offset-[2px]"
           aria-label="다음 달"
         >
           →

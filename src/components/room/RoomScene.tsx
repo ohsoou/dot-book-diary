@@ -258,7 +258,7 @@ export function RoomScene({
     <div
       role="img"
       aria-label="곰이 책을 읽는 따뜻한 방"
-      className={isVisible ? 'opacity-100 transition-opacity duration-300' : 'opacity-0'}
+      className={isVisible ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}
       style={SCENE_STYLE}
     >
       {SPRITE_DEFS.map((def) => {

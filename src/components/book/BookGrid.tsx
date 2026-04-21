@@ -23,7 +23,7 @@ export function BookGrid({ books }: BookGridProps) {
         <li key={book.id}>
           <Link href={`/reading/${book.id}` as never} className="flex flex-col gap-1 group">
             <BookCover book={book} />
-            <span className="text-xs text-[#d7c199] line-clamp-1 group-hover:text-[#f4e4c1] transition-colors">
+            <span className="text-xs text-[#d7c199] line-clamp-1 group-hover:text-[#f4e4c1] transition-colors duration-100 ease-linear">
               {book.title}
             </span>
           </Link>

@@ -46,7 +46,7 @@ export default async function SettingsPage() {
             <p className="text-sm text-[#6b5540]">로그인하면 기기 간 데이터를 동기화할 수 있어요.</p>
             <Link
               href="/login"
-              className="inline-block text-sm text-center bg-[#3a2a1a] border border-[#1a100a] px-4 py-2 text-[#d7c199] hover:border-[#a08866] transition-colors"
+              className="inline-block text-sm text-center bg-[#3a2a1a] border border-[#1a100a] px-4 py-2 text-[#d7c199] hover:border-[#a08866] transition-colors duration-100 ease-linear"
             >
               로그인
             </Link>

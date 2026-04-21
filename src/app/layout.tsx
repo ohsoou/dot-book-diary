@@ -45,7 +45,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ko" data-theme={theme}>
-      <body className="min-h-screen bg-[#2a1f17] text-[#d7c199] pb-[64px]">
+      <body className="min-h-screen pb-[64px]">
         <ThemeHydrator />
         <ToastProvider>
           <GuestArchiver />

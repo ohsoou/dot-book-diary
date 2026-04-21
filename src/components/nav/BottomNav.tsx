@@ -99,7 +99,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="전역 네비게이션"
-      className="fixed bottom-0 inset-x-0 z-10 bg-[#3a2a1a] border-t border-[#1a100a] grid grid-cols-5 h-[64px]"
+      className="fixed bottom-0 inset-x-0 z-10 bg-[var(--color-bg-card)] border-t border-[var(--color-border)] grid grid-cols-5 h-[64px]"
     >
       {NAV_ITEMS.map(({ href, label, icon }) => {
         const isActive = pathname === href

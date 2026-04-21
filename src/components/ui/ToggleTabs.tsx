@@ -11,7 +11,7 @@ export function ToggleTabs({ variants, value, onChange, className = '' }: Toggle
   return (
     <div
       role="tablist"
-      className={`flex border border-[#1a100a] ${className}`}
+      className={`flex border border-[var(--color-border)] ${className}`}
     >
       {variants.map((v) => {
         const isSelected = v === value
@@ -23,8 +23,8 @@ export function ToggleTabs({ variants, value, onChange, className = '' }: Toggle
             onClick={() => onChange(v)}
             className={`flex-1 px-3 py-2 text-sm transition-colors duration-100 ease-linear ${
               isSelected
-                ? 'bg-[#e89b5e] text-[#2a1f17]'
-                : 'bg-transparent text-[#d7c199] hover:text-[#f4e4c1]'
+                ? 'bg-[var(--color-accent)] text-[var(--color-bg)]'
+                : 'bg-transparent text-[var(--color-text-body)] hover:text-[var(--color-text-primary)]'
             }`}
           >
             {v}

@@ -20,10 +20,10 @@ export function DayCell({ date, currentMonth, sessions, booksById }: DayCellProp
   const visibleSessions = daySessions.slice(0, 3)
   const overflow = daySessions.length - 3
 
-  const textColor = isCurrentMonth ? 'text-[#f4e4c1]' : 'text-[#6b5540]'
+  const textColor = isCurrentMonth ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-disabled)]'
 
   const inner = (
-    <div className="flex flex-col gap-1 p-1 min-h-[56px]">
+    <div className="flex flex-col gap-1 p-1 min-h-[80px]">
       <span className={`text-xs leading-none ${textColor}`}>{dayLabel}</span>
       {hasSessions && (
         <div className="flex flex-wrap gap-0.5">
@@ -32,18 +32,18 @@ export function DayCell({ date, currentMonth, sessions, booksById }: DayCellProp
             return (
               <div
                 key={session.id}
-                className="relative w-5 h-8 border border-[#1a100a] overflow-hidden shrink-0 bg-[#3a2a1a]"
+                className="relative w-7 h-11 border border-[var(--color-border)] overflow-hidden shrink-0 bg-[var(--color-bg-card)]"
               >
                 {book?.coverUrl ? (
                   <Image
                     src={book.coverUrl}
                     alt={book.title}
                     fill
+                    sizes="28px"
                     style={{ objectFit: 'cover', imageRendering: 'auto' }}
-                    unoptimized
                   />
                 ) : (
-                  <span className="text-[#a08866] text-[6px] flex items-center justify-center h-full">
+                  <span className="text-[var(--color-text-secondary)] text-[6px] flex items-center justify-center h-full">
                     {book?.title.charAt(0) ?? '?'}
                   </span>
                 )}
@@ -51,7 +51,7 @@ export function DayCell({ date, currentMonth, sessions, booksById }: DayCellProp
             )
           })}
           {overflow > 0 && (
-            <span className="text-[#a08866] text-[10px] self-end leading-none">+{overflow}</span>
+            <span className="text-[var(--color-text-secondary)] text-[10px] self-end leading-none">+{overflow}</span>
           )}
         </div>
       )}
@@ -60,7 +60,7 @@ export function DayCell({ date, currentMonth, sessions, booksById }: DayCellProp
 
   if (!hasSessions) {
     return (
-      <div data-date={dateKey} className="border border-[#1a100a] bg-[#2a1f17]">
+      <div data-date={dateKey} className="border border-[var(--color-border)] bg-[var(--color-bg)]">
         {inner}
       </div>
     )
@@ -72,7 +72,7 @@ export function DayCell({ date, currentMonth, sessions, booksById }: DayCellProp
     <Link
       href={`/reading/${firstBookId}` as never}
       data-date={dateKey}
-      className="block border border-[#1a100a] bg-[#2a1f17] hover:bg-[#3a2a1a] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[#e89b5e] focus-visible:outline-offset-[2px]"
+      className="block border border-[var(--color-border)] bg-[var(--color-bg)] hover:bg-[var(--color-bg-card)] transition-colors duration-100 ease-linear focus-visible:outline focus-visible:outline-1 focus-visible:outline-dashed focus-visible:outline-[var(--color-border-focus)] focus-visible:outline-offset-[2px]"
     >
       {inner}
     </Link>

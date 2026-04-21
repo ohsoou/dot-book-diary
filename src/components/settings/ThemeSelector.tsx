@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ToggleTabs } from '@/components/ui/ToggleTabs'
 import { updateThemePreferenceAction } from '@/lib/actions/profile'
 import { updatePreferences } from '@/lib/storage/preferences'
@@ -24,6 +24,15 @@ const VARIANTS = PREFS.map((p) => LABELS[p])
 export function ThemeSelector({ initialPreference, isLoggedIn }: ThemeSelectorProps) {
   const [preference, setPreference] = useState<ThemePreference>(initialPreference)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current) }, [])
+
+  function showToast(message: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    setToastMessage(message)
+    toastTimerRef.current = setTimeout(() => setToastMessage(null), 3000)
+  }
 
   async function handleChange(label: string) {
     const next = PREFS[VARIANTS.indexOf(label)]
@@ -38,8 +47,7 @@ export function ThemeSelector({ initialPreference, isLoggedIn }: ThemeSelectorPr
       if (!result.ok) {
         setPreference(prev)
         document.documentElement.dataset.theme = resolveTheme(prev)
-        setToastMessage('테마를 저장하지 못했어요')
-        setTimeout(() => setToastMessage(null), 3000)
+        showToast('테마를 저장하지 못했어요')
       }
     } else {
       try {
@@ -47,8 +55,7 @@ export function ThemeSelector({ initialPreference, isLoggedIn }: ThemeSelectorPr
       } catch {
         setPreference(prev)
         document.documentElement.dataset.theme = resolveTheme(prev)
-        setToastMessage('테마를 저장하지 못했어요')
-        setTimeout(() => setToastMessage(null), 3000)
+        showToast('테마를 저장하지 못했어요')
       }
     }
   }

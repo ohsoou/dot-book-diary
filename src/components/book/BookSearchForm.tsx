@@ -66,7 +66,7 @@ export function BookSearchForm({ onAddBook }: BookSearchFormProps) {
 
   const handleClickAdd = useCallback(
     async (book: BookSearchResult) => {
-      const key = book.isbn ?? book.title
+      const key = book.isbn?.trim() || book.title
       setAddingIsbn(key)
       await handleAdd(book)
       setAddingIsbn(null)
@@ -118,8 +118,8 @@ export function BookSearchForm({ onAddBook }: BookSearchFormProps) {
 
       {!isPending && state.results !== null && state.results.length > 0 && (
         <ul className="flex flex-col gap-3">
-          {state.results.map((book) => {
-            const key = book.isbn ?? book.title
+          {state.results.map((book, index) => {
+            const key = book.isbn?.trim() || book.title || String(index)
             const isAdding = addingIsbn === key
             return (
               <li
@@ -127,14 +127,15 @@ export function BookSearchForm({ onAddBook }: BookSearchFormProps) {
                 className="flex gap-3 border border-[#3a2a1a] bg-[#2a1f17] p-3"
               >
                 {book.coverUrl ? (
-                  <Image
-                    src={book.coverUrl}
-                    alt={`${book.title} 표지`}
-                    width={56}
-                    height={80}
-                    className="object-cover shrink-0"
-                    unoptimized
-                  />
+                  <div className="relative w-[56px] h-[80px] shrink-0">
+                    <Image
+                      src={book.coverUrl}
+                      alt={`${book.title} 표지`}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
                 ) : (
                   <div className="w-[56px] h-[80px] bg-[#3a2a1a] shrink-0 flex items-center justify-center">
                     <span className="text-[#6b5540] text-xs">표지 없음</span>

@@ -14,7 +14,7 @@ export default async function DiaryPage() {
   } = await supabase.auth.getUser()
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-base text-[#f4e4c1]">다이어리</h1>
         <Link

@@ -20,7 +20,7 @@ export default async function DiaryNewPage({ searchParams }: Props) {
   } = await supabase.auth.getUser()
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={'/diary' as never}
