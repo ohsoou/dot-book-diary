@@ -61,7 +61,10 @@
     {
       "step": 7,
       "name": "reading-goal-progress",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-21T14:29:54+0900",
+      "summary": "lib/goal.ts: computeGoal() 순수 함수(pageProgress/dateProgress/remainingDays/status 계산); GoalProgress.tsx: full/compact 두 variant 렌더(CSS 변수만 사용); ReadingSessionForm에 목표 완독일 입력+저장+GoalProgress full 통합; BookGrid에 compact 뱃지 추가; bookshelf/page.tsx·BookGridHydrator에 sessions 로드; 테스트 355개 전체 통과",
+      "completed_at": "2026-04-21T14:39:00+0900"
     },
     {
       "step": 8,
