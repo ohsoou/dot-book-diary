@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { NicknameForm } from '@/components/settings/NicknameForm'
 import { LogoutButton } from '@/components/settings/LogoutButton'
+import { ThemeSelector } from '@/components/settings/ThemeSelector'
 import type { Profile } from '@/types'
 
 export const metadata = { title: '설정' }
@@ -62,6 +63,15 @@ export default async function SettingsPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-sm text-[#a08866] font-medium">닉네임</h2>
         <NicknameForm isGuest={isGuest} defaultValue={profile?.nickname} />
+      </section>
+
+      {/* 테마 섹션 */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm text-[#a08866] font-medium">테마</h2>
+        <ThemeSelector
+          initialPreference={profile?.themePreference ?? 'system'}
+          isLoggedIn={!isGuest}
+        />
       </section>
 
       {/* 동기화 섹션 — 회원에게만 표시 */}

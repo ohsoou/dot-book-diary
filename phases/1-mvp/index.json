@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "settings-theme-toggle",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-21T09:02:12+0900",
+      "summary": "ThemeSelector 컴포넌트(3택 ToggleTabs, 낙관적 UI + 실패 롤백) 추가; updateThemePreferenceAction(RLS eq user_id) 추가; settings/page.tsx에 회원/비회원 공통 테마 섹션 추가; 테스트 17개 추가 포함 296개 전체 통과",
+      "completed_at": "2026-04-21T09:08:30+0900"
     },
     {
       "step": 5,
