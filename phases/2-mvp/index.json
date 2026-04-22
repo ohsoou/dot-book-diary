@@ -24,7 +24,7 @@
       "status": "completed",
       "started_at": "2026-04-22T13:44:03+0900",
       "summary": "RoomScene에 bearAsset?: string prop 추가 — bear fileKey 렌더 시 bearAsset 우선 사용, SPRITE_DEFS/SPRITE_FILES 미변경. 신규 테스트 3개 포함 총 15개 통과, night 에셋 6종 존재 확인, build/lint 에러 없음",
-      "completed_at": "2026-04-22T13:46:00+0900"
+      "completed_at": "2026-04-22T13:45:40+0900"
     },
     {
       "step": 3,
