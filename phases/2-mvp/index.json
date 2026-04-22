@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "guest-bear-hydrator",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-22T13:48:35+0900",
+      "summary": "BearStateContext(Provider+useBearState+useSetBearState)+BearStateHydrator(비회원 mount 시 LocalStore→computeBearState→context 업데이트) 생성. BearStatusBar/LastReadNote/RoomScene에 context 읽기 추가. lib/last-read-store.ts(클라이언트-세이프 getLastReadAtFromStore)+lib/storage/use-store.ts(클라이언트-세이프 useStore) 분리로 server-only 빌드 에러 해결. 신규 4개 포함 총 389개 테스트 통과, build/lint 에러 없음",
+      "completed_at": "2026-04-22T14:00:00+0900"
     },
     {
       "step": 5,
