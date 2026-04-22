@@ -148,4 +148,20 @@ describe('RoomScene', () => {
     const { container: nightContainer } = render(<RoomScene theme="night" />)
     expect(nightContainer.querySelector('img[src="/sprites/night/BookStack.png"]')).not.toBeNull()
   })
+
+  it('renders rug sprite with correct properties and z-index below bear', () => {
+    const { container } = render(<RoomScene theme="day" />)
+
+    const rugImg = container.querySelector('img[src="/sprites/day/Rug.png"]') as HTMLElement | null
+    const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]') as HTMLElement | null
+
+    expect(rugImg).not.toBeNull()
+    expect(rugImg?.style.bottom).toBe('0.5%')
+    expect(rugImg?.style.left).toBe('35.9375%')
+    expect(rugImg?.style.zIndex).toBe('15')
+
+    const rugZ = parseInt(rugImg?.style.zIndex || '0')
+    const bearZ = parseInt(bearImg?.style.zIndex || '0')
+    expect(rugZ).toBeLessThan(bearZ)
+  })
 })

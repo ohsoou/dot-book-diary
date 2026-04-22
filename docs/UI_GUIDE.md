@@ -370,6 +370,37 @@ Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color
 - `target_date` 없음 → "목표 완독일을 정해 볼까요?" CTA.
 - `/bookshelf` 카드에서는 소형 버전(막대 + 잔여 일수)만 노출.
 
+### BearStatusBar (MVP2, `/` 상단 letterbox)
+
+```
+컨테이너: py-1 text-center text-sm text-[var(--color-text-secondary)]
+라벨 예시: "곰이 책을 기다려요" / "곰이 책을 읽고 왔어요" / "곰이 놀고 있어요" / "곰이 자고 있어요"
+aria-live: "polite", aria-atomic: "true"
+```
+
+- 독서 기록 없음: "곰이 책을 기다려요"
+- `fresh` (< 1시간): "곰이 책을 읽고 왔어요"
+- `active` (1시간~7일): variant에 맞는 라벨 (예: "곰이 쉬고 있어요", "곰이 놀고 있어요")
+- `sleeping` (≥ 7일): "곰이 자고 있어요"
+- 비회원 초기 SSR: `null`이면 렌더 생략 (hydration 전까지).
+
+### LastReadNote (MVP2, `/` 하단 letterbox)
+
+```
+컨테이너: py-1 text-center text-xs text-[var(--color-text-secondary)]
+형식: "마지막 독서: N시간 전" / "마지막 독서: 3일 전" / "마지막 독서: 방금"
+aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
+```
+
+- `formatElapsed` 출력:
+  - `< 1분`: "방금"
+  - `1분 ~ 1시간`: "N분 전"
+  - `1시간 ~ 24시간`: "N시간 전"
+  - `1일 ~ 7일`: "N일 전"
+  - `7일 이상`: "N주 전"
+- 독서 기록 없음: "아직 독서 기록이 없어요"
+- 비회원 초기 SSR: `null`이면 렌더 생략.
+
 ---
 
 ## 포커스 스타일

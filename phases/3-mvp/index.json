@@ -1,0 +1,10 @@
+{
+  "project": "dot-book-diary",
+  "phase": "3-mvp",
+  "steps": [
+    { "step": 0, "name": "lamp-state-pure-fn", "status": "pending" },
+    { "step": 1, "name": "room-scene-lamp-toggle", "status": "pending" },
+    { "step": 2, "name": "docs-update", "status": "pending" },
+    { "step": 3, "name": "release-hardening-mvp3", "status": "pending" }
+  ]
+}

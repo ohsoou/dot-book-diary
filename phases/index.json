@@ -8,6 +8,14 @@
       "dir": "1-mvp",
       "status": "completed",
       "completed_at": "2026-04-21T14:42:34+0900"
+    },
+    {
+      "dir": "2-mvp",
+      "status": "pending"
+    },
+    {
+      "dir": "3-mvp",
+      "status": "pending"
     }
   ]
 }

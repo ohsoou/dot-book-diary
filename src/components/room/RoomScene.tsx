@@ -40,6 +40,7 @@ const SPRITE_FILES: Record<string, { day: string; night: string }> = {
   bookstack:    { day: 'Bookstack.png',     night: 'BookStack.png' },
   diary:        { day: 'Diary.png',         night: 'Diary.png' },
   bear:         { day: 'Bear.png',          night: 'Bear.png' },
+  rug:          { day: 'Rug.png',           night: 'Rug.png' },
 }
 
 // 640×400 캔버스(aspect-ratio 8/5) 기준 퍼센트 좌표.
@@ -75,6 +76,12 @@ const SPRITE_DEFS: SpriteConfig[] = [
     style: { top: '17.25%', right: '3.125%', width: '21.5625%', height: '17.25%' },
   },
   {
+    fileKey: 'rug',
+    label: '러그',
+    z: 15,
+    style: { bottom: '0.5%', left: '35.9375%', width: '45%', height: '29%' },
+  },
+  {
     fileKey: 'bedTable',
     label: '침대 테이블',
     z: 22,
@@ -97,7 +104,7 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'diary',
     label: '다이어리',
     z: 30,
-    style: { bottom: '4.25%', left: '32.3438%', width: '14.0625%', height: '18%' },
+    style: { bottom: '4.25%', left: '35.3438%', width: '14.0625%', height: '18%' },
   },
   {
     fileKey: 'bear',
@@ -115,7 +122,7 @@ const HITBOX_DEFS: HitboxConfig[] = [
   {
     label: '다이어리',
     hrefKey: 'diaryHref',
-    style: { bottom: '4.25%', left: '32.3438%', width: '14.0625%', height: '18%' },
+    style: { bottom: '4.25%', left: '35.3438%', width: '14.0625%', height: '18%' },
   },
   {
     label: '책장',
