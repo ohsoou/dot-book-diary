@@ -7,7 +7,8 @@
       "name": "bear-state-pure-fn",
       "status": "completed",
       "started_at": "2026-04-22T13:24:25+0900",
-      "summary": "lib/bear-state.ts에 computeBearState(순수 함수, mulberry32 시드 기반 active variant, formatElapsed) 구현 및 15개 테스트 통과"
+      "summary": "lib/bear-state.ts에 computeBearState(순수 함수, mulberry32 시드 기반 active variant, formatElapsed) 구현 및 15개 테스트 통과",
+      "completed_at": "2026-04-22T13:26:12+0900"
     },
     {
       "step": 1,
