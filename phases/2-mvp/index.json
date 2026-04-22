@@ -32,7 +32,7 @@
       "status": "completed",
       "started_at": "2026-04-22T13:45:40+0900",
       "summary": "BearStatusBar(aria-live 상태 라벨)·LastReadNote(<time> 경과 표시) 생성, page.tsx에 회원 SSR 경로(getLastReadAtFromSupabase+computeBearState) 추가. 신규 7개 포함 총 385개 테스트 통과, build/lint 에러 없음",
-      "completed_at": "2026-04-22T13:49:00+0900"
+      "completed_at": "2026-04-22T13:48:35+0900"
     },
     {
       "step": 4,
