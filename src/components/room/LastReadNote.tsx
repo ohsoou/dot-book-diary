@@ -1,11 +1,17 @@
+'use client'
+
 import { formatElapsed } from '@/lib/bear-state'
+import { useBearState } from './BearStateContext'
 
 interface LastReadNoteProps {
-  lastReadAt: string | null
+  lastReadAt?: string | null
   now?: Date
 }
 
-export function LastReadNote({ lastReadAt, now = new Date() }: LastReadNoteProps) {
+export function LastReadNote({ lastReadAt: lastReadAtProp, now = new Date() }: LastReadNoteProps) {
+  const { lastReadAt: contextLastReadAt } = useBearState()
+  const lastReadAt = lastReadAtProp !== undefined ? lastReadAtProp : contextLastReadAt
+
   if (lastReadAt === null) {
     return (
       <p className="py-1 text-center text-xs text-[var(--color-text-secondary)]">

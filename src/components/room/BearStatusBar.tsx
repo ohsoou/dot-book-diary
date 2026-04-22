@@ -1,8 +1,14 @@
+'use client'
+
+import { useBearState } from './BearStateContext'
+
 interface BearStatusBarProps {
-  label: string | null
+  label?: string | null
 }
 
-export function BearStatusBar({ label }: BearStatusBarProps) {
+export function BearStatusBar({ label: labelProp }: BearStatusBarProps) {
+  const { bearLabel } = useBearState()
+  const label = labelProp !== undefined ? labelProp : bearLabel
   return (
     <p
       role="status"
@@ -10,7 +16,7 @@ export function BearStatusBar({ label }: BearStatusBarProps) {
       aria-atomic="true"
       className="py-1 text-center text-sm text-[var(--color-text-secondary)]"
     >
-      {label ?? ' '}
+      {label ?? ' '}
     </p>
   )
 }

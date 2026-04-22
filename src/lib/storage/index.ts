@@ -29,14 +29,10 @@ export async function getStore(): Promise<Store> {
 
 /**
  * Client 컴포넌트에서 비회원 LocalStore에 접근할 때 사용.
- * Context + Provider 패턴으로 루트 layout에서 주입한다.
- *
- * 현재는 항상 LocalStore를 반환한다.
- * 회원 데이터 읽기는 서버 경로(Server Component, Server Action)를 통해서만 수행한다.
+ * 클라이언트 번들에서 server-only 모듈 체인을 피하려면
+ * @/lib/storage/use-store 에서 직접 import 할 것.
  */
-export function useStore(): Store {
-  return new LocalStore();
-}
+export { useStore } from './use-store';
 
 export {
   getPreferences,

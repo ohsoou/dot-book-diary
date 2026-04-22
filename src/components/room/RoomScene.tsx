@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useBearState } from './BearStateContext'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'
@@ -223,7 +224,7 @@ function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImagePr
 
 export function RoomScene({
   theme,
-  bearAsset,
+  bearAsset: bearAssetProp,
   diaryHref = '/diary',
   bookshelfHref = '/bookshelf',
   calendarHref = '/book-calendar',
@@ -231,6 +232,8 @@ export function RoomScene({
   settingsHref = '/settings',
 }: RoomSceneProps) {
   const router = useRouter()
+  const { bearAsset: contextBearAsset } = useBearState()
+  const bearAsset = bearAssetProp ?? contextBearAsset
   const [settledCount, setSettledCount] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
 
