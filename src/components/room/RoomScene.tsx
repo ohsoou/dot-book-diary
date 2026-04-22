@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'
+  bearAsset?: string
   diaryHref?: string
   bookshelfHref?: string
   calendarHref?: string
@@ -222,6 +223,7 @@ function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImagePr
 
 export function RoomScene({
   theme,
+  bearAsset,
   diaryHref = '/diary',
   bookshelfHref = '/bookshelf',
   calendarHref = '/book-calendar',
@@ -269,7 +271,10 @@ export function RoomScene({
       style={SCENE_STYLE}
     >
       {SPRITE_DEFS.map((def) => {
-        const filename = SPRITE_FILES[def.fileKey]![theme]
+        const filename =
+          def.fileKey === 'bear' && bearAsset != null
+            ? bearAsset
+            : SPRITE_FILES[def.fileKey]![theme]
         const src = `${SPRITE_BASE}/${filename}`
         return (
           <SpriteImage

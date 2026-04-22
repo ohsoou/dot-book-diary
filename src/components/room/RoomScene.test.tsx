@@ -149,6 +149,23 @@ describe('RoomScene', () => {
     expect(nightContainer.querySelector('img[src="/sprites/night/BookStack.png"]')).not.toBeNull()
   })
 
+  it('renders Bear_sleeping.png when bearAsset="Bear_sleeping.png" with day theme', () => {
+    const { container } = render(<RoomScene theme="day" bearAsset="Bear_sleeping.png" />)
+    expect(container.querySelector('img[src="/sprites/day/Bear_sleeping.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).toBeNull()
+  })
+
+  it('renders Bear_playing.png from /sprites/night/ when bearAsset="Bear_playing.png" and theme="night"', () => {
+    const { container } = render(<RoomScene theme="night" bearAsset="Bear_playing.png" />)
+    expect(container.querySelector('img[src="/sprites/night/Bear_playing.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/night/Bear.png"]')).toBeNull()
+  })
+
+  it('uses Bear.png when bearAsset is not provided', () => {
+    const { container } = render(<RoomScene theme="day" />)
+    expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
+  })
+
   it('renders rug sprite with correct properties and z-index below bear', () => {
     const { container } = render(<RoomScene theme="day" />)
 
