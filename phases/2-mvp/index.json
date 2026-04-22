@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "last-read-query",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-22T13:26:12+0900",
+      "summary": "lib/last-read.ts에 getLastReadAtFromStore(Store → createdAt DESC 정렬 후 최신 반환)와 getLastReadAtFromSupabase(Supabase 단건 쿼리, 에러 시 null 반환) 구현. import 'server-only' 첫 줄 확인. 4개 테스트 통과, 전체 375개 통과, build/lint 에러 없음",
+      "completed_at": "2026-04-22T13:28:30+0900"
     },
     {
       "step": 2,
