@@ -21,9 +21,10 @@
     {
       "step": 2,
       "name": "room-scene-bear-asset",
-      "status": "blocked",
-      "started_at": "2026-04-22T13:28:49+0900",
-      "blocked_reason": "night 에셋 1종 미존재: Bear_working.png. public/sprites/night/에 배치 후 재실행."
+      "status": "completed",
+      "started_at": "2026-04-22T13:44:03+0900",
+      "summary": "RoomScene에 bearAsset?: string prop 추가 — bear fileKey 렌더 시 bearAsset 우선 사용, SPRITE_DEFS/SPRITE_FILES 미변경. 신규 테스트 3개 포함 총 15개 통과, night 에셋 6종 존재 확인, build/lint 에러 없음",
+      "completed_at": "2026-04-22T13:46:00+0900"
     },
     {
       "step": 3,
