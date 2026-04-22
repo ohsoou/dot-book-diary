@@ -21,7 +21,9 @@
     {
       "step": 2,
       "name": "room-scene-bear-asset",
-      "status": "pending"
+      "status": "blocked",
+      "started_at": "2026-04-22T13:28:49+0900",
+      "blocked_reason": "night 에셋 1종 미존재: Bear_working.png. public/sprites/night/에 배치 후 재실행."
     },
     {
       "step": 3,
