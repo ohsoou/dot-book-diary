@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GoalProgress } from './GoalProgress'
 import type { Book, ReadingSession } from '@/types'
 
@@ -22,6 +22,17 @@ function makeSession(endPage?: number): ReadingSession {
 }
 
 describe('GoalProgress - full variant', () => {
+  beforeEach(() => {
+    // 2026-04-15: createdAt(04-01) ~ targetDate(05-01) 중간보다 앞
+    // dateProgress = 14/30 ≈ 0.47, pageProgress = 0.6 → on-track 조건 성립
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-15T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('targetDate 없으면 CTA 텍스트를 렌더한다', () => {
     render(<GoalProgress book={baseBook} sessions={[]} />)
     expect(screen.getByText('목표 완독일을 정해 볼까요?')).toBeDefined()
