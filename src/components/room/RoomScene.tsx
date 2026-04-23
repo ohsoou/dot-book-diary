@@ -235,16 +235,17 @@ export function RoomScene({
   const { bearAsset: contextBearAsset } = useBearState()
   const bearAsset = bearAssetProp ?? contextBearAsset
   const [settledCount, setSettledCount] = useState(0)
+  const [prevTheme, setPrevTheme] = useState(theme)
   const [reducedMotion, setReducedMotion] = useState(false)
+
+  if (theme !== prevTheme) {
+    setPrevTheme(theme)
+    setSettledCount(0)
+  }
 
   const handleSettled = useCallback(() => {
     setSettledCount((prev) => prev + 1)
   }, [])
-
-  // Reset settled counter when theme changes so remounted sprites re-trigger visibility
-  useEffect(() => {
-    setSettledCount(0)
-  }, [theme])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
