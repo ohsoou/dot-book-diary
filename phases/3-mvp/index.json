@@ -15,7 +15,7 @@
       "name": "room-scene-lamp-toggle",
       "status": "completed",
       "started_at": "2026-04-23T09:37:07+0900",
-      "completed_at": "2026-04-23T09:41:00+0900",
+      "completed_at": "2026-04-23T09:41:27+0900",
       "summary": "RoomScene에 lampState toggle 추가: night only 램프 버튼, Background/Table_Lamp _off 교체, lamp-flicker 조건부 제거, localStorage 복원"
     },
     {
