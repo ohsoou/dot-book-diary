@@ -445,6 +445,7 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 - `translate` 허용 범위: 1px 이내. 초과 금지(§AI 슬롭 표).
 - `steps(2)`로 픽셀 스텝 느낌 유지. `ease-in-out` / `linear` 금지.
 - `prefers-reduced-motion: reduce` 시 `animation: none`(기존 규칙 유지).
+- `lamp-flicker`: 램프 off 상태(`lampState === 'off'`)에서도 비적용. `prefers-reduced-motion` 규칙과 동일하게 처리.
 
 **금지**:
 - `duration-150` 초과 transition

@@ -795,6 +795,15 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
 - **레이아웃**: `src/app/page.tsx`의 `<main>` flex-col 내부에서 상단 HUD → `flex-1` 씬 → 하단 HUD 3단 배치. HUD는 단일 텍스트 줄 높이로 최소화하여 씬 크기에 영향 없음.
 - **비회원**: `BearStateHydrator` (ThemeHydrator 패턴) — 클라이언트 마운트 시 LocalStore 조회 → React Context로 HUD·RoomScene에 전파. 회원은 SSR prop으로 초기값 제공, hydrator 비활성.
 
+## 22.6 야간 램프 on/off 토글 (MVP3, `lib/lamp-state.ts`)
+
+- **테마 범위**: night 전용. `theme === 'night'`일 때만 램프 버튼 렌더.
+- **스프라이트 파일명 규칙**: on 상태는 기본 파일명(`Background.png`, `Table_Lamp.png`), off 상태는 `_off` suffix(`Background_off.png`, `Table_Lamp_off.png`). 대상 에셋: `public/sprites/night/` 하위 두 파일.
+- **상태 저장소**: `localStorage` 키 `dbd:lamp_state` (`'on' | 'off'`). `src/lib/lamp-state.ts`의 `readLampState` / `writeLampState` API를 통해서만 접근.
+- **SSR 초기값**: `useState('on')` 고정으로 SSR 렌더. 마운트 후 `useEffect`에서 localStorage를 1회 읽어 hydrate. Hydration mismatch 방지.
+- **램프 버튼**: `aria-label="램프 전원"`, `aria-pressed={lampState === 'on'}`.
+- **애니메이션**: `lamp-flicker` 클래스는 `lampState === 'on'`이고 `prefers-reduced-motion`이 아닐 때만 적용. off 상태에서는 `prefers-reduced-motion` 조건과 동일하게 처리하여 정지.
+
 ## 23. 관측·로깅 (`lib/log.ts`)
 ```ts
 export const log = {
