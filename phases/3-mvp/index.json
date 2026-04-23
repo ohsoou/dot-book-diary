@@ -23,7 +23,7 @@
       "name": "docs-update",
       "status": "completed",
       "started_at": "2026-04-23T09:41:27+0900",
-      "completed_at": "2026-04-23T09:49:00+0900",
+      "completed_at": "2026-04-23T09:43:38+0900",
       "summary": "docs 업데이트: ADR-023, ARCHITECTURE §22.6, PRD MVP3 항목, UI_GUIDE 애니메이션 섹션"
     },
     {
