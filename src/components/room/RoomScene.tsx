@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBearState } from './BearStateContext'
+import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'
@@ -237,6 +238,7 @@ export function RoomScene({
   const [settledCount, setSettledCount] = useState(0)
   const [prevTheme, setPrevTheme] = useState(theme)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const [lampState, setLampState] = useState<LampState>('on')
 
   if (theme !== prevTheme) {
     setPrevTheme(theme)
@@ -255,6 +257,10 @@ export function RoomScene({
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  useEffect(() => {
+    setLampState(readLampState())
+  }, [])
+
   const isVisible = settledCount >= TOTAL_SPRITES
 
   const hrefMap: Record<HrefKey, string> = {
@@ -267,6 +273,13 @@ export function RoomScene({
 
   const SPRITE_BASE = theme === 'day' ? '/sprites/day' : '/sprites/night'
 
+  function resolveFilename(fileKey: string, baseFilename: string): string {
+    if (theme === 'night' && lampState === 'off' && (fileKey === 'background' || fileKey === 'tableLamp')) {
+      return baseFilename.replace(/\.png$/, '_off.png')
+    }
+    return baseFilename
+  }
+
   return (
     <div
       role="img"
@@ -275,10 +288,11 @@ export function RoomScene({
       style={SCENE_STYLE}
     >
       {SPRITE_DEFS.map((def) => {
-        const filename =
+        const baseFilename =
           def.fileKey === 'bear' && bearAsset != null
             ? bearAsset
             : SPRITE_FILES[def.fileKey]![theme]
+        const filename = resolveFilename(def.fileKey, baseFilename)
         const src = `${SPRITE_BASE}/${filename}`
         return (
           <SpriteImage
@@ -286,7 +300,7 @@ export function RoomScene({
             src={src}
             label={def.label}
             style={{ zIndex: def.z, ...def.style }}
-            extraClass={def.animClass && !reducedMotion ? def.animClass : ''}
+            extraClass={def.animClass && !reducedMotion && !(def.animClass === 'lamp-flicker' && lampState === 'off') ? def.animClass : ''}
             onSettled={handleSettled}
           />
         )
@@ -301,6 +315,21 @@ export function RoomScene({
           style={{ zIndex: 50, ...def.style }}
         />
       ))}
+
+      {theme === 'night' && (
+        <button
+          type="button"
+          aria-label="램프 전원"
+          aria-pressed={lampState === 'on'}
+          onClick={() => {
+            const next: LampState = lampState === 'on' ? 'off' : 'on'
+            setLampState(next)
+            writeLampState(next)
+          }}
+          className="absolute bg-transparent cursor-pointer"
+          style={{ zIndex: 50, bottom: '19%', right: '-0.1563%', width: '19.8438%', height: '31%' }}
+        />
+      )}
     </div>
   )
 }
