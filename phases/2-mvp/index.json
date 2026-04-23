@@ -1,0 +1,56 @@
+{
+  "project": "dot-book-diary",
+  "phase": "2-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "bear-state-pure-fn",
+      "status": "completed",
+      "started_at": "2026-04-22T13:24:25+0900",
+      "summary": "lib/bear-state.ts에 computeBearState(순수 함수, mulberry32 시드 기반 active variant, formatElapsed) 구현 및 15개 테스트 통과",
+      "completed_at": "2026-04-22T13:26:12+0900"
+    },
+    {
+      "step": 1,
+      "name": "last-read-query",
+      "status": "completed",
+      "started_at": "2026-04-22T13:26:12+0900",
+      "summary": "lib/last-read.ts에 getLastReadAtFromStore(Store → createdAt DESC 정렬 후 최신 반환)와 getLastReadAtFromSupabase(Supabase 단건 쿼리, 에러 시 null 반환) 구현. import 'server-only' 첫 줄 확인. 4개 테스트 통과, 전체 375개 통과, build/lint 에러 없음",
+      "completed_at": "2026-04-22T13:28:48+0900"
+    },
+    {
+      "step": 2,
+      "name": "room-scene-bear-asset",
+      "status": "completed",
+      "started_at": "2026-04-22T13:44:03+0900",
+      "summary": "RoomScene에 bearAsset?: string prop 추가 — bear fileKey 렌더 시 bearAsset 우선 사용, SPRITE_DEFS/SPRITE_FILES 미변경. 신규 테스트 3개 포함 총 15개 통과, night 에셋 6종 존재 확인, build/lint 에러 없음",
+      "completed_at": "2026-04-22T13:45:40+0900"
+    },
+    {
+      "step": 3,
+      "name": "letterbox-hud-components",
+      "status": "completed",
+      "started_at": "2026-04-22T13:45:40+0900",
+      "summary": "BearStatusBar(aria-live 상태 라벨)·LastReadNote(<time> 경과 표시) 생성, page.tsx에 회원 SSR 경로(getLastReadAtFromSupabase+computeBearState) 추가. 신규 7개 포함 총 385개 테스트 통과, build/lint 에러 없음",
+      "completed_at": "2026-04-22T13:48:35+0900"
+    },
+    {
+      "step": 4,
+      "name": "guest-bear-hydrator",
+      "status": "completed",
+      "started_at": "2026-04-22T13:48:35+0900",
+      "summary": "BearStateContext(Provider+useBearState+useSetBearState)+BearStateHydrator(비회원 mount 시 LocalStore→computeBearState→context 업데이트) 생성. BearStatusBar/LastReadNote/RoomScene에 context 읽기 추가. lib/last-read-store.ts(클라이언트-세이프 getLastReadAtFromStore)+lib/storage/use-store.ts(클라이언트-세이프 useStore) 분리로 server-only 빌드 에러 해결. 신규 4개 포함 총 389개 테스트 통과, build/lint 에러 없음",
+      "completed_at": "2026-04-22T14:00:23+0900"
+    },
+    {
+      "step": 5,
+      "name": "release-hardening-mvp2",
+      "status": "completed",
+      "started_at": "2026-04-22T14:00:23+0900",
+      "summary": "bun build/lint 0에러, vitest 389개 전체 통과, UI_GUIDE 금지 grep 빈 결과, 6개 테스트 파일 존재 확인, night 스프라이트 6종 존재 확인, .env.example 신규 변수 없음. 수동 체크: 세션없음→fresh/Bear.png, <1h→fresh, 1h~7d→active(mulberry32 시드 하루 안정), ≥7d→sleeping. 비회원 SSR null→hydration 후 LocalStore 조회.",
+      "completed_at": "2026-04-22T14:07:00+0900"
+    }
+  ],
+  "created_at": "2026-04-22T13:24:25+0900",
+  "completed_at": "2026-04-23T09:34:50+0900"
+}

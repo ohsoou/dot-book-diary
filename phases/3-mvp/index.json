@@ -1,0 +1,40 @@
+{
+  "project": "dot-book-diary",
+  "phase": "3-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "lamp-state-pure-fn",
+      "status": "completed",
+      "started_at": "2026-04-23T09:35:22+0900",
+      "summary": "lamp-state.ts 생성: readLampState/writeLampState/LampState/LAMP_STATE_KEY export, localStorage 안전 접근 (SSR safe, try/catch, 알 수 없는 값 폴백)",
+      "completed_at": "2026-04-23T09:37:07+0900"
+    },
+    {
+      "step": 1,
+      "name": "room-scene-lamp-toggle",
+      "status": "completed",
+      "started_at": "2026-04-23T09:37:07+0900",
+      "completed_at": "2026-04-23T09:41:27+0900",
+      "summary": "RoomScene에 lampState toggle 추가: night only 램프 버튼, Background/Table_Lamp _off 교체, lamp-flicker 조건부 제거, localStorage 복원"
+    },
+    {
+      "step": 2,
+      "name": "docs-update",
+      "status": "completed",
+      "started_at": "2026-04-23T09:41:27+0900",
+      "completed_at": "2026-04-23T09:43:38+0900",
+      "summary": "docs 업데이트: ADR-023, ARCHITECTURE §22.6, PRD MVP3 항목, UI_GUIDE 애니메이션 섹션"
+    },
+    {
+      "step": 3,
+      "name": "release-hardening-mvp3",
+      "status": "completed",
+      "started_at": "2026-04-23T09:43:39+0900",
+      "completed_at": "2026-04-23T09:47:07+0900",
+      "summary": "build/lint/test 0 에러 통과, UI 금지 패턴 grep 빈 결과, GoalProgress.test 날짜 고정(vi.useFakeTimers) 수정, lamp-state/RoomScene 테스트 파일 존재 확인, Background_off+Table_Lamp_off 에셋 확인"
+    }
+  ],
+  "created_at": "2026-04-23T09:35:22+0900",
+  "completed_at": "2026-04-23T09:47:07+0900"
+}

@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useBearState } from './BearStateContext'
+import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'
+  bearAsset?: string
   diaryHref?: string
   bookshelfHref?: string
   calendarHref?: string
@@ -40,6 +43,7 @@ const SPRITE_FILES: Record<string, { day: string; night: string }> = {
   bookstack:    { day: 'Bookstack.png',     night: 'BookStack.png' },
   diary:        { day: 'Diary.png',         night: 'Diary.png' },
   bear:         { day: 'Bear.png',          night: 'Bear.png' },
+  rug:          { day: 'Rug.png',           night: 'Rug.png' },
 }
 
 // 640×400 캔버스(aspect-ratio 8/5) 기준 퍼센트 좌표.
@@ -75,6 +79,12 @@ const SPRITE_DEFS: SpriteConfig[] = [
     style: { top: '17.25%', right: '3.125%', width: '21.5625%', height: '17.25%' },
   },
   {
+    fileKey: 'rug',
+    label: '러그',
+    z: 15,
+    style: { bottom: '0.5%', left: '35.9375%', width: '45%', height: '29%' },
+  },
+  {
     fileKey: 'bedTable',
     label: '침대 테이블',
     z: 22,
@@ -97,7 +107,7 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'diary',
     label: '다이어리',
     z: 30,
-    style: { bottom: '4.25%', left: '32.3438%', width: '14.0625%', height: '18%' },
+    style: { bottom: '4.25%', left: '35.3438%', width: '14.0625%', height: '18%' },
   },
   {
     fileKey: 'bear',
@@ -115,7 +125,7 @@ const HITBOX_DEFS: HitboxConfig[] = [
   {
     label: '다이어리',
     hrefKey: 'diaryHref',
-    style: { bottom: '4.25%', left: '32.3438%', width: '14.0625%', height: '18%' },
+    style: { bottom: '4.25%', left: '35.3438%', width: '14.0625%', height: '18%' },
   },
   {
     label: '책장',
@@ -215,6 +225,7 @@ function SpriteImage({ src, label, style, extraClass, onSettled }: SpriteImagePr
 
 export function RoomScene({
   theme,
+  bearAsset: bearAssetProp,
   diaryHref = '/diary',
   bookshelfHref = '/bookshelf',
   calendarHref = '/book-calendar',
@@ -222,17 +233,21 @@ export function RoomScene({
   settingsHref = '/settings',
 }: RoomSceneProps) {
   const router = useRouter()
+  const { bearAsset: contextBearAsset } = useBearState()
+  const bearAsset = bearAssetProp ?? contextBearAsset
   const [settledCount, setSettledCount] = useState(0)
+  const [prevTheme, setPrevTheme] = useState(theme)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const [lampState, setLampState] = useState<LampState>('on')
+
+  if (theme !== prevTheme) {
+    setPrevTheme(theme)
+    setSettledCount(0)
+  }
 
   const handleSettled = useCallback(() => {
     setSettledCount((prev) => prev + 1)
   }, [])
-
-  // Reset settled counter when theme changes so remounted sprites re-trigger visibility
-  useEffect(() => {
-    setSettledCount(0)
-  }, [theme])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -240,6 +255,10 @@ export function RoomScene({
     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  useEffect(() => {
+    setLampState(readLampState())
   }, [])
 
   const isVisible = settledCount >= TOTAL_SPRITES
@@ -254,6 +273,13 @@ export function RoomScene({
 
   const SPRITE_BASE = theme === 'day' ? '/sprites/day' : '/sprites/night'
 
+  function resolveFilename(fileKey: string, baseFilename: string): string {
+    if (theme === 'night' && lampState === 'off' && (fileKey === 'background' || fileKey === 'tableLamp')) {
+      return baseFilename.replace(/\.png$/, '_off.png')
+    }
+    return baseFilename
+  }
+
   return (
     <div
       role="img"
@@ -262,7 +288,11 @@ export function RoomScene({
       style={SCENE_STYLE}
     >
       {SPRITE_DEFS.map((def) => {
-        const filename = SPRITE_FILES[def.fileKey]![theme]
+        const baseFilename =
+          def.fileKey === 'bear' && bearAsset != null
+            ? bearAsset
+            : SPRITE_FILES[def.fileKey]![theme]
+        const filename = resolveFilename(def.fileKey, baseFilename)
         const src = `${SPRITE_BASE}/${filename}`
         return (
           <SpriteImage
@@ -270,7 +300,7 @@ export function RoomScene({
             src={src}
             label={def.label}
             style={{ zIndex: def.z, ...def.style }}
-            extraClass={def.animClass && !reducedMotion ? def.animClass : ''}
+            extraClass={def.animClass && !reducedMotion && !(def.animClass === 'lamp-flicker' && lampState === 'off') ? def.animClass : ''}
             onSettled={handleSettled}
           />
         )
@@ -285,6 +315,21 @@ export function RoomScene({
           style={{ zIndex: 50, ...def.style }}
         />
       ))}
+
+      {theme === 'night' && (
+        <button
+          type="button"
+          aria-label="램프 전원"
+          aria-pressed={lampState === 'on'}
+          onClick={() => {
+            const next: LampState = lampState === 'on' ? 'off' : 'on'
+            setLampState(next)
+            writeLampState(next)
+          }}
+          className="absolute bg-transparent cursor-pointer"
+          style={{ zIndex: 50, bottom: '19%', right: '-0.1563%', width: '19.8438%', height: '31%' }}
+        />
+      )}
     </div>
   )
 }

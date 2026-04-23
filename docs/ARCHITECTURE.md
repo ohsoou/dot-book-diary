@@ -78,7 +78,10 @@ src/
 │           └── isbn/route.ts
 ├── components/
 │   ├── room/
-│   │   ├── RoomScene.tsx           # Client, theme prop(day|night)
+│   │   ├── RoomScene.tsx           # Client, theme + bearAsset? prop
+│   │   ├── BearStatusBar.tsx       # MVP2, 상단 letterbox 곰 상태 라벨
+│   │   ├── LastReadNote.tsx        # MVP2, 하단 letterbox 경과 시간
+│   │   ├── BearStateHydrator.tsx   # MVP2, 비회원 클라이언트 hydration
 │   │   ├── Bear.tsx                # 장식 sprite
 │   │   ├── Hitbox.tsx              # 접근성 처리된 <button>
 │   │   ├── Lamp.tsx
@@ -138,6 +141,8 @@ src/
 │   ├── escape.ts                   # HTML 이스케이프
 │   ├── theme.ts                    # MVP1, resolveTheme(pref, now) → 'day' | 'night'
 │   ├── reading-timer.ts            # MVP1, localStorage 기반 단일 활성 타이머
+│   ├── bear-state.ts               # MVP2, computeBearState() 순수 함수 + formatElapsed()
+│   ├── last-read.ts                # MVP2, getLastReadAtFromStore() / getLastReadAtFromSupabase()
 │   ├── actions/                    # Server Actions
 │   │   ├── books.ts
 │   │   ├── reading-sessions.ts
@@ -151,7 +156,8 @@ src/
 └── (services/)                     # 외부 API 추가 시 이관
 
 public/
-├── sprites/night/                  # room.png, bear.png, diary.png, books.png, window.png, lamp.png, rug.png
+├── sprites/day/                    # Background, Bear, Bear_drinking, Bear_eating, Bear_healing, Bear_playing, Bear_sleeping, Bear_working 외
+├── sprites/night/                  # Background, Bear, Bear_drinking, Bear_eating, Bear_healing, Bear_playing, Bear_sleeping, Bear_working 외 (MVP2 추가)
 └── fonts/galmuri/                  # Galmuri11-Regular.woff2
 
 supabase/
@@ -765,6 +771,38 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
   - `dateProgress = (today - createdAt) / (targetDate - createdAt)` (targetDate 있을 때, 0 이하 clamp)
   - 상태: `page ≥ date` → `'on-track'`, `date - page ≥ 0.1` → `'behind'`, `today > targetDate && pageProgress < 1` → `'overdue'`.
 - revalidate: `updateBook(target_date)` 성공 후 `/bookshelf`, `/reading/[bookId]`.
+
+## 22.4 곰 상태 파생 (MVP2, `lib/bear-state.ts`)
+
+- **상태 종류**: `'fresh' | 'active' | 'sleeping'`
+- **기준 데이터**: `reading_sessions.created_at` (마지막 세션의 UTC ISO 시각)
+- **판정 규칙**:
+  - `lastReadAt === null` 또는 `elapsed < 0` → `fresh`, `Bear.png`, "곰이 책을 기다려요"
+  - `elapsed < 1h` → `fresh`, `Bear.png`, "곰이 책을 읽고 왔어요"
+  - `1h ≤ elapsed < 7d` → `active`, variant 1택, "곰이 {행동}하고 있어요"
+  - `elapsed ≥ 7d` → `sleeping`, `Bear_sleeping.png`, "곰이 자고 있어요"
+- **Variant 풀** (`active` 상태): `Bear_drinking | Bear_eating | Bear_healing | Bear_playing | Bear_working`
+- **랜덤 시드**: `YYYY-MM-DD(오늘) + lastReadAt` 문자열 해시 → mulberry32 기반 시드 rng. 하루 단위 안정, 새 독서 기록 생성 시 variant 변경. `rng`는 주입 가능하여 테스트에서 결정적.
+- **Night 테마**: day·night 동일 파일명 규칙. `public/sprites/night/Bear_*.png` 에셋 존재 전제.
+- **API** (`lib/last-read.ts`):
+  - `getLastReadAtFromStore(store: Store): Promise<string | null>` — LocalStore에서 전체 세션 로드 후 `created_at DESC` 1건
+  - `getLastReadAtFromSupabase(userId: string, supabase): Promise<string | null>` — `select('created_at').eq('user_id',...).order('created_at',{ascending:false}).limit(1).maybeSingle()`. `server-only` 임포트 필수.
+
+## 22.5 Letterbox HUD (MVP2)
+
+- **BearStatusBar**: 메인 씬 상단 여백에 곰 상태 라벨. `aria-live="polite" aria-atomic="true"`.
+- **LastReadNote**: 메인 씬 하단 여백에 경과 시간. `<time dateTime={lastReadAt}>` 래핑.
+- **레이아웃**: `src/app/page.tsx`의 `<main>` flex-col 내부에서 상단 HUD → `flex-1` 씬 → 하단 HUD 3단 배치. HUD는 단일 텍스트 줄 높이로 최소화하여 씬 크기에 영향 없음.
+- **비회원**: `BearStateHydrator` (ThemeHydrator 패턴) — 클라이언트 마운트 시 LocalStore 조회 → React Context로 HUD·RoomScene에 전파. 회원은 SSR prop으로 초기값 제공, hydrator 비활성.
+
+## 22.6 야간 램프 on/off 토글 (MVP3, `lib/lamp-state.ts`)
+
+- **테마 범위**: night 전용. `theme === 'night'`일 때만 램프 버튼 렌더.
+- **스프라이트 파일명 규칙**: on 상태는 기본 파일명(`Background.png`, `Table_Lamp.png`), off 상태는 `_off` suffix(`Background_off.png`, `Table_Lamp_off.png`). 대상 에셋: `public/sprites/night/` 하위 두 파일.
+- **상태 저장소**: `localStorage` 키 `dbd:lamp_state` (`'on' | 'off'`). `src/lib/lamp-state.ts`의 `readLampState` / `writeLampState` API를 통해서만 접근.
+- **SSR 초기값**: `useState('on')` 고정으로 SSR 렌더. 마운트 후 `useEffect`에서 localStorage를 1회 읽어 hydrate. Hydration mismatch 방지.
+- **램프 버튼**: `aria-label="램프 전원"`, `aria-pressed={lampState === 'on'}`.
+- **애니메이션**: `lamp-flicker` 클래스는 `lampState === 'on'`이고 `prefers-reduced-motion`이 아닐 때만 적용. off 상태에서는 `prefers-reduced-motion` 조건과 동일하게 처리하여 정지.
 
 ## 23. 관측·로깅 (`lib/log.ts`)
 ```ts

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RoomScene } from './RoomScene'
 
 const mockPush = vi.fn()
@@ -25,6 +25,7 @@ function mockMatchMedia({ reducedMotion = false } = {}) {
 beforeEach(() => {
   mockPush.mockReset()
   mockMatchMedia()
+  localStorage.clear()
 })
 
 describe('RoomScene', () => {
@@ -147,5 +148,79 @@ describe('RoomScene', () => {
 
     const { container: nightContainer } = render(<RoomScene theme="night" />)
     expect(nightContainer.querySelector('img[src="/sprites/night/BookStack.png"]')).not.toBeNull()
+  })
+
+  it('renders Bear_sleeping.png when bearAsset="Bear_sleeping.png" with day theme', () => {
+    const { container } = render(<RoomScene theme="day" bearAsset="Bear_sleeping.png" />)
+    expect(container.querySelector('img[src="/sprites/day/Bear_sleeping.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).toBeNull()
+  })
+
+  it('renders Bear_playing.png from /sprites/night/ when bearAsset="Bear_playing.png" and theme="night"', () => {
+    const { container } = render(<RoomScene theme="night" bearAsset="Bear_playing.png" />)
+    expect(container.querySelector('img[src="/sprites/night/Bear_playing.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/night/Bear.png"]')).toBeNull()
+  })
+
+  it('uses Bear.png when bearAsset is not provided', () => {
+    const { container } = render(<RoomScene theme="day" />)
+    expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
+  })
+
+  it('renders rug sprite with correct properties and z-index below bear', () => {
+    const { container } = render(<RoomScene theme="day" />)
+
+    const rugImg = container.querySelector('img[src="/sprites/day/Rug.png"]') as HTMLElement | null
+    const bearImg = container.querySelector('img[src="/sprites/day/Bear.png"]') as HTMLElement | null
+
+    expect(rugImg).not.toBeNull()
+    expect(rugImg?.style.bottom).toBe('0.5%')
+    expect(rugImg?.style.left).toBe('35.9375%')
+    expect(rugImg?.style.zIndex).toBe('15')
+
+    const rugZ = parseInt(rugImg?.style.zIndex || '0')
+    const bearZ = parseInt(bearImg?.style.zIndex || '0')
+    expect(rugZ).toBeLessThan(bearZ)
+  })
+})
+
+describe('lamp toggle (night theme)', () => {
+  it('initial on state: uses Background.png and Table_Lamp.png with lamp-flicker', () => {
+    const { container } = render(<RoomScene theme="night" />)
+    expect(container.querySelector('img[src="/sprites/night/Background.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/night/Table_Lamp.png"]')).not.toBeNull()
+    const lampImg = container.querySelector('img[src="/sprites/night/Table_Lamp.png"]')
+    expect(lampImg?.className).toContain('lamp-flicker')
+  })
+
+  it('toggle → off: uses Background_off.png and Table_Lamp_off.png without lamp-flicker', () => {
+    const { container } = render(<RoomScene theme="night" />)
+    fireEvent.click(screen.getByRole('button', { name: '램프 전원' }))
+    expect(container.querySelector('img[src="/sprites/night/Background_off.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/night/Table_Lamp_off.png"]')).not.toBeNull()
+    expect(container.querySelector('.lamp-flicker')).toBeNull()
+  })
+
+  it('re-toggle → on: reverts to Background.png and Table_Lamp.png', () => {
+    const { container } = render(<RoomScene theme="night" />)
+    const lampBtn = screen.getByRole('button', { name: '램프 전원' })
+    fireEvent.click(lampBtn)
+    fireEvent.click(lampBtn)
+    expect(container.querySelector('img[src="/sprites/night/Background.png"]')).not.toBeNull()
+    expect(container.querySelector('img[src="/sprites/night/Table_Lamp.png"]')).not.toBeNull()
+  })
+
+  it('day theme: does not render 램프 전원 button', () => {
+    render(<RoomScene theme="day" />)
+    expect(screen.queryByRole('button', { name: '램프 전원' })).toBeNull()
+  })
+
+  it('restores lamp off state from localStorage on mount', async () => {
+    localStorage.setItem('dbd:lamp_state', 'off')
+    const { container } = render(<RoomScene theme="night" />)
+    await waitFor(() => {
+      expect(container.querySelector('img[src="/sprites/night/Background_off.png"]')).not.toBeNull()
+    })
+    expect(container.querySelector('img[src="/sprites/night/Table_Lamp_off.png"]')).not.toBeNull()
   })
 })

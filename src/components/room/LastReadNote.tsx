@@ -1,0 +1,41 @@
+'use client'
+
+import { formatElapsed } from '@/lib/bear-state'
+import { useBearState } from './BearStateContext'
+
+interface LastReadNoteProps {
+  lastReadAt?: string | null
+  now?: Date
+}
+
+export function LastReadNote({ lastReadAt: lastReadAtProp, now = new Date() }: LastReadNoteProps) {
+  const { lastReadAt: contextLastReadAt } = useBearState()
+  const lastReadAt = lastReadAtProp !== undefined ? lastReadAtProp : contextLastReadAt
+
+  if (lastReadAt === null) {
+    return (
+      <p className="py-1 text-center text-xs text-[var(--color-text-secondary)]">
+        아직 독서 기록이 없어요
+      </p>
+    )
+  }
+
+  const parsed = new Date(lastReadAt)
+  if (isNaN(parsed.getTime())) {
+    return (
+      <p className="py-1 text-center text-xs text-[var(--color-text-secondary)]">
+        아직 독서 기록이 없어요
+      </p>
+    )
+  }
+
+  const elapsedMs = now.getTime() - parsed.getTime()
+  const elapsedText = elapsedMs >= 0 ? formatElapsed(elapsedMs) : '방금'
+
+  return (
+    <p className="py-1 text-center text-xs text-[var(--color-text-secondary)]">
+      마지막 독서:{' '}
+      <time dateTime={lastReadAt}>{elapsedText}</time>
+    </p>
+  )
+}
