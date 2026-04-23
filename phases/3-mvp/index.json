@@ -2,9 +2,28 @@
   "project": "dot-book-diary",
   "phase": "3-mvp",
   "steps": [
-    { "step": 0, "name": "lamp-state-pure-fn", "status": "pending" },
-    { "step": 1, "name": "room-scene-lamp-toggle", "status": "pending" },
-    { "step": 2, "name": "docs-update", "status": "pending" },
-    { "step": 3, "name": "release-hardening-mvp3", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "lamp-state-pure-fn",
+      "status": "completed",
+      "started_at": "2026-04-23T09:35:22+0900",
+      "summary": "lamp-state.ts 생성: readLampState/writeLampState/LampState/LAMP_STATE_KEY export, localStorage 안전 접근 (SSR safe, try/catch, 알 수 없는 값 폴백)"
+    },
+    {
+      "step": 1,
+      "name": "room-scene-lamp-toggle",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "docs-update",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "release-hardening-mvp3",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-04-23T09:35:22+0900"
 }
