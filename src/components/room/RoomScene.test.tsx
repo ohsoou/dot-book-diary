@@ -202,6 +202,13 @@ describe('RoomScene', () => {
     const bearZ = parseInt(bearImg?.style.zIndex || '0')
     expect(rugZ).toBeLessThan(bearZ)
   })
+
+  it('renders setting sprite image', () => {
+    render(<RoomScene theme="day" />)
+    const imgs = document.querySelectorAll('img.pixel')
+    const srcList = Array.from(imgs).map((img) => (img as HTMLImageElement).src)
+    expect(srcList.some((src) => src.includes('Setting.png'))).toBe(true)
+  })
 })
 
 describe('lamp toggle (night theme)', () => {
