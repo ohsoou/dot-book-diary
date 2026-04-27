@@ -33,7 +33,7 @@
       "status": "completed",
       "summary": "BookPicker 신규 생성, DiaryEntryForm bookId state 관리, BookGrid 일기 쓰기 링크, DiaryList/DiaryEntryDetail 책 제목 표시, 페이지/하이드레이터 books 병렬 로드, 27개 신규 테스트 통과",
       "started_at": "2026-04-27T13:24:19+0900",
-      "completed_at": "2026-04-27T13:32:00+0900"
+      "completed_at": "2026-04-27T13:32:30+0900"
     },
     {
       "step": 5,
