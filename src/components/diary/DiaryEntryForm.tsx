@@ -16,6 +16,7 @@ import {
   deleteDiaryEntryAction,
 } from '@/lib/actions/diary-entries'
 import { LocalStore } from '@/lib/storage/LocalStore'
+import { BookPicker } from './BookPicker'
 
 export type EntryType = 'quote' | 'review'
 
@@ -56,6 +57,7 @@ export function DiaryEntryForm({
   const [entryType, setEntryType] = useState<EntryType>(initialEntryType)
   const [body, setBody] = useState(initialBody)
   const [page, setPage] = useState(initialPage != null ? String(initialPage) : '')
+  const [bookId, setBookId] = useState<string | undefined>(initialBookId)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDraftConfirm, setShowDraftConfirm] = useState(false)
   const [pendingDraft, setPendingDraft] = useState<{
@@ -65,13 +67,14 @@ export function DiaryEntryForm({
   } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const initialRef = useRef({ entryType: initialEntryType, body: initialBody, page: initialPage })
+  const initialRef = useRef({ entryType: initialEntryType, body: initialBody, page: initialPage, bookId: initialBookId })
 
   // dirty 감지
   const isDirty =
     entryType !== initialRef.current.entryType ||
     body !== initialRef.current.body ||
-    page !== (initialRef.current.page != null ? String(initialRef.current.page) : '')
+    page !== (initialRef.current.page != null ? String(initialRef.current.page) : '') ||
+    bookId !== initialRef.current.bookId
 
   useEffect(() => {
     setIsDirty(isDirty)
@@ -113,12 +116,12 @@ export function DiaryEntryForm({
       setDiaryDraft(draftId, {
         entryType,
         body,
-        bookId: initialBookId,
+        bookId,
         page: page !== '' ? Number(page) : undefined,
       })
     }, 30_000)
     return () => clearInterval(interval)
-  }, [draftId, entryType, body, page, initialBookId, isDirty])
+  }, [draftId, entryType, body, page, bookId, isDirty])
 
   // Server Action 바인딩
   const boundUpdateAction = entryId
@@ -257,8 +260,12 @@ export function DiaryEntryForm({
           <FieldError message={fieldErrors['entryType']} />
         </div>
 
-        {/* bookId hidden */}
-        {initialBookId && <input type="hidden" name="bookId" value={initialBookId} />}
+        {/* bookId picker */}
+        <div>
+          <p className="text-xs text-[#a08866] mb-2">연결할 책 (선택)</p>
+          <BookPicker value={bookId} onChange={setBookId} />
+          {bookId && <input type="hidden" name="bookId" value={bookId} />}
+        </div>
 
         {/* body */}
         <div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { DiaryEntry } from '@/types'
+import type { Book, DiaryEntry } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { DiaryEntryForm } from './DiaryEntryForm'
 
@@ -13,9 +13,10 @@ const ENTRY_TYPE_LABEL: Record<DiaryEntry['entryType'], string> = {
 interface DiaryEntryDetailProps {
   entry: DiaryEntry
   isLoggedIn: boolean
+  book?: Book
 }
 
-export function DiaryEntryDetail({ entry: initialEntry, isLoggedIn }: DiaryEntryDetailProps) {
+export function DiaryEntryDetail({ entry: initialEntry, isLoggedIn, book }: DiaryEntryDetailProps) {
   const [entry, setEntry] = useState(initialEntry)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -51,6 +52,10 @@ export function DiaryEntryDetail({ entry: initialEntry, isLoggedIn }: DiaryEntry
         <span className="text-xs text-[#e89b5e]">{ENTRY_TYPE_LABEL[entry.entryType]}</span>
         <span className="text-xs text-[#a08866]">{entry.createdAt.slice(0, 10)}</span>
       </div>
+
+      {book && (
+        <p className="text-xs text-[#a08866]">· {book.title}</p>
+      )}
 
       {entry.page != null && (
         <p className="text-xs text-[#8b6f4a]">{entry.page}p</p>

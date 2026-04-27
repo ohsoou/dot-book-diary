@@ -36,7 +36,7 @@ export default async function DiaryPage() {
 
 async function ServerDiaryList() {
   const store = await getStore()
-  const entries = await store.listDiaryEntries()
+  const [entries, books] = await Promise.all([store.listDiaryEntries(), store.listBooks()])
   const sorted = entries.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  return <DiaryList entries={sorted} />
+  return <DiaryList entries={sorted} books={books} />
 }

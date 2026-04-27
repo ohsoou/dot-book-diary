@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import type { DiaryEntry } from '@/types'
+import type { Book, DiaryEntry } from '@/types'
 import { ToggleTabs } from '@/components/ui/ToggleTabs'
 import { EmptyState } from '@/components/ui/EmptyState'
 
@@ -19,10 +19,20 @@ const ENTRY_TYPE_LABEL: Record<DiaryEntry['entryType'], string> = {
 
 interface DiaryListProps {
   entries: DiaryEntry[]
+  books?: Book[]
 }
 
-export function DiaryList({ entries }: DiaryListProps) {
+export function DiaryList({ entries, books }: DiaryListProps) {
   const [filter, setFilter] = useState('전체')
+
+  const booksById = useMemo(
+    () =>
+      books?.reduce<Record<string, Book>>((acc, b) => {
+        acc[b.id] = b
+        return acc
+      }, {}) ?? {},
+    [books],
+  )
 
   const filtered =
     FILTER_MAP[filter] == null
@@ -55,9 +65,14 @@ export function DiaryList({ entries }: DiaryListProps) {
                 <p className="text-sm text-[#d7c199] line-clamp-3 whitespace-pre-wrap leading-relaxed">
                   {entry.body}
                 </p>
-                {entry.page != null && (
-                  <p className="text-xs text-[#8b6f4a] mt-1">{entry.page}p</p>
-                )}
+                <div className="flex gap-2 mt-1">
+                  {entry.page != null && (
+                    <span className="text-xs text-[#8b6f4a]">{entry.page}p</span>
+                  )}
+                  {entry.bookId && booksById[entry.bookId] && (
+                    <span className="text-xs text-[#a08866]">· {booksById[entry.bookId]!.title}</span>
+                  )}
+                </div>
               </Link>
             </li>
           ))}

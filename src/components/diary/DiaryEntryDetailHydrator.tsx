@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { DiaryEntry } from '@/types'
+import type { Book, DiaryEntry } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
 import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -13,6 +13,7 @@ interface DiaryEntryDetailHydratorProps {
 
 export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) {
   const [entry, setEntry] = useState<DiaryEntry | null | undefined>(undefined)
+  const [book, setBook] = useState<Book | undefined>(undefined)
 
   useEffect(() => {
     getPreferences().then((prefs) => {
@@ -21,7 +22,16 @@ export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) 
         return
       }
       const store = new LocalStore()
-      store.getDiaryEntry(id).then(setEntry).catch(() => setEntry(null))
+      store
+        .getDiaryEntry(id)
+        .then(async (loaded) => {
+          setEntry(loaded)
+          if (loaded?.bookId) {
+            const linkedBook = await store.getBook(loaded.bookId).catch(() => null)
+            setBook(linkedBook ?? undefined)
+          }
+        })
+        .catch(() => setEntry(null))
     })
   }, [id])
 
@@ -41,5 +51,5 @@ export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) 
     return <p className="text-sm text-[#a08866]">기록을 찾을 수 없어요.</p>
   }
 
-  return <DiaryEntryDetail entry={entry} isLoggedIn={false} />
+  return <DiaryEntryDetail entry={entry} isLoggedIn={false} book={book} />
 }
