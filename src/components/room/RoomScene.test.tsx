@@ -168,6 +168,25 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
   })
 
+  it('hitbox buttons have outline-dashed affordance class', () => {
+    render(<RoomScene theme="day" />)
+    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
+    for (const label of labels) {
+      const btn = screen.getByRole('button', { name: label })
+      expect(btn.className).toContain('outline-dashed')
+    }
+  })
+
+  it('hitbox buttons each contain an aria-hidden indicator dot', () => {
+    render(<RoomScene theme="day" />)
+    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
+    for (const label of labels) {
+      const btn = screen.getByRole('button', { name: label })
+      const dot = btn.querySelector('[aria-hidden="true"]')
+      expect(dot).not.toBeNull()
+    }
+  })
+
   it('renders rug sprite with correct properties and z-index below bear', () => {
     const { container } = render(<RoomScene theme="day" />)
 

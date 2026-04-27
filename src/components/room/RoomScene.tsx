@@ -314,9 +314,14 @@ export function RoomScene({
           key={def.label}
           aria-label={def.label}
           onClick={() => router.push(hrefMap[def.hrefKey] as never)}
-          className="absolute bg-transparent"
+          className="absolute bg-transparent outline outline-1 outline-dashed outline-[#e89b5e]/60 hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e] transition-[outline-color] duration-100 ease-linear"
           style={{ zIndex: 50, ...def.style }}
-        />
+        >
+          <span
+            aria-hidden="true"
+            className="absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]"
+          />
+        </button>
       ))}
 
       {theme === 'night' && (
