@@ -24,7 +24,8 @@
       "step": 3,
       "name": "hitbox-affordance",
       "status": "completed",
-      "summary": "5개 hitbox 버튼에 outline-dashed 어포던스 + 우상단 인디케이터 점 추가, 신규 테스트 2케이스 통과"
+      "summary": "5개 hitbox 버튼에 outline-dashed 어포던스 + 우상단 인디케이터 점 추가, 신규 테스트 2케이스 통과",
+      "completed_at": "2026-04-27T13:24:19+0900"
     },
     {
       "step": 4,
