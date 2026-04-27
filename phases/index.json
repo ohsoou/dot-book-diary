@@ -23,6 +23,10 @@
       "dir": "4-mvp",
       "status": "completed",
       "completed_at": "2026-04-27T13:34:23+0900"
+    },
+    {
+      "dir": "4-mvp-polish",
+      "status": "in_progress"
     }
   ]
 }

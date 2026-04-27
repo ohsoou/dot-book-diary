@@ -374,30 +374,29 @@ Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color
 
 MVP2에서 letterbox 상단에 평문 라벨로 있었으나, MVP4에서 `BearSpeechBubble`로 교체됨. 파일 삭제됨.
 
-### BearSpeechBubble (MVP4, `/` RoomScene 내)
+### BearSpeechBubble (MVP4, `/` 상단 전체너비 박스)
 
-위치: RoomScene 캔버스 내 absolute, z-index 35, 곰 sprite 위쪽.
+위치: `page.tsx` `<main>` flex-col 내 RoomScene **위** 별도 full-width 블록. absolute 오버레이 아님.
 
 ```
-박스:
-  bg-[#3a2a1a] border border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-3 py-2
-  헤더: text-xs text-[#f4e4c1] (닉네임, 강조)
-  본문: text-xs text-[#d7c199] (곰 상태 라벨, 보조)
-
-꼬리: 하단 중앙, 1px hard border CSS 삼각형. no rounded.
+외부 래퍼: w-full px-4 py-4
+내부 카드: bg-[#3a2a1a] border-2 border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-4 py-3 w-full
+  헤더: text-sm font-bold text-[#f4e4c1] (닉네임)
+  본문: text-sm text-[#d7c199] (곰 상태 라벨)
+```
 
 접근성: role="status" aria-live="polite" aria-atomic="true".
-label null → unmount(빈 공간 없음).
-```
+bearLabel null → unmount(빈 공간 없음).
 
 금지:
 - `rounded-*` 금지
 - `backdrop-blur` 금지
 - `gradient` 금지
 - box-shadow glow 금지
-- z-index ≥ 50 금지 (hitbox 우선 보장)
 
-### LastReadNote (MVP2, `/` 하단 letterbox)
+### LastReadNote (MVP2, `/` 하단)
+
+위치: `page.tsx` `<main>` flex-col 내 RoomScene 아래 마지막 요소. BottomNav(fixed, 64px) 위에 표시되도록 `<main>`은 `bottom-[64px]`로 설정(4-mvp-polish~).
 
 ```
 컨테이너: py-1 text-center text-xs text-[var(--color-text-secondary)]
@@ -452,6 +451,32 @@ outline:
 - transition duration > 100ms 금지
 - `rounded-*` 금지
 - 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
+
+### Settings Sprite (4-mvp-polish)
+
+설정 hitbox(`top:2%, right:1.25%, width:6.25%, height:10%`)와 **동일 좌표**에 sprite 추가.
+
+```
+SPRITE_DEFS: { fileKey: 'setting', label: '설정', z: 35 }
+파일: public/sprites/day/Setting.png, public/sprites/night/Setting.png (day/night 동일)
+z-index 35 — hitbox(z:50)보다 낮아 클릭이 hitbox 버튼에 전달됨
+animClass 없음
+```
+
+---
+
+## ThemeSelector (MVP1 / 4-mvp-polish)
+
+위치: `/settings` 페이지 테마 섹션.
+
+| 상태 | 렌더 |
+|---|---|
+| 회원 | `ToggleTabs`(자동/낮/밤). 변경 시 `updateThemePreferenceAction()` → Supabase 저장 |
+| 비회원 (4-mvp-polish~) | 토글 없음. "로그인하면 테마를 저장할 수 있어요." + `/login` 링크 |
+
+비회원 비활성 이유: server component(SSR)가 비회원 IndexedDB를 읽을 수 없어 새로고침 시 토글 상태와 실제 저장값이 불일치. 차후 SSR↔IndexedDB 동기화로 개선 예정(ADR-027).
+
+금지: `rounded-*`, `backdrop-blur`, `gradient` 사용 금지.
 
 ---
 

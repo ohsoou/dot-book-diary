@@ -823,10 +823,10 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
 
 ### 22.7.3 BearSpeechBubble 배치
 - `src/components/room/BearSpeechBubble.tsx` — `'use client'`
-- RoomScene 내 absolute 배치. z-index 35. 곰 sprite 위쪽(bottom ≈ 38%, left ≈ 58%).
-- `role="status" aria-live="polite" aria-atomic="true"`. label null이면 unmount.
+- `page.tsx` `<main>` flex-col 내 RoomScene **위** 별도 full-width 블록. absolute 오버레이 아님(4-mvp-polish에서 변경).
+- 외부 래퍼: `w-full px-4 py-4`. 내부: `bg-[#3a2a1a] border-2 border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-4 py-3`.
+- `role="status" aria-live="polite" aria-atomic="true"`. bearLabel null이면 unmount.
 - 헤더: nickname (`text-[#f4e4c1]`), 본문: bearLabel (`text-[#d7c199]`).
-- 꼬리: 하단 CSS border trick 삼각형.
 - `BearStatusBar` 제거됨. 하단 `LastReadNote`는 유지.
 
 ### 22.7.4 hitbox 어포던스
@@ -840,6 +840,22 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
 - `DiaryEntryForm`: `initialBookId` → `useState(bookId)` → `BookPicker`로 제어. autosave draft에 반영.
 - `DiaryList` / `DiaryEntryDetail`: 선택적 `books?: Book[]` prop으로 책 제목 표시.
 - 책장 카드(`BookGrid`): "일기 쓰기" 링크 → `/diary/new?bookId={id}`.
+
+## 22.8 4-mvp-polish — 메인 페이지 정비
+
+### 22.8.1 레이아웃 수정 (step0)
+- `<main>`의 `inset-0` → `top-0 inset-x-0 bottom-[64px]` 변경. BottomNav(`fixed bottom-0 h-[64px]`)와의 겹침 제거 → `LastReadNote`가 BottomNav 위에 표시됨.
+- `RoomScene`의 `SCENE_STYLE` 단순화: `maxHeight: calc(100dvh - 64px)` 제거 → `height:'100%', maxHeight:'100%', maxWidth:'100%'`. 부모 `flex-1` 컨테이너가 높이를 결정.
+- `body`의 `pb-[64px]`(root layout.tsx)는 유지 — 다른 페이지 자연 흐름 레이아웃에 필요.
+
+### 22.8.2 설정 sprite (step1)
+- `SPRITE_FILES`에 `setting: { day: 'Setting.png', night: 'Setting.png' }` 추가.
+- `SPRITE_DEFS`에 `{ fileKey:'setting', label:'설정', z:35, style: { top:'2%', right:'1.25%', width:'6.25%', height:'10%' } }` 추가. 좌표는 `HITBOX_DEFS[설정]`과 동일.
+- 파일: `public/sprites/{day,night}/Setting.png` (day/night 동일 이미지).
+
+### 22.8.3 비회원 테마 토글 비활성 (step2)
+- `ThemeSelector`에서 `!isLoggedIn`이면 `ToggleTabs` 대신 로그인 유도 안내 + 링크 렌더.
+- 근거 및 제약: ADR-027 참조.
 
 ## 23. 관측·로깅 (`lib/log.ts`)
 ```ts
