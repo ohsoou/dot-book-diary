@@ -5,6 +5,7 @@ import { GuestBanner } from '@/components/ui/GuestBanner'
 import { LastReadNote } from '@/components/room/LastReadNote'
 import { BearStateProvider } from '@/components/room/BearStateContext'
 import { BearStateHydrator } from '@/components/room/BearStateHydrator'
+import { BearSpeechBubble } from '@/components/room/BearSpeechBubble'
 import { resolveTheme } from '@/lib/theme'
 import type { ThemePreference } from '@/lib/theme'
 import { getLastReadAtFromSupabase } from '@/lib/last-read'
@@ -60,6 +61,7 @@ export default async function HomePage() {
       <BearStateProvider initial={initialBearState}>
         <BearStateHydrator isGuest={isGuest} />
         {isGuest && <GuestBanner />}
+        <BearSpeechBubble />
         <div className="flex-1 flex items-center justify-center overflow-hidden">
           <RoomScene theme={theme} />
         </div>

@@ -807,7 +807,7 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
 ## 22.7 곰 말풍선 / 닉네임 / hitbox 어포던스 (MVP4)
 
 ### 22.7.1 닉네임 헬퍼 (`src/lib/nickname.ts`)
-- `getDisplayNickname(nickname?: string | null): string` — 폴백 `'책벌레'`. null·undefined·빈값·공백 전부 폴백.
+- `getDisplayNickname(nickname?: string | null): string` — 폴백 `'책곰이'`. null·undefined·빈값·공백 전부 폴백.
 - 단일 진실원. page.tsx(회원 SSR)·BearStateHydrator(게스트)·기본값 모두 이 함수만 사용.
 
 ### 22.7.2 nickname hydration 흐름

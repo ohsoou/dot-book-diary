@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBearState } from './BearStateContext'
-import { BearSpeechBubble } from './BearSpeechBubble'
 import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
 
 interface RoomSceneProps {
@@ -307,7 +306,6 @@ export function RoomScene({
         )
       })}
 
-      <BearSpeechBubble label={bearLabel} nickname={nickname} />
 
       {HITBOX_DEFS.map((def) => (
         <button
