@@ -31,7 +31,7 @@
       "name": "docs-and-release-hardening",
       "status": "completed",
       "started_at": "2026-04-28T08:14:32+0900",
-      "completed_at": "2026-04-28T08:17:00+0900",
+      "completed_at": "2026-04-28T08:16:32+0900",
       "summary": "docs 최신 상태 확인(BearSpeechBubble full-width 배치, §22.8, ADR-027 모두 반영됨), build/lint 0 에러, test 430개 전부 통과, 금지 패턴 0건"
     }
   ],
