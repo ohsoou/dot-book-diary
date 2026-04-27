@@ -18,6 +18,10 @@
       "dir": "3-mvp",
       "status": "completed",
       "completed_at": "2026-04-23T09:47:07+0900"
+    },
+    {
+      "dir": "4-mvp",
+      "status": "pending"
     }
   ]
 }

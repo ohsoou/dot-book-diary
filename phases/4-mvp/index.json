@@ -1,0 +1,13 @@
+{
+  "project": "dot-book-diary",
+  "phase": "4-mvp",
+  "steps": [
+    { "step": 0, "name": "nickname-label-injection", "status": "pending" },
+    { "step": 1, "name": "nickname-hydration", "status": "pending" },
+    { "step": 2, "name": "bear-speech-bubble", "status": "pending" },
+    { "step": 3, "name": "hitbox-affordance", "status": "pending" },
+    { "step": 4, "name": "diary-book-linking-ui", "status": "pending" },
+    { "step": 5, "name": "docs-update", "status": "completed", "summary": "PRD §10.7 MVP4 범위 신설, ARCHITECTURE §22.7 추가, ADR-024~026 추가, UI_GUIDE BearSpeechBubble·hitbox 어포던스 섹션 추가" },
+    { "step": 6, "name": "release-hardening-mvp4", "status": "pending" }
+  ]
+}
