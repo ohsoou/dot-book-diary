@@ -46,7 +46,7 @@
       "name": "release-hardening-mvp4",
       "status": "completed",
       "started_at": "2026-04-27T13:32:30+0900",
-      "completed_at": "2026-04-27T13:40:00+0900",
+      "completed_at": "2026-04-27T13:34:23+0900",
       "summary": "build/lint/test 0 에러(432개 전체 통과), grep 빈 결과(forbidden CSS·BearStatusBar 참조 없음), 아키텍처 체크리스트 전 항목 통과"
     }
   ],
