@@ -2,9 +2,9 @@
   "project": "dot-book-diary",
   "phase": "4-mvp",
   "steps": [
-    { "step": 0, "name": "nickname-label-injection", "status": "pending" },
-    { "step": 1, "name": "nickname-hydration", "status": "pending" },
-    { "step": 2, "name": "bear-speech-bubble", "status": "pending" },
+    { "step": 0, "name": "nickname-label-injection", "status": "completed", "summary": "getDisplayNickname() 헬퍼 생성, 폴백 '책벌레', 6개 케이스 테스트 통과" },
+    { "step": 1, "name": "nickname-hydration", "status": "completed", "summary": "BearStateContextValue.nickname 추가, page.tsx SSR 닉네임 주입, BearStateHydrator 게스트 preferences 병렬 로드" },
+    { "step": 2, "name": "bear-speech-bubble", "status": "completed", "summary": "BearSpeechBubble K.K. 스타일 말풍선 생성, RoomScene 배치, BearStatusBar 제거, 57개 테스트 통과" },
     { "step": 3, "name": "hitbox-affordance", "status": "pending" },
     { "step": 4, "name": "diary-book-linking-ui", "status": "pending" },
     { "step": 5, "name": "docs-update", "status": "completed", "summary": "PRD §10.7 MVP4 범위 신설, ARCHITECTURE §22.7 추가, ADR-024~026 추가, UI_GUIDE BearSpeechBubble·hitbox 어포던스 섹션 추가" },
