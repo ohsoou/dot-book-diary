@@ -1,0 +1,30 @@
+{
+  "project": "dot-book-diary",
+  "phase": "4-mvp-polish",
+  "steps": [
+    {
+      "step": 0,
+      "name": "layout-fix",
+      "status": "completed",
+      "started_at": "2026-04-28T08:05:03+0900",
+      "completed_at": "2026-04-28T08:06:40+0900",
+      "summary": "<main> inset-0→top-0/inset-x-0/bottom-[64px] 변경으로 BottomNav 겹침 제거, SCENE_STYLE maxHeight/maxWidth 계산식 제거 후 height/maxHeight/maxWidth:100%로 교체, LastReadNote 렌더 테스트 추가"
+    },
+    {
+      "step": 1,
+      "name": "settings-sprite",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "guest-theme-disable",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "docs-and-release-hardening",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-04-27T15:00:00+0900"
+}
