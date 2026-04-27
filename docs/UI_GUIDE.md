@@ -370,19 +370,32 @@ Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color
 - `target_date` 없음 → "목표 완독일을 정해 볼까요?" CTA.
 - `/bookshelf` 카드에서는 소형 버전(막대 + 잔여 일수)만 노출.
 
-### BearStatusBar (MVP2, `/` 상단 letterbox)
+### BearStatusBar — MVP4에서 BearSpeechBubble로 대체됨
+
+MVP2에서 letterbox 상단에 평문 라벨로 있었으나, MVP4에서 `BearSpeechBubble`로 교체됨. 파일 삭제됨.
+
+### BearSpeechBubble (MVP4, `/` RoomScene 내)
+
+위치: RoomScene 캔버스 내 absolute, z-index 35, 곰 sprite 위쪽.
 
 ```
-컨테이너: py-1 text-center text-sm text-[var(--color-text-secondary)]
-라벨 예시: "곰이 책을 기다려요" / "곰이 책을 읽고 왔어요" / "곰이 놀고 있어요" / "곰이 자고 있어요"
-aria-live: "polite", aria-atomic: "true"
+박스:
+  bg-[#3a2a1a] border border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-3 py-2
+  헤더: text-xs text-[#f4e4c1] (닉네임, 강조)
+  본문: text-xs text-[#d7c199] (곰 상태 라벨, 보조)
+
+꼬리: 하단 중앙, 1px hard border CSS 삼각형. no rounded.
+
+접근성: role="status" aria-live="polite" aria-atomic="true".
+label null → unmount(빈 공간 없음).
 ```
 
-- 독서 기록 없음: "곰이 책을 기다려요"
-- `fresh` (< 1시간): "곰이 책을 읽고 왔어요"
-- `active` (1시간~7일): variant에 맞는 라벨 (예: "곰이 쉬고 있어요", "곰이 놀고 있어요")
-- `sleeping` (≥ 7일): "곰이 자고 있어요"
-- 비회원 초기 SSR: `null`이면 렌더 생략 (hydration 전까지).
+금지:
+- `rounded-*` 금지
+- `backdrop-blur` 금지
+- `gradient` 금지
+- box-shadow glow 금지
+- z-index ≥ 50 금지 (hitbox 우선 보장)
 
 ### LastReadNote (MVP2, `/` 하단 letterbox)
 
@@ -416,6 +429,29 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 
 - `outline: none` + `focus:ring-*` Tailwind 조합 사용 금지 — 링이 둥글다.
 - `:focus`(마우스) 대신 `:focus-visible`(키보드)만 스타일 적용.
+
+---
+
+## RoomScene Hitbox 어포던스 (MVP4)
+
+5개 hitbox(다이어리/책장/캘린더/책 등록/설정)에 항상 표시되는 클릭 어포던스:
+
+```
+outline:
+  outline outline-1 outline-dashed outline-[#e89b5e]/60
+  hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e]
+  transition-[outline-color] duration-100 ease-linear
+
+인디케이터 점 (우상단):
+  absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]
+  aria-hidden="true"
+```
+
+금지:
+- glow / blur shadow 금지
+- transition duration > 100ms 금지
+- `rounded-*` 금지
+- 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
 
 ---
 

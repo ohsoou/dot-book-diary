@@ -804,6 +804,43 @@ export function resolveTheme(pref: ThemePreference, now: Date = new Date()): The
 - **램프 버튼**: `aria-label="램프 전원"`, `aria-pressed={lampState === 'on'}`.
 - **애니메이션**: `lamp-flicker` 클래스는 `lampState === 'on'`이고 `prefers-reduced-motion`이 아닐 때만 적용. off 상태에서는 `prefers-reduced-motion` 조건과 동일하게 처리하여 정지.
 
+## 22.7 곰 말풍선 / 닉네임 / hitbox 어포던스 (MVP4)
+
+### 22.7.1 닉네임 헬퍼 (`src/lib/nickname.ts`)
+- `getDisplayNickname(nickname?: string | null): string` — 폴백 `'책벌레'`. null·undefined·빈값·공백 전부 폴백.
+- 단일 진실원. page.tsx(회원 SSR)·BearStateHydrator(게스트)·기본값 모두 이 함수만 사용.
+
+### 22.7.2 nickname hydration 흐름
+```
+회원(SSR):
+  page.tsx → profiles.select('theme_preference, nickname') → getDisplayNickname(profile?.nickname)
+  → BearStateContextValue.nickname → BearSpeechBubble 헤더
+
+게스트(CSR):
+  BearStateHydrator → getPreferences().nickname → getDisplayNickname(prefs.nickname)
+  → setGuestState({ ..., nickname }) → BearSpeechBubble 헤더
+```
+
+### 22.7.3 BearSpeechBubble 배치
+- `src/components/room/BearSpeechBubble.tsx` — `'use client'`
+- RoomScene 내 absolute 배치. z-index 35. 곰 sprite 위쪽(bottom ≈ 38%, left ≈ 58%).
+- `role="status" aria-live="polite" aria-atomic="true"`. label null이면 unmount.
+- 헤더: nickname (`text-[#f4e4c1]`), 본문: bearLabel (`text-[#d7c199]`).
+- 꼬리: 하단 CSS border trick 삼각형.
+- `BearStatusBar` 제거됨. 하단 `LastReadNote`는 유지.
+
+### 22.7.4 hitbox 어포던스
+- HITBOX_DEFS 5개(`다이어리/책장/캘린더/책 등록/설정`)에만 적용.
+- 버튼: `outline outline-1 outline-dashed outline-[#e89b5e]/60 hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e] transition-[outline-color] duration-100`.
+- 인디케이터 점: `absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a] aria-hidden`.
+- 램프 전원 버튼은 제외.
+
+### 22.7.5 일기↔책 BookPicker 데이터 흐름
+- `BookPicker.tsx` (`'use client'`): `useStore().listBooks()` → native `<select>`. bookId를 state로 관리하여 form에 hidden input으로 직렬화.
+- `DiaryEntryForm`: `initialBookId` → `useState(bookId)` → `BookPicker`로 제어. autosave draft에 반영.
+- `DiaryList` / `DiaryEntryDetail`: 선택적 `books?: Book[]` prop으로 책 제목 표시.
+- 책장 카드(`BookGrid`): "일기 쓰기" 링크 → `/diary/new?bookId={id}`.
+
 ## 23. 관측·로깅 (`lib/log.ts`)
 ```ts
 export const log = {
