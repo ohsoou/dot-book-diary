@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RoomScene } from './RoomScene'
+import { BearStateProvider } from './BearStateContext'
 
 const mockPush = vi.fn()
 
@@ -222,5 +223,46 @@ describe('lamp toggle (night theme)', () => {
       expect(container.querySelector('img[src="/sprites/night/Background_off.png"]')).not.toBeNull()
     })
     expect(container.querySelector('img[src="/sprites/night/Table_Lamp_off.png"]')).not.toBeNull()
+  })
+})
+
+describe('BearSpeechBubble in RoomScene', () => {
+  beforeEach(() => {
+    mockMatchMedia()
+    localStorage.clear()
+  })
+
+  it('bearLabel이 있으면 role="status" 말풍선이 렌더된다', () => {
+    render(
+      <BearStateProvider
+        initial={{
+          bearAsset: undefined,
+          bearLabel: '곰이 자고 있어요',
+          lastReadAt: null,
+          nickname: '책벌레',
+        }}
+      >
+        <RoomScene theme="day" />
+      </BearStateProvider>,
+    )
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByText('곰이 자고 있어요')).toBeInTheDocument()
+    expect(screen.getByText('책벌레')).toBeInTheDocument()
+  })
+
+  it('bearLabel이 null이면 말풍선이 렌더되지 않는다', () => {
+    render(
+      <BearStateProvider
+        initial={{
+          bearAsset: undefined,
+          bearLabel: null,
+          lastReadAt: null,
+          nickname: '책벌레',
+        }}
+      >
+        <RoomScene theme="day" />
+      </BearStateProvider>,
+    )
+    expect(screen.queryByRole('status')).toBeNull()
   })
 })

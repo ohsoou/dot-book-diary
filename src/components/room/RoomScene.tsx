@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBearState } from './BearStateContext'
+import { BearSpeechBubble } from './BearSpeechBubble'
 import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
 
 interface RoomSceneProps {
@@ -233,7 +234,7 @@ export function RoomScene({
   settingsHref = '/settings',
 }: RoomSceneProps) {
   const router = useRouter()
-  const { bearAsset: contextBearAsset } = useBearState()
+  const { bearAsset: contextBearAsset, bearLabel, nickname } = useBearState()
   const bearAsset = bearAssetProp ?? contextBearAsset
   const [settledCount, setSettledCount] = useState(0)
   const [prevTheme, setPrevTheme] = useState(theme)
@@ -305,6 +306,8 @@ export function RoomScene({
           />
         )
       })}
+
+      <BearSpeechBubble label={bearLabel} nickname={nickname} />
 
       {HITBOX_DEFS.map((def) => (
         <button

@@ -3,7 +3,9 @@
 import { useEffect } from 'react'
 import { useStore } from '@/lib/storage/use-store'
 import { getLastReadAtFromStore } from '@/lib/last-read-store'
+import { getPreferences } from '@/lib/storage/preferences'
 import { computeBearState } from '@/lib/bear-state'
+import { getDisplayNickname } from '@/lib/nickname'
 import { useSetBearState } from './BearStateContext'
 
 interface BearStateHydratorProps {
@@ -20,7 +22,10 @@ export function BearStateHydrator({ isGuest }: BearStateHydratorProps) {
     let cancelled = false
 
     async function hydrate() {
-      const lastReadAt = await getLastReadAtFromStore(store)
+      const [lastReadAt, prefs] = await Promise.all([
+        getLastReadAtFromStore(store),
+        getPreferences(),
+      ])
       if (cancelled) return
 
       const { asset, label } = computeBearState(lastReadAt, { now: new Date() })
@@ -29,6 +34,7 @@ export function BearStateHydrator({ isGuest }: BearStateHydratorProps) {
         bearAsset: lastReadAt !== null ? asset : undefined,
         bearLabel: label,
         lastReadAt,
+        nickname: getDisplayNickname(prefs.nickname),
       })
     }
 
