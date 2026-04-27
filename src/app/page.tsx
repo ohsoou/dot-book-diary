@@ -57,7 +57,7 @@ export default async function HomePage() {
   const theme = resolveTheme(themePreference, new Date())
 
   return (
-    <main className="fixed inset-0 bg-[var(--color-border)] flex flex-col">
+    <main className="fixed top-0 inset-x-0 bottom-[64px] bg-[var(--color-border)] flex flex-col">
       <BearStateProvider initial={initialBearState}>
         <BearStateHydrator isGuest={isGuest} />
         {isGuest && <GuestBanner />}

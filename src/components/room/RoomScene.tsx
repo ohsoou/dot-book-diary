@@ -151,10 +151,10 @@ const HITBOX_DEFS: HitboxConfig[] = [
 
 const SCENE_STYLE: React.CSSProperties = {
   position: 'relative',
-  width: '100%',
   aspectRatio: '640 / 400',
-  maxHeight: 'calc(100dvh - 64px)',
-  maxWidth: 'calc((100dvh - 64px) * 1.6)',
+  height: '100%',
+  maxHeight: '100%',
+  maxWidth: '100%',
 }
 
 interface SpriteImageProps {

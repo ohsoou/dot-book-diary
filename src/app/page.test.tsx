@@ -47,4 +47,9 @@ describe('HomePage', () => {
     expect(screen.getByRole('button', { name: '다이어리' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '책장' })).toBeInTheDocument()
   })
+
+  it('renders LastReadNote', async () => {
+    await renderPage()
+    expect(screen.getByText('아직 독서 기록이 없어요')).toBeInTheDocument()
+  })
 })
