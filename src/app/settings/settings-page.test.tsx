@@ -95,8 +95,9 @@ describe('SettingsPage', () => {
 
     it('로그인 링크를 렌더한다', async () => {
       await renderPage()
-      const loginLink = screen.getByRole('link', { name: '로그인' })
-      expect((loginLink as HTMLAnchorElement).href).toContain('/login')
+      const loginLinks = screen.getAllByRole('link', { name: '로그인' })
+      expect(loginLinks.length).toBeGreaterThan(0)
+      expect((loginLinks[0] as HTMLAnchorElement).href).toContain('/login')
     })
 
     it('동기화 섹션을 렌더하지 않는다', async () => {

@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "guest-theme-disable",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-28T08:09:54+0900",
+      "completed_at": "2026-04-28T08:14:00+0900",
+      "summary": "ThemeSelector에서 비회원(!isLoggedIn)이면 ToggleTabs 대신 로그인 유도 안내+링크 렌더, settings-page 테스트 중복 링크 오류 수정, 9개 테스트 전부 통과"
     },
     {
       "step": 3,
