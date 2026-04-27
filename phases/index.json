@@ -21,7 +21,8 @@
     },
     {
       "dir": "4-mvp",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-04-27T13:40:00+0900"
     }
   ]
 }
