@@ -15,7 +15,7 @@
       "name": "settings-sprite",
       "status": "completed",
       "started_at": "2026-04-28T08:07:26+0900",
-      "completed_at": "2026-04-28T08:10:00+0900",
+      "completed_at": "2026-04-28T08:09:53+0900",
       "summary": "Setting.png을 day/night 스프라이트 디렉토리에 배치, SPRITE_FILES/SPRITE_DEFS에 setting 항목 추가(z:35, HITBOX_DEFS 설정 좌표와 동일), 스프라이트 렌더 테스트 추가"
     },
     {
