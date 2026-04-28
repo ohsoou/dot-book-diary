@@ -431,24 +431,42 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 
 ---
 
-## RoomScene Hitbox 어포던스 (MVP4)
+## RoomScene Hitbox 어포던스 (MVP4 → MVP4.1)
 
-5개 hitbox(다이어리/책장/캘린더/책 등록/설정)에 항상 표시되는 클릭 어포던스:
+5개 hitbox(다이어리/책장/캘린더/책 등록/설정)의 클릭 어포던스는 **hitbox 영역과 동일 좌표에 위치한 SPRITE 이미지 자체의 idle 모션**으로 표현한다. 점선 outline과 인디케이터 점은 사용하지 않는다.
 
+### Sprite 매핑
+
+| Hitbox | SPRITE fileKey | 좌표 (640×400 기준 %) |
+|---|---|---|
+| 다이어리 | `diary`     | `bottom:4.25%, left:35.3438%, w:14.0625%, h:18%` |
+| 책장     | `wallShelf` | `top:17.25%, right:3.125%, w:21.5625%, h:17.25%` |
+| 캘린더   | `window`    | `top:17.5%, left:32.8125%, w:35.1563%, h:33.75%` |
+| 책 등록  | `bookstack` | `bottom:6.25%, right:14.0625%, w:17.5%, h:19%` |
+| 설정     | `setting`   | `top:2%, right:1.25%, w:6.25%, h:10%` |
+
+### 애니메이션 규격
+
+```css
+@keyframes hitbox-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1px); }
+}
+
+.hitbox-bob         { animation: hitbox-bob 1.8s steps(2) infinite; }
+.hitbox-bob.delay-1 { animation-delay: 0.3s; }
+.hitbox-bob.delay-2 { animation-delay: 0.6s; }
+.hitbox-bob.delay-3 { animation-delay: 0.9s; }
+.hitbox-bob.delay-4 { animation-delay: 1.2s; }
 ```
-outline:
-  outline outline-1 outline-dashed outline-[#e89b5e]/60
-  hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e]
-  transition-[outline-color] duration-100 ease-linear
 
-인디케이터 점 (우상단):
-  absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]
-  aria-hidden="true"
-```
+- `steps(2)` — 픽셀 아트 톤 유지 (`bear-idle`과 동일 패턴)
+- delay로 5개 sprite의 phase를 분산 → 동시 움직임 방지
+- `prefers-reduced-motion: reduce` 시 미적용 (기존 reducedMotion 분기 동일하게 처리)
+- hitbox `<button>`에는 `focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#e89b5e]`만 남겨 키보드 a11y 보장. 일반 hover 시 시각 변화 없음(sprite 모션이 어포던스 담당).
 
 금지:
 - glow / blur shadow 금지
-- transition duration > 100ms 금지
 - `rounded-*` 금지
 - 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
 
@@ -460,7 +478,7 @@ outline:
 SPRITE_DEFS: { fileKey: 'setting', label: '설정', z: 35 }
 파일: public/sprites/day/Setting.png, public/sprites/night/Setting.png (day/night 동일)
 z-index 35 — hitbox(z:50)보다 낮아 클릭이 hitbox 버튼에 전달됨
-animClass 없음
+animClass: 'hitbox-bob', extraClass: 'delay-4'
 ```
 
 ---
