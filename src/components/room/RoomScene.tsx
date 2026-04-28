@@ -234,7 +234,7 @@ export function RoomScene({
   settingsHref = '/settings',
 }: RoomSceneProps) {
   const router = useRouter()
-  const { bearAsset: contextBearAsset, bearLabel, nickname } = useBearState()
+  const { bearAsset: contextBearAsset } = useBearState()
   const bearAsset = bearAssetProp ?? contextBearAsset
   const [settledCount, setSettledCount] = useState(0)
   const [prevTheme, setPrevTheme] = useState(theme)
