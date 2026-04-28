@@ -18,7 +18,7 @@
 - F1 행의 "MVP 최소" 셀에 추가:
   - "곰 상태 말풍선(K.K. 스타일, 닉네임 헤더 + 곰 상태 본문, in-canvas overlay)"
   - "hitbox 1px dashed outline + 우상단 인디케이터 점 (모바일/데스크탑 항상 표시)"
-  - "닉네임 폴백 `'책벌레'` 기본값 적용"
+  - "닉네임 폴백 `'책곰이'` 기본값 적용"
   - 기존 "메인 letterbox HUD(곰 상태·마지막 독서 경과)" 에서 BearStatusBar 부분을 말풍선으로 교체 기술
 - F5 행의 "MVP 최소" 셀에 추가:
   - "책장에서 '일기 쓰기' CTA → `/diary/new?bookId=...`"
@@ -27,7 +27,7 @@
 
 **§8.3 카피 톤 추가**:
 ```
-닉네임 기본값: 미설정·빈값 시 "책벌레"로 대체한다. `getDisplayNickname()` 단일 헬퍼.
+닉네임 기본값: 미설정·빈값 시 "책곰이"로 대체한다. `getDisplayNickname()` 단일 헬퍼.
 ```
 
 **§10.7 MVP4 추가 범위 신설** (§10.6 바로 아래):
@@ -37,7 +37,7 @@
 MVP3(3-mvp) 릴리스 이후 "방이 나를 알아본다"는 정서를 강화하기 위한 확장:
 - F1: 곰 상태 말풍선 (BearSpeechBubble) — 방 캔버스 안 곰 위에 K.K. 스타일 픽셀 말풍선. 헤더=닉네임, 본문=곰 상태 라벨. `BearStatusBar` 제거, 말풍선이 단독 표시. z-index 35 (sprite 25 < bubble < hitbox 50) — ADR-024
 - F1: hitbox 클릭 어포던스 — 5개 hitbox에 항상 보이는 1px dashed outline(`#e89b5e`/60%) + 우상단 8px 인디케이터 점. hover/focus-visible 시 alpha 강조. 모바일·데스크탑 동일 — ADR-025
-- F1/F7: 닉네임 반영 카피 — `getDisplayNickname()` 헬퍼. 폴백 `'책벌레'`. 말풍선 헤더에 적용 — ADR-026
+- F1/F7: 닉네임 반영 카피 — `getDisplayNickname()` 헬퍼. 폴백 `'책곰이'`. 말풍선 헤더에 적용 — ADR-026
 - F5: 일기↔책 연결 UI — 책장 카드에 "일기 쓰기" CTA, 일기 폼 내 BookPicker(native select), 일기 목록/상세에 연결 책 제목 표시 (FK는 기존 존재)
 ```
 
@@ -49,7 +49,7 @@ MVP3(3-mvp) 릴리스 이후 "방이 나를 알아본다"는 정서를 강화하
 ## 22.7 곰 말풍선 / 닉네임 / hitbox 어포던스 (MVP4)
 
 ### 22.7.1 닉네임 헬퍼 (`src/lib/nickname.ts`)
-- `getDisplayNickname(nickname?: string | null): string` — 폴백 `'책벌레'`. null·undefined·빈값·공백 전부 폴백.
+- `getDisplayNickname(nickname?: string | null): string` — 폴백 `'책곰이'`. null·undefined·빈값·공백 전부 폴백.
 - 단일 진실원. page.tsx(회원 SSR)·BearStateHydrator(게스트)·기본값 모두 이 함수만 사용.
 
 ### 22.7.2 nickname hydration 흐름
@@ -114,16 +114,16 @@ ADR-023 다음에 세 ADR 추가:
   - 어포던스 투명도(60%)는 방 정서를 해치지 않는 선에서 최소화.
   - transition ≤100ms. glow/blur 금지.
 
-**ADR-026: 닉네임 반영 카피 — getDisplayNickname() 헬퍼, 폴백 '책벌레'**
+**ADR-026: 닉네임 반영 카피 — getDisplayNickname() 헬퍼, 폴백 '책곰이'**
 - **상태**: Accepted
 - **날짜**: 2026-04-27
 - **컨텍스트**: ADR-016에서 닉네임 저장 전략을 정했으나, UI 표시용 폴백과 말풍선 헤더 적용 방식은 미결.
-- **결정**: `src/lib/nickname.ts`의 `getDisplayNickname()` 단일 헬퍼. null·빈값→`'책벌레'`. 말풍선 헤더에만 사용(본문 라벨은 닉네임 무관).
+- **결정**: `src/lib/nickname.ts`의 `getDisplayNickname()` 단일 헬퍼. null·빈값→`'책곰이'`. 말풍선 헤더에만 사용(본문 라벨은 닉네임 무관).
 - **대안**:
-  - `'독서하는 곰'` 폴백(ADR-016 언급): 말풍선 헤더에 곰 이름이 들어가면 발화 주체가 모호해짐. `'책벌레'`가 독자 정체성 표현에 더 적합.
+  - `'독서하는 곰'` 폴백(ADR-016 언급): 말풍선 헤더에 곰 이름이 들어가면 발화 주체가 모호해짐. `'책곰이'`가 독자 정체성 표현에 더 적합.
   - bear-state.ts 라벨에 닉네임 직접 주입: 라벨 로직 복잡도↑, 순수 함수성 저해.
 - **결과/제약**:
-  - ADR-016의 닉네임 기본값 `'독서하는 곰'`은 설정 페이지 placeholder용으로 유지. 말풍선 표시 폴백은 `'책벌레'`(이 ADR 기준).
+  - ADR-016의 닉네임 기본값 `'독서하는 곰'`은 설정 페이지 placeholder용으로 유지. 말풍선 표시 폴백은 `'책곰이'`(이 ADR 기준).
   - `getDisplayNickname()`은 `src/lib/` 에 위치하며 UI에 의존하지 않는다.
 
 ### 4. `docs/UI_GUIDE.md`

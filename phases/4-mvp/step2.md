@@ -22,7 +22,7 @@ step 1에서 `BearStateContextValue.nickname: string`이 추가됐다.
 말풍선 확정 디자인:
 ```
 ┌────────────────────────┐
-│ 책벌레                  │
+│ 책곰이                  │
 │ ...곰이 책을 읽고 왔어요 │
 └──────────▼─────────────┘
 ```
@@ -87,7 +87,7 @@ export function BearSpeechBubble({ label, nickname }: BearSpeechBubbleProps)
 
 - label이 null → 렌더 없음
 - label이 문자열 → `role="status"` 컨테이너, 헤더에 nickname 텍스트, 본문에 label 텍스트 렌더
-- nickname이 `'책벌레'`인 경우 헤더 표시 확인
+- nickname이 `'책곰이'`인 경우 헤더 표시 확인
 - `BearStateContext`를 감싸서 `useBearState()`에서 값 받아 렌더하는 통합 테스트도 1건 추가
 
 `src/components/room/RoomScene.test.tsx`에 말풍선 등장 케이스 추가:

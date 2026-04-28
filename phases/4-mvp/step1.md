@@ -33,7 +33,7 @@ export interface BearStateContextValue {
 }
 ```
 
-`defaultState`의 `nickname`은 `getDisplayNickname(undefined)` 결과(`'책벌레'`)로 초기화한다.
+`defaultState`의 `nickname`은 `getDisplayNickname(undefined)` 결과(`'책곰이'`)로 초기화한다.
 
 ### 2. `src/app/page.tsx` — 회원 SSR 흐름
 
@@ -53,8 +53,8 @@ export interface BearStateContextValue {
 `src/components/room/BearStateHydrator.test.tsx`에 다음 케이스 추가:
 
 - 게스트 preferences에 nickname이 설정된 경우 → context의 `nickname`이 해당 값
-- preferences에 nickname이 없는 경우 → context의 `nickname`이 `'책벌레'`
-- preferences에 nickname이 빈 문자열인 경우 → context의 `nickname`이 `'책벌레'`
+- preferences에 nickname이 없는 경우 → context의 `nickname`이 `'책곰이'`
+- preferences에 nickname이 빈 문자열인 경우 → context의 `nickname`이 `'책곰이'`
 
 ## Acceptance Criteria
 

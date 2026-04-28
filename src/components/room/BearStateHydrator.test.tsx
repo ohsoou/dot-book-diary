@@ -19,7 +19,7 @@ const guestInitial: BearStateContextValue = {
   bearAsset: undefined,
   bearLabel: null,
   lastReadAt: null,
-  nickname: '책벌레',
+  nickname: '책곰이',
 }
 
 function ContextReader() {
@@ -124,7 +124,7 @@ describe('BearStateHydrator', () => {
     })
   })
 
-  it('preferences에 nickname이 없으면 context.nickname이 책벌레가 된다', async () => {
+  it('preferences에 nickname이 없으면 context.nickname이 책곰이가 된다', async () => {
     const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
 
@@ -136,11 +136,11 @@ describe('BearStateHydrator', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('nickname').textContent).toBe('책벌레')
+      expect(screen.getByTestId('nickname').textContent).toBe('책곰이')
     })
   })
 
-  it('preferences에 nickname이 빈 문자열이면 context.nickname이 책벌레가 된다', async () => {
+  it('preferences에 nickname이 빈 문자열이면 context.nickname이 책곰이가 된다', async () => {
     const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
     const { getPreferences } = await import('@/lib/storage/preferences')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
@@ -154,7 +154,7 @@ describe('BearStateHydrator', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('nickname').textContent).toBe('책벌레')
+      expect(screen.getByTestId('nickname').textContent).toBe('책곰이')
     })
   })
 })
