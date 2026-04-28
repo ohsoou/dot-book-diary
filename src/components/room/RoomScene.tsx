@@ -156,13 +156,7 @@ const HITBOX_DEFS: HitboxConfig[] = [
   },
 ]
 
-const SCENE_STYLE: React.CSSProperties = {
-  position: 'relative',
-  aspectRatio: '640 / 400',
-  height: '100%',
-  maxHeight: '100%',
-  maxWidth: '100%',
-}
+const SCENE_STYLE: React.CSSProperties = {}
 
 interface SpriteImageProps {
   src: string
@@ -291,8 +285,7 @@ export function RoomScene({
     <div
       role="img"
       aria-label="곰이 책을 읽는 따뜻한 방"
-      className={isVisible ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}
-      style={SCENE_STYLE}
+      className={`room-scene-box ${isVisible ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}`}
     >
       {SPRITE_DEFS.map((def) => {
         const baseFilename =

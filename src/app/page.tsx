@@ -62,7 +62,7 @@ export default async function HomePage() {
         <BearStateHydrator isGuest={isGuest} />
         {isGuest && <GuestBanner />}
         <BearSpeechBubble />
-        <div className="flex-1 flex items-center justify-center overflow-hidden">
+        <div className="flex-1 room-scene-wrapper flex items-center justify-center overflow-hidden">
           <RoomScene theme={theme} />
         </div>
         <LastReadNote />
