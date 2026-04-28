@@ -263,7 +263,7 @@ export function DiaryEntryForm({
         {/* bookId picker */}
         <div>
           <p className="text-xs text-[#a08866] mb-2">연결할 책 (선택)</p>
-          <BookPicker value={bookId} onChange={setBookId} />
+          <BookPicker value={bookId} onChange={setBookId} isLoggedIn={isLoggedIn} />
           {bookId && <input type="hidden" name="bookId" value={bookId} />}
         </div>
 

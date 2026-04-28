@@ -1,5 +1,6 @@
 'use client'
 
+import { listBooksAction } from '@/lib/actions/books'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { Book } from '@/types'
@@ -8,14 +9,19 @@ import { useStore } from '@/lib/storage/use-store'
 interface BookPickerProps {
   value: string | undefined
   onChange: (bookId: string | undefined) => void
+  isLoggedIn: boolean
 }
 
-export function BookPicker({ value, onChange }: BookPickerProps) {
+export function BookPicker({ value, onChange, isLoggedIn }: BookPickerProps) {
   const store = useStore()
   const [books, setBooks] = useState<Book[] | null>(null)
 
   useEffect(() => {
-    store.listBooks().then(setBooks).catch(() => setBooks([]))
+    if(isLoggedIn) {
+      listBooksAction().then(resp => setBooks(resp.ok? resp.data : [])).catch(() => setBooks([]))
+    } else {
+      store.listBooks().then(setBooks).catch(() => setBooks([]))
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
