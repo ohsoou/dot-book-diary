@@ -19,7 +19,8 @@ interface SpriteConfig {
   fileKey: string
   label: string
   z: number
-  animClass?: 'bear-idle' | 'lamp-flicker'
+  animClass?: 'bear-idle' | 'lamp-flicker' | 'hitbox-bob'
+  extraClass?: string
   style: React.CSSProperties
 }
 
@@ -65,6 +66,8 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'window',
     label: '창문',
     z: 10,
+    animClass: 'hitbox-bob',
+    extraClass: 'delay-2',
     style: { top: '17.5%', left: '32.8125%', width: '35.1563%', height: '33.75%' },
   },
   {
@@ -77,6 +80,8 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'wallShelf',
     label: '벽선반',
     z: 12,
+    animClass: 'hitbox-bob',
+    extraClass: 'delay-1',
     style: { top: '17.25%', right: '3.125%', width: '21.5625%', height: '17.25%' },
   },
   {
@@ -102,12 +107,15 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'bookstack',
     label: '책더미',
     z: 30,
+    animClass: 'hitbox-bob',
+    extraClass: 'delay-3',
     style: { bottom: '6.25%', right: '14.0625%', width: '17.5%', height: '19%' },
   },
   {
     fileKey: 'diary',
     label: '다이어리',
     z: 30,
+    animClass: 'hitbox-bob',
     style: { bottom: '4.25%', left: '35.3438%', width: '14.0625%', height: '18%' },
   },
   {
@@ -121,6 +129,8 @@ const SPRITE_DEFS: SpriteConfig[] = [
     fileKey: 'setting',
     label: '설정',
     z: 35,
+    animClass: 'hitbox-bob',
+    extraClass: 'delay-4',
     style: { top: '2%', right: '1.25%', width: '6.25%', height: '10%' },
   },
 ]
@@ -300,7 +310,13 @@ export function RoomScene({
             src={src}
             label={def.label}
             style={{ zIndex: def.z, ...def.style }}
-            extraClass={def.animClass && !reducedMotion && !(def.animClass === 'lamp-flicker' && lampState === 'off') ? def.animClass : ''}
+            extraClass={
+              def.animClass &&
+              !reducedMotion &&
+              !(def.animClass === 'lamp-flicker' && lampState === 'off')
+                ? `${def.animClass}${def.extraClass ? ' ' + def.extraClass : ''}`
+                : ''
+            }
             onSettled={handleSettled}
           />
         )
@@ -312,14 +328,9 @@ export function RoomScene({
           key={def.label}
           aria-label={def.label}
           onClick={() => router.push(hrefMap[def.hrefKey] as never)}
-          className="absolute bg-transparent outline outline-1 outline-dashed outline-[#e89b5e]/60 hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e] transition-[outline-color] duration-100 ease-linear"
+          className="absolute bg-transparent focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#e89b5e]"
           style={{ zIndex: 50, ...def.style }}
-        >
-          <span
-            aria-hidden="true"
-            className="absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]"
-          />
-        </button>
+        />
       ))}
 
       {theme === 'night' && (

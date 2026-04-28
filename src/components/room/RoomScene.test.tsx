@@ -168,22 +168,21 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
   })
 
-  it('hitbox buttons have outline-dashed affordance class', () => {
-    render(<RoomScene theme="day" />)
-    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
-    for (const label of labels) {
-      const btn = screen.getByRole('button', { name: label })
-      expect(btn.className).toContain('outline-dashed')
-    }
+  it('hitbox-mapped sprites have hitbox-bob class when reduced motion is off', () => {
+    mockMatchMedia({ reducedMotion: false })
+    const { container } = render(<RoomScene theme="day" />)
+    const imgs = container.querySelectorAll('img')
+    const bobCount = Array.from(imgs).filter((img) =>
+      img.className.includes('hitbox-bob')
+    ).length
+    expect(bobCount).toBe(5)
   })
 
-  it('hitbox buttons each contain an aria-hidden indicator dot', () => {
+  it('hitbox buttons have no dashed outline', () => {
     render(<RoomScene theme="day" />)
-    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
-    for (const label of labels) {
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
       const btn = screen.getByRole('button', { name: label })
-      const dot = btn.querySelector('[aria-hidden="true"]')
-      expect(dot).not.toBeNull()
+      expect(btn.className).not.toContain('outline-dashed')
     }
   })
 

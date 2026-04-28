@@ -116,9 +116,21 @@ img.pixel {
 .bear-idle    { animation: bear-idle 2s steps(2) infinite; }
 .lamp-flicker { animation: lamp-flicker 4s steps(2) infinite; }
 
+@keyframes hitbox-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1px); }
+}
+
+.hitbox-bob         { animation: hitbox-bob 1.8s steps(2) infinite; }
+.hitbox-bob.delay-1 { animation-delay: 0.3s; }
+.hitbox-bob.delay-2 { animation-delay: 0.6s; }
+.hitbox-bob.delay-3 { animation-delay: 0.9s; }
+.hitbox-bob.delay-4 { animation-delay: 1.2s; }
+
 @media (prefers-reduced-motion: reduce) {
   .bear-idle,
-  .lamp-flicker {
+  .lamp-flicker,
+  .hitbox-bob {
     animation: none;
   }
   * {
