@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { renderHook } from '@testing-library/react';
 
 // next/headers 모킹
 vi.mock('next/headers', () => ({
@@ -61,7 +62,7 @@ describe('getStore', () => {
 describe('useStore', () => {
   it('항상 LocalStore를 반환한다 (클라이언트 비회원 경로)', async () => {
     const { useStore } = await import('./index');
-    const store = useStore();
-    expect(store).toBeInstanceOf(LocalStore);
+    const { result } = renderHook(() => useStore());
+    expect(result.current).toBeInstanceOf(LocalStore);
   });
 });
