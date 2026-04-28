@@ -18,6 +18,16 @@
       "dir": "3-mvp",
       "status": "completed",
       "completed_at": "2026-04-23T09:47:07+0900"
+    },
+    {
+      "dir": "4-mvp",
+      "status": "completed",
+      "completed_at": "2026-04-27T13:34:23+0900"
+    },
+    {
+      "dir": "4-mvp-polish",
+      "status": "completed",
+      "completed_at": "2026-04-28T08:16:32+0900"
     }
   ]
 }

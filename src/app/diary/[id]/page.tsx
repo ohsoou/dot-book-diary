@@ -43,5 +43,6 @@ async function ServerDiaryEntry({ id }: { id: string }) {
   const store = await getStore()
   const entry = await store.getDiaryEntry(id)
   if (!entry) notFound()
-  return <DiaryEntryDetail entry={entry} isLoggedIn={true} />
+  const book = entry.bookId ? await store.getBook(entry.bookId) : null
+  return <DiaryEntryDetail entry={entry} isLoggedIn={true} book={book ?? undefined} />
 }

@@ -370,21 +370,33 @@ Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color
 - `target_date` 없음 → "목표 완독일을 정해 볼까요?" CTA.
 - `/bookshelf` 카드에서는 소형 버전(막대 + 잔여 일수)만 노출.
 
-### BearStatusBar (MVP2, `/` 상단 letterbox)
+### BearStatusBar — MVP4에서 BearSpeechBubble로 대체됨
+
+MVP2에서 letterbox 상단에 평문 라벨로 있었으나, MVP4에서 `BearSpeechBubble`로 교체됨. 파일 삭제됨.
+
+### BearSpeechBubble (MVP4, `/` 상단 전체너비 박스)
+
+위치: `page.tsx` `<main>` flex-col 내 RoomScene **위** 별도 full-width 블록. absolute 오버레이 아님.
 
 ```
-컨테이너: py-1 text-center text-sm text-[var(--color-text-secondary)]
-라벨 예시: "곰이 책을 기다려요" / "곰이 책을 읽고 왔어요" / "곰이 놀고 있어요" / "곰이 자고 있어요"
-aria-live: "polite", aria-atomic: "true"
+외부 래퍼: w-full px-4 py-4
+내부 카드: bg-[#3a2a1a] border-2 border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-4 py-3 w-full
+  헤더: text-sm font-bold text-[#f4e4c1] (닉네임)
+  본문: text-sm text-[#d7c199] (곰 상태 라벨)
 ```
 
-- 독서 기록 없음: "곰이 책을 기다려요"
-- `fresh` (< 1시간): "곰이 책을 읽고 왔어요"
-- `active` (1시간~7일): variant에 맞는 라벨 (예: "곰이 쉬고 있어요", "곰이 놀고 있어요")
-- `sleeping` (≥ 7일): "곰이 자고 있어요"
-- 비회원 초기 SSR: `null`이면 렌더 생략 (hydration 전까지).
+접근성: role="status" aria-live="polite" aria-atomic="true".
+bearLabel null → unmount(빈 공간 없음).
 
-### LastReadNote (MVP2, `/` 하단 letterbox)
+금지:
+- `rounded-*` 금지
+- `backdrop-blur` 금지
+- `gradient` 금지
+- box-shadow glow 금지
+
+### LastReadNote (MVP2, `/` 하단)
+
+위치: `page.tsx` `<main>` flex-col 내 RoomScene 아래 마지막 요소. BottomNav(fixed, 64px) 위에 표시되도록 `<main>`은 `bottom-[64px]`로 설정(4-mvp-polish~).
 
 ```
 컨테이너: py-1 text-center text-xs text-[var(--color-text-secondary)]
@@ -416,6 +428,55 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 
 - `outline: none` + `focus:ring-*` Tailwind 조합 사용 금지 — 링이 둥글다.
 - `:focus`(마우스) 대신 `:focus-visible`(키보드)만 스타일 적용.
+
+---
+
+## RoomScene Hitbox 어포던스 (MVP4)
+
+5개 hitbox(다이어리/책장/캘린더/책 등록/설정)에 항상 표시되는 클릭 어포던스:
+
+```
+outline:
+  outline outline-1 outline-dashed outline-[#e89b5e]/60
+  hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e]
+  transition-[outline-color] duration-100 ease-linear
+
+인디케이터 점 (우상단):
+  absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]
+  aria-hidden="true"
+```
+
+금지:
+- glow / blur shadow 금지
+- transition duration > 100ms 금지
+- `rounded-*` 금지
+- 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
+
+### Settings Sprite (4-mvp-polish)
+
+설정 hitbox(`top:2%, right:1.25%, width:6.25%, height:10%`)와 **동일 좌표**에 sprite 추가.
+
+```
+SPRITE_DEFS: { fileKey: 'setting', label: '설정', z: 35 }
+파일: public/sprites/day/Setting.png, public/sprites/night/Setting.png (day/night 동일)
+z-index 35 — hitbox(z:50)보다 낮아 클릭이 hitbox 버튼에 전달됨
+animClass 없음
+```
+
+---
+
+## ThemeSelector (MVP1 / 4-mvp-polish)
+
+위치: `/settings` 페이지 테마 섹션.
+
+| 상태 | 렌더 |
+|---|---|
+| 회원 | `ToggleTabs`(자동/낮/밤). 변경 시 `updateThemePreferenceAction()` → Supabase 저장 |
+| 비회원 (4-mvp-polish~) | 토글 없음. "로그인하면 테마를 저장할 수 있어요." + `/login` 링크 |
+
+비회원 비활성 이유: server component(SSR)가 비회원 IndexedDB를 읽을 수 없어 새로고침 시 토글 상태와 실제 저장값이 불일치. 차후 SSR↔IndexedDB 동기화로 개선 예정(ADR-027).
+
+금지: `rounded-*`, `backdrop-blur`, `gradient` 사용 금지.
 
 ---
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RoomScene } from './RoomScene'
+import { BearStateProvider } from './BearStateContext'
 
 const mockPush = vi.fn()
 
@@ -167,6 +168,25 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
   })
 
+  it('hitbox buttons have outline-dashed affordance class', () => {
+    render(<RoomScene theme="day" />)
+    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
+    for (const label of labels) {
+      const btn = screen.getByRole('button', { name: label })
+      expect(btn.className).toContain('outline-dashed')
+    }
+  })
+
+  it('hitbox buttons each contain an aria-hidden indicator dot', () => {
+    render(<RoomScene theme="day" />)
+    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
+    for (const label of labels) {
+      const btn = screen.getByRole('button', { name: label })
+      const dot = btn.querySelector('[aria-hidden="true"]')
+      expect(dot).not.toBeNull()
+    }
+  })
+
   it('renders rug sprite with correct properties and z-index below bear', () => {
     const { container } = render(<RoomScene theme="day" />)
 
@@ -181,6 +201,13 @@ describe('RoomScene', () => {
     const rugZ = parseInt(rugImg?.style.zIndex || '0')
     const bearZ = parseInt(bearImg?.style.zIndex || '0')
     expect(rugZ).toBeLessThan(bearZ)
+  })
+
+  it('renders setting sprite image', () => {
+    render(<RoomScene theme="day" />)
+    const imgs = document.querySelectorAll('img.pixel')
+    const srcList = Array.from(imgs).map((img) => (img as HTMLImageElement).src)
+    expect(srcList.some((src) => src.includes('Setting.png'))).toBe(true)
   })
 })
 
@@ -224,3 +251,4 @@ describe('lamp toggle (night theme)', () => {
     expect(container.querySelector('img[src="/sprites/night/Table_Lamp_off.png"]')).not.toBeNull()
   })
 })
+

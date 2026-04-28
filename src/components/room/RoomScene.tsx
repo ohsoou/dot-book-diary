@@ -44,6 +44,7 @@ const SPRITE_FILES: Record<string, { day: string; night: string }> = {
   diary:        { day: 'Diary.png',         night: 'Diary.png' },
   bear:         { day: 'Bear.png',          night: 'Bear.png' },
   rug:          { day: 'Rug.png',           night: 'Rug.png' },
+  setting:      { day: 'Setting.png',       night: 'Setting.png' },
 }
 
 // 640×400 캔버스(aspect-ratio 8/5) 기준 퍼센트 좌표.
@@ -116,6 +117,12 @@ const SPRITE_DEFS: SpriteConfig[] = [
     style: { bottom: '1.25%', left: '42.0313%', width: '32.8125%', height: '42.25%' },
     animClass: 'bear-idle',
   },
+  {
+    fileKey: 'setting',
+    label: '설정',
+    z: 35,
+    style: { top: '2%', right: '1.25%', width: '6.25%', height: '10%' },
+  },
 ]
 
 const TOTAL_SPRITES = SPRITE_DEFS.length
@@ -149,13 +156,7 @@ const HITBOX_DEFS: HitboxConfig[] = [
   },
 ]
 
-const SCENE_STYLE: React.CSSProperties = {
-  position: 'relative',
-  width: '100%',
-  aspectRatio: '640 / 400',
-  maxHeight: 'calc(100dvh - 64px)',
-  maxWidth: 'calc((100dvh - 64px) * 1.6)',
-}
+const SCENE_STYLE: React.CSSProperties = {}
 
 interface SpriteImageProps {
   src: string
@@ -284,8 +285,7 @@ export function RoomScene({
     <div
       role="img"
       aria-label="곰이 책을 읽는 따뜻한 방"
-      className={isVisible ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}
-      style={SCENE_STYLE}
+      className={`room-scene-box ${isVisible ? 'opacity-100 transition-opacity duration-100' : 'opacity-0'}`}
     >
       {SPRITE_DEFS.map((def) => {
         const baseFilename =
@@ -306,14 +306,20 @@ export function RoomScene({
         )
       })}
 
+
       {HITBOX_DEFS.map((def) => (
         <button
           key={def.label}
           aria-label={def.label}
           onClick={() => router.push(hrefMap[def.hrefKey] as never)}
-          className="absolute bg-transparent"
+          className="absolute bg-transparent outline outline-1 outline-dashed outline-[#e89b5e]/60 hover:outline-[#e89b5e] focus-visible:outline-[#e89b5e] transition-[outline-color] duration-100 ease-linear"
           style={{ zIndex: 50, ...def.style }}
-        />
+        >
+          <span
+            aria-hidden="true"
+            className="absolute top-1 right-1 w-2 h-2 bg-[#e89b5e] border border-[#1a100a]"
+          />
+        </button>
       ))}
 
       {theme === 'night' && (

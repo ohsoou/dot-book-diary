@@ -1,0 +1,55 @@
+{
+  "project": "dot-book-diary",
+  "phase": "4-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "nickname-label-injection",
+      "status": "completed",
+      "summary": "getDisplayNickname() 헬퍼 생성, 폴백 '책곰이', 6개 케이스 테스트 통과"
+    },
+    {
+      "step": 1,
+      "name": "nickname-hydration",
+      "status": "completed",
+      "summary": "BearStateContextValue.nickname 추가, page.tsx SSR 닉네임 주입, BearStateHydrator 게스트 preferences 병렬 로드"
+    },
+    {
+      "step": 2,
+      "name": "bear-speech-bubble",
+      "status": "completed",
+      "summary": "BearSpeechBubble K.K. 스타일 말풍선 생성, RoomScene 배치, BearStatusBar 제거, 57개 테스트 통과"
+    },
+    {
+      "step": 3,
+      "name": "hitbox-affordance",
+      "status": "completed",
+      "summary": "5개 hitbox 버튼에 outline-dashed 어포던스 + 우상단 인디케이터 점 추가, 신규 테스트 2케이스 통과",
+      "completed_at": "2026-04-27T13:24:19+0900"
+    },
+    {
+      "step": 4,
+      "name": "diary-book-linking-ui",
+      "status": "completed",
+      "summary": "BookPicker 신규 생성, DiaryEntryForm bookId state 관리, BookGrid 일기 쓰기 링크, DiaryList/DiaryEntryDetail 책 제목 표시, 페이지/하이드레이터 books 병렬 로드, 27개 신규 테스트 통과",
+      "started_at": "2026-04-27T13:24:19+0900",
+      "completed_at": "2026-04-27T13:32:30+0900"
+    },
+    {
+      "step": 5,
+      "name": "docs-update",
+      "status": "completed",
+      "summary": "PRD §10.7 MVP4 범위 신설, ARCHITECTURE §22.7 추가, ADR-024~026 추가, UI_GUIDE BearSpeechBubble·hitbox 어포던스 섹션 추가"
+    },
+    {
+      "step": 6,
+      "name": "release-hardening-mvp4",
+      "status": "completed",
+      "started_at": "2026-04-27T13:32:30+0900",
+      "completed_at": "2026-04-27T13:34:23+0900",
+      "summary": "build/lint/test 0 에러(432개 전체 통과), grep 빈 결과(forbidden CSS·BearStatusBar 참조 없음), 아키텍처 체크리스트 전 항목 통과"
+    }
+  ],
+  "created_at": "2026-04-27T13:22:23+0900",
+  "completed_at": "2026-04-27T13:34:23+0900"
+}

@@ -49,7 +49,7 @@ types/ (순수 타입 정의)
 bun dev           # 개발 서버 (http://localhost:3000)
 bun build         # 프로덕션 빌드 (타입 에러 없음 확인)
 bun lint          # ESLint
-bun test          # Vitest (= vitest run, 비대화형)
+bun run test          # Vitest (= vitest run, 비대화형)
 bun db:migrate    # supabase db push --linked (스키마 배포)
 bun db:types      # supabase gen types typescript --linked > src/types/supabase.ts
 ```

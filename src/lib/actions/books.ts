@@ -6,6 +6,26 @@ import type { ActionResult } from '@/lib/errors'
 import type { Book, BookSearchResult } from '@/types'
 import { AppError } from '@/lib/errors'
 
+export async function listBooksAction() : Promise<ActionResult<Book[]>>{
+  try {
+    const store = await getStore()
+    const books = await store.listBooks()
+
+    return { ok: true, data: books }
+  } catch (err) {
+    if (err instanceof AppError) {
+      return {
+        ok: false,
+        error: { code: err.code, message: err.message, fieldErrors: err.fieldErrors },
+      }
+    }
+    return {
+      ok: false,
+      error: { code: 'UPSTREAM_FAILED', message: '책 목록을 불러오지 못했어요' },
+    }
+  }
+}
+
 export async function addBookAction(
   input: BookSearchResult,
 ): Promise<ActionResult<Book>> {

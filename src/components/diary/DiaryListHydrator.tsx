@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { DiaryEntry } from '@/types'
+import type { Book, DiaryEntry } from '@/types'
 import { LocalStore } from '@/lib/storage/LocalStore'
 import { getPreferences } from '@/lib/storage/preferences'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -9,6 +9,7 @@ import { DiaryList } from './DiaryList'
 
 export function DiaryListHydrator() {
   const [entries, setEntries] = useState<DiaryEntry[] | undefined>(undefined)
+  const [books, setBooks] = useState<Book[]>([])
 
   useEffect(() => {
     getPreferences().then((prefs) => {
@@ -17,9 +18,11 @@ export function DiaryListHydrator() {
         return
       }
       const store = new LocalStore()
-      store
-        .listDiaryEntries()
-        .then((list) => setEntries(list.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt))))
+      Promise.all([store.listDiaryEntries(), store.listBooks()])
+        .then(([entryList, bookList]) => {
+          setEntries(entryList.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+          setBooks(bookList)
+        })
         .catch(() => setEntries([]))
     })
   }, [])
@@ -37,5 +40,5 @@ export function DiaryListHydrator() {
     )
   }
 
-  return <DiaryList entries={entries} />
+  return <DiaryList entries={entries} books={books} />
 }

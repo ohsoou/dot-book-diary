@@ -24,7 +24,7 @@ export function BookGrid({ books, sessionsByBookId }: BookGridProps) {
       {books.map((book) => {
         const sessions = sessionsByBookId?.[book.id] ?? []
         return (
-          <li key={book.id}>
+          <li key={book.id} className="flex flex-col gap-1">
             <Link href={`/reading/${book.id}` as never} className="flex flex-col gap-1 group">
               <BookCover book={book} />
               <span className="text-xs text-[#d7c199] line-clamp-1 group-hover:text-[#f4e4c1] transition-colors duration-100 ease-linear">
@@ -33,6 +33,12 @@ export function BookGrid({ books, sessionsByBookId }: BookGridProps) {
               {book.targetDate && (
                 <GoalProgress book={book} sessions={sessions} variant="compact" />
               )}
+            </Link>
+            <Link
+              href={`/diary/new?bookId=${book.id}` as never}
+              className="text-xs text-[#a08866] hover:text-[#d7c199] transition-colors duration-100 ease-linear"
+            >
+              일기 쓰기
             </Link>
           </li>
         )

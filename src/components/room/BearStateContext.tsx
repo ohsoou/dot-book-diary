@@ -1,11 +1,13 @@
 'use client'
 
 import { createContext, useContext, useState } from 'react'
+import { getDisplayNickname } from '@/lib/nickname'
 
 export interface BearStateContextValue {
   bearAsset: string | undefined
   bearLabel: string | null
   lastReadAt: string | null
+  nickname: string
 }
 
 interface BearStateContextFull {
@@ -17,6 +19,7 @@ const defaultState: BearStateContextValue = {
   bearAsset: undefined,
   bearLabel: null,
   lastReadAt: null,
+  nickname: getDisplayNickname(undefined),
 }
 
 const BearStateContext = createContext<BearStateContextFull>({

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { ToggleTabs } from '@/components/ui/ToggleTabs'
 import { updateThemePreferenceAction } from '@/lib/actions/profile'
@@ -42,22 +43,26 @@ export function ThemeSelector({ initialPreference, isLoggedIn }: ThemeSelectorPr
     setPreference(next)
     document.documentElement.dataset.theme = resolveTheme(next)
 
-    if (isLoggedIn) {
-      const result = await updateThemePreferenceAction(next)
-      if (!result.ok) {
-        setPreference(prev)
-        document.documentElement.dataset.theme = resolveTheme(prev)
-        showToast('테마를 저장하지 못했어요')
-      }
-    } else {
-      try {
-        await updatePreferences({ themePreference: next })
-      } catch {
-        setPreference(prev)
-        document.documentElement.dataset.theme = resolveTheme(prev)
-        showToast('테마를 저장하지 못했어요')
-      }
+    const result = await updateThemePreferenceAction(next)
+    if (!result.ok) {
+      setPreference(prev)
+      document.documentElement.dataset.theme = resolveTheme(prev)
+      showToast('테마를 저장하지 못했어요')
     }
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm text-[#6b5540]">로그인하면 테마를 저장할 수 있어요.</p>
+        <Link
+          href="/login"
+          className="inline-block text-sm text-center bg-[#3a2a1a] border border-[#1a100a] px-4 py-2 text-[#d7c199] hover:border-[#a08866] transition-colors duration-100 ease-linear"
+        >
+          로그인
+        </Link>
+      </div>
+    )
   }
 
   return (

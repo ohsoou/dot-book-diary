@@ -46,12 +46,14 @@ vi.mock('@/lib/storage/preferences', () => ({
 const mockLocalAddEntry = vi.fn()
 const mockLocalUpdateEntry = vi.fn()
 const mockLocalDeleteEntry = vi.fn()
+const mockLocalListBooks = vi.fn()
 
 vi.mock('@/lib/storage/LocalStore', () => ({
   LocalStore: vi.fn().mockImplementation(() => ({
     addDiaryEntry: (...args: unknown[]) => mockLocalAddEntry(...args),
     updateDiaryEntry: (...args: unknown[]) => mockLocalUpdateEntry(...args),
     deleteDiaryEntry: (...args: unknown[]) => mockLocalDeleteEntry(...args),
+    listBooks: (...args: unknown[]) => mockLocalListBooks(...args),
   })),
 }))
 
@@ -69,6 +71,7 @@ beforeEach(() => {
   mockGetDraft.mockResolvedValue(null)
   mockSetDraft.mockResolvedValue(undefined)
   mockClearDraft.mockResolvedValue(undefined)
+  mockLocalListBooks.mockResolvedValue([])
 })
 
 afterEach(() => {
@@ -225,6 +228,57 @@ describe('DiaryEntryForm', () => {
 
       const hiddenInput = document.querySelector('input[name="entryType"]') as HTMLInputElement
       expect(hiddenInput.value).toBe('review')
+    })
+  })
+
+  describe('bookId 관리', () => {
+    it('initialBookId 없으면 BookPicker는 빈 상태(책 없음)를 표시한다', async () => {
+      mockLocalListBooks.mockResolvedValue([])
+
+      render(<DiaryEntryForm draftId="new" isLoggedIn={false} />)
+
+      await waitFor(() => {
+        expect(screen.getByText(/책장에 책이 없어요/)).toBeDefined()
+      })
+    })
+
+    it('initialBookId가 있으면 BookPicker에 해당 책이 선택된 상태로 렌더된다', async () => {
+      mockLocalListBooks.mockResolvedValue([
+        {
+          id: 'book-1',
+          title: '연결 책',
+          createdAt: '2026-04-01T00:00:00Z',
+          updatedAt: '2026-04-01T00:00:00Z',
+        },
+      ])
+
+      render(<DiaryEntryForm draftId="new" initialBookId="book-1" isLoggedIn={false} />)
+
+      await waitFor(() => {
+        const select = screen.getByRole('combobox') as HTMLSelectElement
+        expect(select.value).toBe('book-1')
+      })
+    })
+
+    it('bookId 변경 시 isDirty가 true가 된다', async () => {
+      const user = userEvent.setup()
+      mockLocalListBooks.mockResolvedValue([
+        {
+          id: 'book-1',
+          title: '연결 책',
+          createdAt: '2026-04-01T00:00:00Z',
+          updatedAt: '2026-04-01T00:00:00Z',
+        },
+      ])
+
+      render(<DiaryEntryForm draftId="new" isLoggedIn={false} />)
+
+      await waitFor(() => screen.getByRole('combobox'))
+      await user.selectOptions(screen.getByRole('combobox'), 'book-1')
+
+      await waitFor(() => {
+        expect(mockSetIsDirty).toHaveBeenCalledWith(true)
+      })
     })
   })
 

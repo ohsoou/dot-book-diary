@@ -125,3 +125,14 @@ img.pixel {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* RoomScene: container query로 aspect-ratio 8:5 유지 (portrait/landscape 모두 정확히 맞춤) */
+.room-scene-wrapper {
+  container-type: size;
+}
+
+.room-scene-box {
+  position: relative;
+  aspect-ratio: 640 / 400;
+  width: min(100cqw, calc(100cqh * 640 / 400));
+}
