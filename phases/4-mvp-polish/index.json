@@ -47,7 +47,7 @@
       "name": "bubble-margin-center",
       "status": "completed",
       "started_at": "2026-04-29T11:23:37+0900",
-      "completed_at": "2026-04-29T11:26:30+0900",
+      "completed_at": "2026-04-29T11:27:05+0900",
       "summary": "globals.css container-type: size→inline-size + cqh→(100dvh-64px)로 교체, page.tsx flex-col→grid grid-rows-[1fr_auto_1fr]로 변경해 BearSpeechBubble/LastReadNote를 RoomScene 여백 수직 중앙에 배치, 439개 테스트 전부 통과"
     },
     {
