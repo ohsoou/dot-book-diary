@@ -24,7 +24,7 @@
       "status": "completed",
       "started_at": "2026-04-30T08:31:30+0900",
       "summary": "route.ts에서 providerError/oauth_failed 분기 제거, profile upsert에 user_metadata.nickname(폴백 '책곰이') 포함, ignoreDuplicates 제거 — 테스트 5개 통과",
-      "completed_at": "2026-04-30T08:35:00+0900"
+      "completed_at": "2026-04-30T08:35:02+0900"
     },
     {
       "step": 3,
