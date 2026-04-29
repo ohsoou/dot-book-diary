@@ -7,7 +7,8 @@
       "name": "docs-and-error-codes",
       "status": "completed",
       "started_at": "2026-04-30T08:18:43+0900",
-      "summary": "ADR-029 추가, PRD/ARCHITECTURE/UI_GUIDE/README 문서 업데이트, errors.ts에 EMAIL_TAKEN/INVALID_CREDENTIALS/WEAK_PASSWORD/EMAIL_NOT_CONFIRMED 에러 코드 추가 및 테스트 작성"
+      "summary": "ADR-029 추가, PRD/ARCHITECTURE/UI_GUIDE/README 문서 업데이트, errors.ts에 EMAIL_TAKEN/INVALID_CREDENTIALS/WEAK_PASSWORD/EMAIL_NOT_CONFIRMED 에러 코드 추가 및 테스트 작성",
+      "completed_at": "2026-04-30T08:23:19+0900"
     },
     {
       "step": 1,
