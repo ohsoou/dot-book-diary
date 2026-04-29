@@ -1,3 +1,4 @@
+import { version } from '../../../package.json'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { NicknameForm } from '@/components/settings/NicknameForm'
@@ -92,6 +93,10 @@ export default async function SettingsPage() {
           </div>
         </section>
       )}
+      <footer className="mt-4 pt-4 border-t border-[#3a2a1a] text-center flex flex-col gap-1">
+        <p className="text-xs text-[#6b5540]">v{version}</p>
+        <p className="text-xs text-[#6b5540]">© 2026 dot-book-diary</p>
+      </footer>
     </main>
   )
 }

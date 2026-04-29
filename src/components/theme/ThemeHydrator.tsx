@@ -3,17 +3,26 @@
 import { useEffect } from 'react';
 import { getPreferences } from '@/lib/storage/preferences';
 import { resolveTheme } from '@/lib/theme';
+import type { ThemePreference } from '@/lib/theme';
 
-export function ThemeHydrator() {
+interface Props {
+  themePreference?: ThemePreference;
+}
+
+export function ThemeHydrator({ themePreference }: Props) {
   useEffect(() => {
     let cancelled = false;
 
     async function applyTheme() {
-      const prefs = await getPreferences();
-      if (cancelled) return;
-      const pref = prefs.themePreference ?? 'system';
-      const theme = resolveTheme(pref);
-      document.documentElement.dataset.theme = theme;
+      let pref: ThemePreference;
+      if (themePreference !== undefined) {
+        pref = themePreference;
+      } else {
+        const prefs = await getPreferences();
+        if (cancelled) return;
+        pref = prefs.themePreference ?? 'system';
+      }
+      document.documentElement.dataset.theme = resolveTheme(pref);
     }
 
     void applyTheme();
@@ -27,7 +36,7 @@ export function ThemeHydrator() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [themePreference]);
 
   return null;
 }

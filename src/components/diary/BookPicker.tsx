@@ -17,13 +17,12 @@ export function BookPicker({ value, onChange, isLoggedIn }: BookPickerProps) {
   const [books, setBooks] = useState<Book[] | null>(null)
 
   useEffect(() => {
-    if(isLoggedIn) {
-      listBooksAction().then(resp => setBooks(resp.ok? resp.data : [])).catch(() => setBooks([]))
+    if (isLoggedIn) {
+      listBooksAction().then(resp => setBooks(resp.ok ? resp.data : [])).catch(() => setBooks([]))
     } else {
       store.listBooks().then(setBooks).catch(() => setBooks([]))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isLoggedIn, store])
 
   if (books === null) {
     return <p className="text-xs text-[#a08866]">불러오는 중...</p>

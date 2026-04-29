@@ -168,23 +168,29 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).not.toBeNull()
   })
 
-  it('hitbox buttons have outline-dashed affordance class', () => {
+  it('hitbox-mapped sprites have hitbox-bob class when reduced motion is off', () => {
+    mockMatchMedia({ reducedMotion: false })
+    const { container } = render(<RoomScene theme="day" />)
+    const imgs = container.querySelectorAll('img')
+    const bobCount = Array.from(imgs).filter((img) =>
+      img.className.includes('hitbox-bob')
+    ).length
+    expect(bobCount).toBe(4)
+  })
+
+  it('hitbox buttons have no dashed outline', () => {
     render(<RoomScene theme="day" />)
-    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
-    for (const label of labels) {
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
       const btn = screen.getByRole('button', { name: label })
-      expect(btn.className).toContain('outline-dashed')
+      expect(btn.className).not.toContain('outline-dashed')
     }
   })
 
-  it('hitbox buttons each contain an aria-hidden indicator dot', () => {
+  it('bear hitbox has same coordinates as bear sprite', () => {
     render(<RoomScene theme="day" />)
-    const labels = ['다이어리', '책장', '캘린더', '책 등록', '설정']
-    for (const label of labels) {
-      const btn = screen.getByRole('button', { name: label })
-      const dot = btn.querySelector('[aria-hidden="true"]')
-      expect(dot).not.toBeNull()
-    }
+    const btn = screen.getByRole('button', { name: '설정' })
+    expect(btn.style.bottom).toBe('1.25%')
+    expect(btn.style.left).toBe('42.0313%')
   })
 
   it('renders rug sprite with correct properties and z-index below bear', () => {
@@ -203,12 +209,6 @@ describe('RoomScene', () => {
     expect(rugZ).toBeLessThan(bearZ)
   })
 
-  it('renders setting sprite image', () => {
-    render(<RoomScene theme="day" />)
-    const imgs = document.querySelectorAll('img.pixel')
-    const srcList = Array.from(imgs).map((img) => (img as HTMLImageElement).src)
-    expect(srcList.some((src) => src.includes('Setting.png'))).toBe(true)
-  })
 })
 
 describe('lamp toggle (night theme)', () => {

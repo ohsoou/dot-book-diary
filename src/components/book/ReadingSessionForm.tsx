@@ -268,9 +268,9 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
       <div className="flex gap-4 items-start">
         <BookCover book={book} />
         <div className="flex flex-col gap-2 flex-1 min-w-0">
-          <h1 className="text-base text-[#f4e4c1] leading-snug">{book.title}</h1>
-          {book.author && <p className="text-sm text-[#a08866]">{book.author}</p>}
-          {book.publisher && <p className="text-xs text-[#8b6f4a]">{book.publisher}</p>}
+          <h1 className="text-base text-[var(--color-text-primary)] leading-snug">{book.title}</h1>
+          {book.author && <p className="text-sm text-[var(--color-text-secondary)]">{book.author}</p>}
+          {book.publisher && <p className="text-xs text-[var(--color-neutral)]">{book.publisher}</p>}
           <Button
             variant="danger"
             size="sm"
@@ -296,13 +296,13 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
       <div className="flex gap-2">
         <Link
           href={`/diary/new?bookId=${book.id}&type=quote` as never}
-          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors duration-100 ease-linear"
+          className="text-xs px-3 py-2 border border-[var(--color-neutral)] text-[var(--color-text-body)] hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] transition-colors duration-100 ease-linear"
         >
           이 책으로 문장 기록
         </Link>
         <Link
           href={`/diary/new?bookId=${book.id}&type=review` as never}
-          className="text-xs px-3 py-2 border border-[#8b6f4a] text-[#d7c199] hover:border-[#e89b5e] hover:text-[#f4e4c1] transition-colors duration-100 ease-linear"
+          className="text-xs px-3 py-2 border border-[var(--color-neutral)] text-[var(--color-text-body)] hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] transition-colors duration-100 ease-linear"
         >
           독후감 작성
         </Link>
@@ -343,12 +343,12 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
 
       {/* 세션 추가/수정 폼 */}
       <section>
-        <h2 className="text-sm text-[#d7c199] mb-3">
+        <h2 className="text-sm text-[var(--color-text-body)] mb-3">
           {editingId ? '기록 수정' : '독서 기록 추가'}
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
-            <label className="text-xs text-[#a08866] block mb-1" htmlFor="readDate">
+            <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="readDate">
               날짜
             </label>
             <input
@@ -358,14 +358,14 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
               value={fields.readDate}
               max={today}
               onChange={(e) => handleFieldChange('readDate', e.target.value)}
-              className="bg-[#3a2a1a] border border-[#8b6f4a] text-[#f4e4c1] text-sm px-3 py-2 w-full focus:outline-none focus:border-[#e89b5e]"
+              className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)]"
             />
             <FieldError message={fieldErrors.readDate} />
           </div>
 
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="text-xs text-[#a08866] block mb-1" htmlFor="startPage">
+              <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="startPage">
                 시작 페이지
               </label>
               <input
@@ -375,14 +375,14 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
                 min="0"
                 value={fields.startPage}
                 onChange={(e) => handleFieldChange('startPage', e.target.value)}
-                className="bg-[#3a2a1a] border border-[#8b6f4a] text-[#f4e4c1] text-sm px-3 py-2 w-full focus:outline-none focus:border-[#e89b5e]"
+                className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)]"
                 placeholder="0"
               />
               <FieldError message={fieldErrors.startPage} />
             </div>
 
             <div>
-              <label className="text-xs text-[#a08866] block mb-1" htmlFor="endPage">
+              <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="endPage">
                 끝 페이지
               </label>
               <input
@@ -392,14 +392,14 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
                 min="0"
                 value={fields.endPage}
                 onChange={(e) => handleFieldChange('endPage', e.target.value)}
-                className="bg-[#3a2a1a] border border-[#8b6f4a] text-[#f4e4c1] text-sm px-3 py-2 w-full focus:outline-none focus:border-[#e89b5e]"
+                className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)]"
                 placeholder="0"
               />
               <FieldError message={fieldErrors.endPage} />
             </div>
 
             <div>
-              <label className="text-xs text-[#a08866] block mb-1" htmlFor="durationMinutes">
+              <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="durationMinutes">
                 독서 시간(분)
               </label>
               <input
@@ -409,7 +409,7 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
                 min="0"
                 value={fields.durationMinutes}
                 onChange={(e) => handleFieldChange('durationMinutes', e.target.value)}
-                className="bg-[#3a2a1a] border border-[#8b6f4a] text-[#f4e4c1] text-sm px-3 py-2 w-full focus:outline-none focus:border-[#e89b5e]"
+                className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)]"
                 placeholder="0"
               />
               <FieldError message={fieldErrors.durationMinutes} />
@@ -417,7 +417,7 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
           </div>
 
           {fieldErrors._form && (
-            <p className="text-xs text-[#c85a54]" role="alert">
+            <p className="text-xs text-[var(--color-error)]" role="alert">
               {fieldErrors._form}
             </p>
           )}
@@ -438,16 +438,16 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
       {/* 세션 목록 */}
       {sessions.length > 0 && (
         <section>
-          <h2 className="text-sm text-[#d7c199] mb-3">독서 기록 ({sessions.length})</h2>
+          <h2 className="text-sm text-[var(--color-text-body)] mb-3">독서 기록 ({sessions.length})</h2>
           <ul className="flex flex-col gap-2">
             {sessions.map((session) => (
               <li
                 key={session.id}
-                className="flex items-center justify-between bg-[#3a2a1a] border border-[#1a100a] px-3 py-2"
+                className="flex items-center justify-between bg-[var(--color-bg-card)] border border-[var(--color-border)] px-3 py-2"
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm text-[#f4e4c1]">{session.readDate}</span>
-                  <span className="text-xs text-[#a08866]">
+                  <span className="text-sm text-[var(--color-text-primary)]">{session.readDate}</span>
+                  <span className="text-xs text-[var(--color-text-secondary)]">
                     {[
                       session.startPage != null && session.endPage != null
                         ? `${session.startPage}–${session.endPage}p`

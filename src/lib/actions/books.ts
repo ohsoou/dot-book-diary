@@ -51,6 +51,8 @@ export async function addBookAction(
       totalPages: input.totalPages,
     })
 
+    revalidatePath('/bookshelf')
+    revalidatePath('/')
     return { ok: true, data: book }
   } catch (err) {
     if (err instanceof AppError) {
