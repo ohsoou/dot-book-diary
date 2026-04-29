@@ -1,0 +1,8 @@
+{
+  "project": "dot-book-diary",
+  "phase": "6-share-meta-and-cursor",
+  "steps": [
+    { "step": 0, "name": "og-image-bear", "status": "pending" },
+    { "step": 1, "name": "room-pointer-cursor", "status": "pending" }
+  ]
+}
