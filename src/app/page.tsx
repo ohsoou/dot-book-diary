@@ -58,15 +58,19 @@ export default async function HomePage() {
   const theme = resolveTheme(themePreference, now)
 
   return (
-    <main className="fixed top-0 inset-x-0 bottom-[64px] bg-[var(--color-border)] flex flex-col">
+    <main className="fixed top-0 inset-x-0 bottom-[64px] bg-[var(--color-border)] grid grid-rows-[1fr_auto_1fr]">
       <BearStateProvider initial={initialBearState}>
         <BearStateHydrator isGuest={isGuest} />
-        {isGuest && <GuestBanner />}
-        <BearSpeechBubble />
-        <div className="flex-1 room-scene-wrapper flex items-center justify-center overflow-hidden">
+        <div className="flex flex-col items-stretch justify-center">
+          {isGuest && <GuestBanner />}
+          <BearSpeechBubble />
+        </div>
+        <div className="room-scene-wrapper flex items-center justify-center overflow-hidden">
           <RoomScene theme={theme} />
         </div>
-        <LastReadNote now={now} />
+        <div className="flex items-center justify-center">
+          <LastReadNote now={now} />
+        </div>
       </BearStateProvider>
     </main>
   )
