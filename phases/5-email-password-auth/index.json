@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "password-reset-flow",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T08:39:59+0900",
+      "summary": "ForgotPasswordForm(/forgot-password) + ResetPasswordForm(/reset-password) 구현 — 이메일 존재 여부 노출 방지(항상 성공 메시지), passwordSchema 클라이언트 검증, updateUser 성공 시 /login 이동 — 테스트 14개 통과",
+      "completed_at": "2026-04-30T08:43:00+0900"
     },
     {
       "step": 5,
