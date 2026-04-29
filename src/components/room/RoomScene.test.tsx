@@ -30,13 +30,13 @@ beforeEach(() => {
 })
 
 describe('RoomScene', () => {
-  it('renders 5 hitbox buttons with correct aria-labels', () => {
+  it('renders 4 hitbox buttons with correct aria-labels', () => {
     render(<RoomScene theme="day" />)
     expect(screen.getByRole('button', { name: '다이어리' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '책장' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '캘린더' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '책 등록' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '설정' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '설정' })).toBeNull()
   })
 
   it('navigates to correct href on each hitbox click', () => {
@@ -53,9 +53,6 @@ describe('RoomScene', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '책 등록' }))
     expect(mockPush).toHaveBeenCalledWith('/add-book')
-
-    fireEvent.click(screen.getByRole('button', { name: '설정' }))
-    expect(mockPush).toHaveBeenCalledWith('/settings')
   })
 
   it('accepts custom href props', () => {
@@ -175,12 +172,12 @@ describe('RoomScene', () => {
     const bobCount = Array.from(imgs).filter((img) =>
       img.className.includes('hitbox-bob')
     ).length
-    expect(bobCount).toBe(5)
+    expect(bobCount).toBe(4)
   })
 
   it('hitbox buttons have no dashed outline', () => {
     render(<RoomScene theme="day" />)
-    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록']) {
       const btn = screen.getByRole('button', { name: label })
       expect(btn.className).not.toContain('outline-dashed')
     }
@@ -202,12 +199,6 @@ describe('RoomScene', () => {
     expect(rugZ).toBeLessThan(bearZ)
   })
 
-  it('renders setting sprite image', () => {
-    render(<RoomScene theme="day" />)
-    const imgs = document.querySelectorAll('img.pixel')
-    const srcList = Array.from(imgs).map((img) => (img as HTMLImageElement).src)
-    expect(srcList.some((src) => src.includes('Setting.png'))).toBe(true)
-  })
 })
 
 describe('lamp toggle (night theme)', () => {
