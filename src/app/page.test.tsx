@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn().mockResolvedValue({
@@ -33,7 +33,9 @@ beforeEach(() => {
 async function renderPage() {
   const { default: HomePage } = await import('./page')
   const jsx = await HomePage()
-  return render(jsx as React.ReactElement)
+  await act(async () => {
+    render(jsx as React.ReactElement)
+  })
 }
 
 describe('HomePage', () => {
