@@ -32,7 +32,7 @@
       "status": "completed",
       "started_at": "2026-04-30T08:35:02+0900",
       "summary": "LoginForm 재작성 — signInWithOtp/OAuth 완전 제거, signInWithPassword 기반으로 교체, /forgot-password·/signup 링크 추가 — 테스트 11개 통과",
-      "completed_at": "2026-04-30T08:39:00+0900"
+      "completed_at": "2026-04-30T08:39:59+0900"
     },
     {
       "step": 4,
