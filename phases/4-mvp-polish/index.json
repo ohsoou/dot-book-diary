@@ -63,7 +63,7 @@
       "name": "bear-as-settings-entry",
       "status": "completed",
       "started_at": "2026-04-29T11:29:46+0900",
-      "completed_at": "2026-04-29T13:14:00+0900",
+      "completed_at": "2026-04-29T13:14:25+0900",
       "summary": "HITBOX_DEFS 끝에 곰 hitbox(설정, 곰 sprite 동일 좌표) 추가, 테스트 5개 기준으로 업데이트+bear hitbox 좌표 테스트 추가, docs 업데이트(UI_GUIDE sprite 매핑/애니메이션/위치 설명, PRD 설정 진입 경로, ADR-028 추가), 439개 테스트 전부 통과"
     }
   ],
