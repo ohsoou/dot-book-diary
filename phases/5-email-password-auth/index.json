@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "signup-page",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T08:23:19+0900",
+      "summary": "signUpSchema(validation/auth.ts), signUpAction(actions/auth.ts), SignupForm 컴포넌트, /signup 페이지 신규 구현 — 테스트 36개(validation 18 + action 8 + component 10) 모두 통과",
+      "completed_at": "2026-04-30T08:30:00+0900"
     },
     {
       "step": 2,
