@@ -105,4 +105,20 @@ describe('SettingsPage', () => {
       expect(screen.queryByRole('checkbox')).toBeNull()
     })
   })
+
+  describe('푸터', () => {
+    beforeEach(() => {
+      mockGetUser.mockResolvedValue({ data: { user: null } })
+    })
+
+    it('버전을 표시한다', async () => {
+      await renderPage()
+      expect(screen.getByText('v1.0.0')).toBeDefined()
+    })
+
+    it('카피라이트를 표시한다', async () => {
+      await renderPage()
+      expect(screen.getByText('© 2026 dot-book-diary')).toBeDefined()
+    })
+  })
 })
