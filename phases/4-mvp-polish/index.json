@@ -55,7 +55,7 @@
       "name": "remove-settings-sprite-hitbox",
       "status": "completed",
       "started_at": "2026-04-29T11:27:05+0900",
-      "completed_at": "2026-04-29T11:30:00+0900",
+      "completed_at": "2026-04-29T11:29:46+0900",
       "summary": "SPRITE_FILES/SPRITE_DEFS/HITBOX_DEFS에서 setting 항목 제거, globals.css delay-4 규칙 제거, Setting.png 파일 제거, 테스트 hitbox 수 5→4 업데이트, 438개 테스트 전부 통과"
     },
     {
