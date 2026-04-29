@@ -32,19 +32,18 @@ interface HitboxConfig {
   style: React.CSSProperties
 }
 
-// Per-sprite filename map — handles day/night filename mismatches (e.g. Bookstack vs BookStack)
-const SPRITE_FILES: Record<string, { day: string; night: string }> = {
-  background:   { day: 'Background.png',    night: 'Background.png' },
-  outsideView:  { day: 'Outside_view.png',  night: 'Outside_view.png' },
-  window:       { day: 'Window.png',        night: 'Window.png' },
-  hangingPlant: { day: 'Hanging_plant.png', night: 'Hanging_plant.png' },
-  wallShelf:    { day: 'Wall_shelf.png',    night: 'Wall_shelf.png' },
-  bedTable:     { day: 'Bed_Table.png',     night: 'Bed_Table.png' },
-  tableLamp:    { day: 'Table_Lamp.png',    night: 'Table_Lamp.png' },
-  bookstack:    { day: 'Bookstack.png',     night: 'BookStack.png' },
-  diary:        { day: 'Diary.png',         night: 'Diary.png' },
-  bear:         { day: 'Bear.png',          night: 'Bear.png' },
-  rug:          { day: 'Rug.png',           night: 'Rug.png' },
+const SPRITE_FILES: Record<string, string> = {
+  background:   'Background_special.png',
+  outsideView:  'Outside_view.png',
+  window:       'Window.png',
+  hangingPlant: 'Hanging_plant.png',
+  wallShelf:    'Wall_shelf.png',
+  bedTable:     'Bed_Table.png',
+  tableLamp:    'Table_Lamp.png',
+  bookstack:    'Bookstack.png',
+  diary:        'Diary.png',
+  bear:         'Bear.png',
+  rug:          'Rug.png',
 }
 
 // 640×400 캔버스(aspect-ratio 8/5) 기준 퍼센트 좌표.
@@ -292,7 +291,7 @@ export function RoomScene({
         const baseFilename =
           def.fileKey === 'bear' && bearAsset != null
             ? bearAsset
-            : SPRITE_FILES[def.fileKey]![theme]
+            : SPRITE_FILES[def.fileKey]!
         const filename = resolveFilename(def.fileKey, baseFilename)
         const src = `${SPRITE_BASE}/${filename}`
         return (
@@ -319,7 +318,7 @@ export function RoomScene({
           key={def.label}
           aria-label={def.label}
           onClick={() => router.push(hrefMap[def.hrefKey] as never)}
-          className="absolute bg-transparent focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#e89b5e]"
+          className="absolute bg-transparent focus-visible:outline focus-visible:outline-[#e89b5e]"
           style={{ zIndex: 50, ...def.style }}
         />
       ))}
