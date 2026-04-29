@@ -3,10 +3,33 @@
 따뜻한 도트 그림체의 "방"을 메타포로 한 개인 독서 기록 웹앱.  
 회원은 Supabase에 저장, 비회원은 브라우저 로컬(IndexedDB)에만 저장합니다.
 
+## 주요 기능
+
+- 도트 픽셀 아트 방 화면 — 곰 캐릭터가 독서 습관에 따라 다른 모습으로 등장
+- 책 검색 및 등록 (알라딘 Open API 연동)
+- 독서 세션 기록 (읽은 날짜, 페이지, 메모)
+- 인용 문장 / 독후감(diary) 작성 및 관리
+- 월간 캘린더로 독서 이력 조회
+- 책장 — 등록한 책 표지 그리드
+- 낮/밤 테마 전환 + 야간 램프 on/off 토글
+- 회원가입 없이 즉시 사용 (로컬 저장), 로그인 시 클라우드 동기화
+
+## 화면 구성
+
+| 라우트 | 역할 |
+|---|---|
+| `/` | 도트 방 메인 (곰 캐릭터 클릭 → 설정) |
+| `/bookshelf` | 책장 — 등록한 책 그리드 |
+| `/add-book` | 책 등록 (바코드 / 키워드 검색) |
+| `/reading/[bookId]` | 독서 세션 기록 |
+| `/diary` | 인용·독후감 목록 및 작성 |
+| `/book-calendar` | 월간 독서 캘린더 |
+| `/settings` | 닉네임, 테마, 로그인/로그아웃 |
+| `/login` | 이메일 매직링크 + Google OAuth |
+
 ## 요구사항
 
 - **Bun** ≥ 1.1 (런타임 + 패키지 매니저)
-- **Node.js** ≥ 20 (Bun이 내부적으로 사용)
 
 ## Galmuri11 폰트 수동 설치
 
@@ -42,7 +65,7 @@ bun dev
 | `bun build` | 프로덕션 빌드 |
 | `bun start` | 프로덕션 서버 실행 |
 | `bun lint` | ESLint 실행 |
-| `bun test` | Vitest 테스트 실행 |
+| `bun run test` | Vitest 테스트 실행 |
 | `bun db:migrate` | Supabase 스키마 배포 (`supabase db push --linked`) |
 | `bun db:types` | Supabase TypeScript 타입 생성 |
 
