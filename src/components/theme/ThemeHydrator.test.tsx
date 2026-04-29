@@ -78,4 +78,41 @@ describe('ThemeHydrator', () => {
     })
     expect(container.firstChild).toBeNull()
   })
+
+  describe('themePreference prop (logged-in user)', () => {
+    it('applies night without reading IndexedDB', async () => {
+      await act(async () => {
+        render(<ThemeHydrator themePreference="night" />)
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+      expect(document.documentElement.dataset.theme).toBe('night')
+      expect(mockGetPreferences).not.toHaveBeenCalled()
+    })
+
+    it('applies day without reading IndexedDB', async () => {
+      document.documentElement.dataset.theme = 'night'
+      await act(async () => {
+        render(<ThemeHydrator themePreference="day" />)
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+      expect(document.documentElement.dataset.theme).toBe('day')
+      expect(mockGetPreferences).not.toHaveBeenCalled()
+    })
+
+    it('resolves system by time without reading IndexedDB', async () => {
+      const now = new Date()
+      now.setHours(10, 0, 0, 0)
+      vi.setSystemTime(now)
+
+      await act(async () => {
+        render(<ThemeHydrator themePreference="system" />)
+        await Promise.resolve()
+        await Promise.resolve()
+      })
+      expect(document.documentElement.dataset.theme).toBe('day')
+      expect(mockGetPreferences).not.toHaveBeenCalled()
+    })
+  })
 })

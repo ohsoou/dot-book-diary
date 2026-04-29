@@ -24,14 +24,14 @@ export default async function ReadingPage({ params }: Props) {
     if (!book) notFound()
     const sessions = await store.listReadingSessions({ bookId })
     return (
-      <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+      <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
         <ReadingPageContent book={book} sessions={sessions} isLoggedIn={true} />
       </main>
     )
   }
 
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <ReadingPageHydrator bookId={bookId} />
     </main>
   )
