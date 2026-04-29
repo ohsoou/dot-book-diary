@@ -287,19 +287,28 @@ Client ReadingSessionForm
         └─ return { ok: true }
 ```
 
-### 6.4 로그인 (매직링크)
+### 6.4 로그인 (이메일+비밀번호)
 ```
-Client /login
-  └─> supabase.auth.signInWithOtp({ email, emailRedirectTo: `${origin}/auth/callback` })
-        (메일 발송)
-사용자가 링크 클릭
+**회원가입**:
+Client /signup
+  └─> signUpAction({ email, password, nickname })
+        (supabase.auth.signUp + user_metadata.nickname 저장)
+        (확인 메일 발송, emailRedirectTo: origin/auth/callback)
+
+사용자가 확인 메일 링크 클릭
   └─> GET /auth/callback?code=...
         ├─ supabase.auth.exchangeCodeForSession(code)
-        ├─ profiles upsert (fallback: handle_new_user 트리거가 이미 생성)
+        ├─ profiles upsert (user_metadata.nickname 포함, 없으면 '책곰이' 폴백)
         └─ redirect('/')
+
+**로그인**:
+Client /login
+  └─> supabase.auth.signInWithPassword({ email, password })
+        ├─ 성공 → 세션 쿠키 설정 → redirect('/')
+        └─ 실패 → 에러 메시지 표시 (INVALID_CREDENTIALS 또는 EMAIL_NOT_CONFIRMED)
+
 실패 시:
-  - 매직링크/OTP 교환 실패 → redirect('/login?error=link_expired')
-  - OAuth provider callback 실패 → redirect('/login?error=oauth_failed')
+  - code 없음/만료 → redirect('/login?error=link_expired')
   - profiles upsert fallback 실패 → redirect('/login?error=profile_setup_failed')
 ```
 
@@ -606,13 +615,16 @@ export const config = {
 - 인증이 필요한 쓰기 동작(Server Action, Auth callback 후 profile 보정 등)만 `UNAUTHORIZED` 또는 `/login?reason=expired`로 처리한다.
 
 ## 15. 인증·콜백 라우트
-- `/login/page.tsx`: 매직링크 입력 + Google OAuth 버튼. 하단에 `?error=...` 해석 영역.
-- `/auth/callback/route.ts`: `code` 교환 → 세션 쿠키 설정 → `redirect('/')`.
+- `/login/page.tsx`: 이메일+비밀번호 입력 폼, 비밀번호 분실 링크(`/forgot-password`), 회원가입 링크(`/signup`). 하단에 `?error=...` 해석 영역.
+- `/signup/page.tsx`: 이메일+비밀번호+닉네임 입력 폼. 제출 후 확인 메일 안내 화면으로 전환.
+- `/auth/callback/route.ts`: `code` 교환 → profiles upsert(닉네임 포함) → `redirect('/')`.
+- `/forgot-password/page.tsx`: 이메일 입력 → `resetPasswordForEmail()` 호출 → 안내 화면.
+- `/reset-password/page.tsx`: 새 비밀번호 입력 → `updateUser({ password })` 호출 → `/login`으로 redirect.
 - 에러 매핑:
-  - `code` 없음 또는 OTP/매직링크 교환 실패 → `/login?error=link_expired`
-  - OAuth provider callback 자체 실패 또는 provider 에러 파라미터 수신 → `/login?error=oauth_failed`
+  - `code` 없음 또는 교환 실패 → `/login?error=link_expired`
   - 세션 수립 후 `profiles` upsert fallback 실패 → `/login?error=profile_setup_failed`
-- 매직링크 `emailRedirectTo`는 `new URL('/auth/callback', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
+- `emailRedirectTo`는 `new URL('/auth/callback', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
+- `resetPasswordForEmail`의 `redirectTo`는 `new URL('/reset-password', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
 
 ## 15.1 Unsaved Changes Hook
 - `src/lib/hooks/useUnsavedChanges.ts`의 계약은 `useUnsavedChanges(isDirty: boolean): void`로 고정한다.

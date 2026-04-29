@@ -1,0 +1,39 @@
+{
+  "project": "dot-book-diary",
+  "phase": "5-email-password-auth",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-and-error-codes",
+      "status": "completed",
+      "started_at": "2026-04-30T08:18:43+0900",
+      "summary": "ADR-029 추가, PRD/ARCHITECTURE/UI_GUIDE/README 문서 업데이트, errors.ts에 EMAIL_TAKEN/INVALID_CREDENTIALS/WEAK_PASSWORD/EMAIL_NOT_CONFIRMED 에러 코드 추가 및 테스트 작성"
+    },
+    {
+      "step": 1,
+      "name": "signup-page",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "callback-rewrite-and-profile",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "login-form-password",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "password-reset-flow",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "cleanup-and-final-verify",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-04-30T08:18:43+0900"
+}

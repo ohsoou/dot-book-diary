@@ -564,6 +564,24 @@ step 6에서 제거됨. 설정 진입점은 step 7에서 곰 캐릭터 hitbox로
 
 ---
 
+### 인증 폼
+
+공통 규칙:
+- 모든 입력 필드: `bg-[#3a2a1a] border border-[#1a100a] px-3 py-2 text-sm text-[#d7c199] placeholder:text-[#6b5540] outline-none focus:border-[#a08866]`
+- 에러 텍스트: `text-sm text-[#c85a54] text-center`
+- 성공/안내 텍스트: `text-sm text-center text-[#a08866]`
+- pending 버튼: `disabled` + pendingLabel prop
+
+**/login 폼 필드**: 이메일, 비밀번호(password input), [로그인] 버튼, "비밀번호를 잊으셨나요?" 링크(/forgot-password), "아직 계정이 없으신가요? [회원가입]" 링크(/signup)
+
+**/signup 폼 필드**: 이메일, 비밀번호(min 8), 닉네임(max 30), [가입하기] 버튼, 성공 시 "확인 메일을 보냈어요. 메일함을 확인해 주세요." 안내, "이미 계정이 있으신가요? [로그인]" 링크
+
+**/forgot-password 폼 필드**: 이메일, [재설정 메일 받기] 버튼, 제출 후 "메일을 확인해 주세요" 안내(이메일 존재 여부 노출 금지)
+
+**/reset-password 폼 필드**: 새 비밀번호(min 8), [비밀번호 변경] 버튼, 성공 시 /login으로 redirect
+
+---
+
 ## 카피 톤 & 보이스
 
 독자에게 따뜻하게 말을 건다. 기능 설명보다 정서적 공감을 우선.

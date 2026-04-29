@@ -520,3 +520,20 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
   - `bear-idle` 애니메이션이 클릭 어포던스 역할을 겸함 (`hitbox-bob` 미적용).
   - Setting.png day/night 자산 삭제. SPRITE_DEFS에서 `setting` 항목 제거.
   - ADR-025(hitbox 어포던스)의 sprite 매핑 표가 갱신됨.
+
+## ADR-029: 이메일+비밀번호 인증 채택, 매직링크/OTP/OAuth 제거
+
+**결정**: 로그인 방식을 이메일+비밀번호 단일 경로로 변경한다. 매직링크(OTP)와 Google OAuth는 제거한다.
+
+**이유**: 매직링크는 로그인할 때마다 이메일 메일함을 열어 링크를 클릭해야 해서 사용자 마찰이 과도하다. 단순 개인 독서 기록 앱에 불필요한 절차다. 비밀번호 기반은 한 번 가입 후 확인 메일 1회 클릭으로 계정을 활성화하고, 이후로는 비밀번호만 사용한다.
+
+**결과·제약**:
+- `/signup` 페이지 신규 추가 (이메일 + 비밀번호 + 닉네임)
+- `/forgot-password` + `/reset-password` 페이지 신규 추가
+- `src/lib/actions/auth.ts` 신규 (signUpAction)
+- `src/lib/validation/auth.ts` 신규 (emailSchema, passwordSchema, nicknameSchema)
+- `src/components/auth/LoginForm.tsx` 재작성 (signInWithPassword 사용)
+- `src/components/auth/SignupForm.tsx` 신규
+- `src/app/auth/callback/route.ts` 단순화 (OAuth 분기 제거, 닉네임 저장 추가)
+- Supabase 대시보드 설정 필요: "Confirm email" ON, Magic Link/Google provider OFF
+- `NEXT_PUBLIC_APP_URL` 환경변수 기반 콜백 URL (기존과 동일)
