@@ -63,9 +63,9 @@
 - 다이어리(곰 왼쪽) → `/diary`
 - 책더미(곰 오른쪽) → `/bookshelf`
 - 창문 → `/book-calendar`
-- 곰 → `/add-book` (메뉴 팝오버 대신 직접 이동으로 확정)
-- 우상단 톱니 → `/settings`
-- Tab 키 순서: 다이어리 → 책장 → 캘린더 → 책 등록 → 설정
+- 책더미 위 책장(우측 벽) → `/add-book`
+- 곰 캐릭터 클릭 → `/settings` 설정 페이지 이동 (4-mvp-polish step 7~)
+- Tab 키 순서: 다이어리 → 책장 → 캘린더 → 책 등록 → 곰(설정)
 
 ### 4.3 빠른 등록 흐름(핵심 재방문 고리)
 `/` → 곰 클릭 → `/add-book` → 검색/바코드 → 추가 → `/bookshelf` → 표지 클릭 → `/reading/[id]` → 세션 기록 → "문장 기록" 버튼 → `/diary/new?bookId=…&type=quote`. 이 한 사이클이 2분 안에 돌아야 한다.

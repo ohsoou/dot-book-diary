@@ -506,3 +506,17 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
   - 비회원은 `/settings` 테마 섹션에서 로그인 유도 UI만 본다.
   - `updatePreferences()` 함수는 유지 — 닉네임 등 다른 preference 저장에 사용되며, 차후 SSR↔IndexedDB 동기화 phase에서 테마도 포함 가능.
   - ADR-022의 "비회원 초기 SSR: null이면 렌더 생략" 원칙과 일관성 유지.
+
+## ADR-028: 설정 진입점을 톱니바퀴 sprite에서 곰 캐릭터로 변경 (4-mvp-polish)
+- **상태**: Accepted
+- **날짜**: 2026-04-29
+- **컨텍스트**: 4-mvp-polish step 1에서 추가한 톱니바퀴 이미지(Setting.png)가 방 화면 우상단에 위치하며 설정 진입 역할을 했으나, 시각적으로 곰 캐릭터와 분리되어 화면 위계가 산만해졌다. 곰이 메인 화면의 중심 캐릭터인 만큼, 설정 진입점을 곰에 통합해 인터랙션을 단순화한다.
+- **결정**: Setting.png sprite와 해당 hitbox를 제거하고, 곰 sprite(bear)와 동일 좌표에 `aria-label="설정"` hitbox를 추가한다. 기존 `settingsHref` prop과 `/settings` 라우팅은 그대로 유지한다.
+- **대안**:
+  - 톱니바퀴 유지 + 곰에도 hitbox 추가: 진입점 중복으로 오히려 혼란.
+  - BottomNav "설정" 탭만 사용: 탭이 이미 존재하지만 곰 인터랙션 결여로 캐릭터 존재감 약화.
+- **결과/제약**:
+  - Tab 순서 마지막이 곰(설정) — 키보드 사용자에게 자연스러운 흐름.
+  - `bear-idle` 애니메이션이 클릭 어포던스 역할을 겸함 (`hitbox-bob` 미적용).
+  - Setting.png day/night 자산 삭제. SPRITE_DEFS에서 `setting` 항목 제거.
+  - ADR-025(hitbox 어포던스)의 sprite 매핑 표가 갱신됨.

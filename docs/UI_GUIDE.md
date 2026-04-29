@@ -376,10 +376,12 @@ MVP2에서 letterbox 상단에 평문 라벨로 있었으나, MVP4에서 `BearSp
 
 ### BearSpeechBubble (MVP4, `/` 상단 전체너비 박스)
 
-위치: `page.tsx` `<main>` flex-col 내 RoomScene **위** 별도 full-width 블록. absolute 오버레이 아님.
+위치: `page.tsx` `<main>` CSS grid(grid-rows: 1fr auto 1fr)의 **row 1**. `div.flex.flex-col.items-stretch.justify-center`로 감싸
+수직 중앙 정렬. GuestBanner가 있을 경우 위에 쌓임.
 
 ```
-외부 래퍼: w-full px-4 py-4
+외부 래퍼: div.flex.flex-col.items-stretch.justify-center (row 1 wrapper)
+BearSpeechBubble 자체: w-full px-4 py-2
 내부 카드: bg-[#3a2a1a] border-2 border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-4 py-3 w-full
   헤더: text-sm font-bold text-[#f4e4c1] (닉네임)
   본문: text-sm text-[#d7c199] (곰 상태 라벨)
@@ -396,7 +398,8 @@ bearLabel null → unmount(빈 공간 없음).
 
 ### LastReadNote (MVP2, `/` 하단)
 
-위치: `page.tsx` `<main>` flex-col 내 RoomScene 아래 마지막 요소. BottomNav(fixed, 64px) 위에 표시되도록 `<main>`은 `bottom-[64px]`로 설정(4-mvp-polish~).
+위치: `page.tsx` `<main>` CSS grid의 **row 3**. `div.flex.items-center.justify-center`로 감싸 수직 중앙 정렬.
+BottomNav(fixed, 64px) 위에 표시되도록 `<main>`은 `bottom-[64px]`로 설정(4-mvp-polish step 0~).
 
 ```
 컨테이너: py-1 text-center text-xs text-[var(--color-text-secondary)]
@@ -443,7 +446,7 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 | 책장     | `wallShelf` | `top:17.25%, right:3.125%, w:21.5625%, h:17.25%` |
 | 캘린더   | `window`    | `top:17.5%, left:32.8125%, w:35.1563%, h:33.75%` |
 | 책 등록  | `bookstack` | `bottom:6.25%, right:14.0625%, w:17.5%, h:19%` |
-| 설정     | `setting`   | `top:2%, right:1.25%, w:6.25%, h:10%` |
+| 곰(설정) | `bear`      | `bottom:1.25%, left:42.0313%, w:32.8125%, h:42.25%` |
 
 ### 애니메이션 규격
 
@@ -457,11 +460,11 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 .hitbox-bob.delay-1 { animation-delay: 0.3s; }
 .hitbox-bob.delay-2 { animation-delay: 0.6s; }
 .hitbox-bob.delay-3 { animation-delay: 0.9s; }
-.hitbox-bob.delay-4 { animation-delay: 1.2s; }
 ```
 
 - `steps(2)` — 픽셀 아트 톤 유지 (`bear-idle`과 동일 패턴)
-- delay로 5개 sprite의 phase를 분산 → 동시 움직임 방지
+- delay로 4개 sprite의 phase를 분산 → 동시 움직임 방지
+- 곰(설정) hitbox: `bear` sprite에 이미 `bear-idle` 애니메이션이 적용되어 있어 `hitbox-bob`을 추가 적용하지 않는다. 클릭 어포던스는 `bear-idle` 모션이 담당.
 - `prefers-reduced-motion: reduce` 시 미적용 (기존 reducedMotion 분기 동일하게 처리)
 - hitbox `<button>`에는 `focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#e89b5e]`만 남겨 키보드 a11y 보장. 일반 hover 시 시각 변화 없음(sprite 모션이 어포던스 담당).
 
@@ -470,16 +473,10 @@ aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
 - `rounded-*` 금지
 - 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
 
-### Settings Sprite (4-mvp-polish)
+### Settings Sprite (4-mvp-polish → 제거됨, 4-mvp-polish step 6)
 
-설정 hitbox(`top:2%, right:1.25%, width:6.25%, height:10%`)와 **동일 좌표**에 sprite 추가.
-
-```
-SPRITE_DEFS: { fileKey: 'setting', label: '설정', z: 35 }
-파일: public/sprites/day/Setting.png, public/sprites/night/Setting.png (day/night 동일)
-z-index 35 — hitbox(z:50)보다 낮아 클릭이 hitbox 버튼에 전달됨
-animClass: 'hitbox-bob', extraClass: 'delay-4'
-```
+4-mvp-polish step 1에서 `Setting.png` sprite를 추가하고 우상단(`top:2%, right:1.25%`)에 배치했으나,
+step 6에서 제거됨. 설정 진입점은 step 7에서 곰 캐릭터 hitbox로 대체.
 
 ---
 

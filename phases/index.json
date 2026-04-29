@@ -26,7 +26,8 @@
     },
     {
       "dir": "4-mvp-polish",
-      "status": "in_progress"
+      "status": "completed",
+      "completed_at": "2026-04-29T13:14:00+0900"
     }
   ]
 }

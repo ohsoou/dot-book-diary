@@ -30,13 +30,13 @@ beforeEach(() => {
 })
 
 describe('RoomScene', () => {
-  it('renders 4 hitbox buttons with correct aria-labels', () => {
+  it('renders 5 hitbox buttons with correct aria-labels', () => {
     render(<RoomScene theme="day" />)
     expect(screen.getByRole('button', { name: '다이어리' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '책장' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '캘린더' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '책 등록' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '설정' })).toBeNull()
+    expect(screen.getByRole('button', { name: '설정' })).toBeInTheDocument()
   })
 
   it('navigates to correct href on each hitbox click', () => {
@@ -53,6 +53,9 @@ describe('RoomScene', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '책 등록' }))
     expect(mockPush).toHaveBeenCalledWith('/add-book')
+
+    fireEvent.click(screen.getByRole('button', { name: '설정' }))
+    expect(mockPush).toHaveBeenCalledWith('/settings')
   })
 
   it('accepts custom href props', () => {
@@ -177,10 +180,17 @@ describe('RoomScene', () => {
 
   it('hitbox buttons have no dashed outline', () => {
     render(<RoomScene theme="day" />)
-    for (const label of ['다이어리', '책장', '캘린더', '책 등록']) {
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
       const btn = screen.getByRole('button', { name: label })
       expect(btn.className).not.toContain('outline-dashed')
     }
+  })
+
+  it('bear hitbox has same coordinates as bear sprite', () => {
+    render(<RoomScene theme="day" />)
+    const btn = screen.getByRole('button', { name: '설정' })
+    expect(btn.style.bottom).toBe('1.25%')
+    expect(btn.style.left).toBe('42.0313%')
   })
 
   it('renders rug sprite with correct properties and z-index below bear', () => {

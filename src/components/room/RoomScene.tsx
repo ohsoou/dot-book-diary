@@ -150,6 +150,11 @@ const HITBOX_DEFS: HitboxConfig[] = [
     hrefKey: 'addBookHref',
     style: { bottom: '6.25%', right: '14.0625%', width: '17.5%', height: '19%' },
   },
+  {
+    label: '설정',
+    hrefKey: 'settingsHref',
+    style: { bottom: '1.25%', left: '42.0313%', width: '32.8125%', height: '42.25%' },
+  },
 ]
 
 const SCENE_STYLE: React.CSSProperties = {}
