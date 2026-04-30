@@ -521,6 +521,18 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
   - Setting.png day/night 자산 삭제. SPRITE_DEFS에서 `setting` 항목 제거.
   - ADR-025(hitbox 어포던스)의 sprite 매핑 표가 갱신됨.
 
+## ADR-030: SNS 공유 썸네일로 Bear.png 채택
+
+**결정**: og:image로 `public/sprites/day/Bear.png`를 사용한다.
+
+**이유**: 앱 아이덴티티를 대표하는 이미지가 곰 캐릭터이며, 이미 day 스프라이트로 고해상도 PNG가 존재한다. 별도 1200×630 합성본 제작은 현재 스코프 밖이다.
+
+**결과·제약**:
+- `src/app/layout.tsx`의 `metadata.openGraph.images`에 절대 URL로 설정.
+- `metadataBase`는 `NEXT_PUBLIC_APP_URL` 기반으로 설정.
+- 이미지 비율이 1:1에 가까워 SNS 플랫폼별 크롭이 발생할 수 있음 — 허용 범위.
+- 카카오톡은 OG 캐시를 가지므로 URL 변경 시 https://developers.kakao.com/tool/clear/og 에서 수동 갱신 필요.
+
 ## ADR-029: 이메일+비밀번호 인증 채택, 매직링크/OTP/OAuth 제거
 
 **결정**: 로그인 방식을 이메일+비밀번호 단일 경로로 변경한다. 매직링크(OTP)와 Google OAuth는 제거한다.

@@ -2,7 +2,18 @@
   "project": "dot-book-diary",
   "phase": "6-share-meta-and-cursor",
   "steps": [
-    { "step": 0, "name": "og-image-bear", "status": "pending" },
-    { "step": 1, "name": "room-pointer-cursor", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "og-image-bear",
+      "status": "completed",
+      "started_at": "2026-04-30T13:28:26+0900",
+      "summary": "layout.tsx에 metadataBase + openGraph(Bear.png) + twitter:card 추가, ADR-030 등록, layout.metadata.test.ts 신규 — 빌드 및 전체 테스트(506) 통과"
+    },
+    {
+      "step": 1,
+      "name": "room-pointer-cursor",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-04-30T13:28:26+0900"
 }
