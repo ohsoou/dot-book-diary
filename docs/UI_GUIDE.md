@@ -597,3 +597,14 @@ step 6에서 제거됨. 설정 진입점은 step 7에서 곰 캐릭터 hitbox로
 - 물음표는 적절히 사용한다. 경고/오류 메시지에는 쓰지 않는다.
 - 버튼 라벨: 동사형 짧게. "추가", "저장", "삭제", "닫기".
 - 에러 메시지: 원인 + 다음 행동 제안. "네트워크 오류가 생겼어요. 잠시 후 다시 시도해 주세요."
+
+---
+
+### 커스텀 커서
+
+클릭 가능한 sprite 영역(hitbox button)에 `cursor-pixel` 클래스를 적용한다.
+
+- 에셋: `public/Pointer.png`
+- CSS: `cursor: url('/Pointer.png') 0 0, pointer`
+- 적용 대상: RoomScene의 모든 hitbox button, 램프 button
+- 비인터랙티브 영역(배경 이미지, 장식 sprite)에는 적용하지 않는다

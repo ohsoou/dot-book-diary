@@ -316,7 +316,7 @@ export function RoomScene({
           key={def.label}
           aria-label={def.label}
           onClick={() => router.push(hrefMap[def.hrefKey] as never)}
-          className="absolute bg-transparent focus-visible:outline focus-visible:outline-[#e89b5e]"
+          className="absolute bg-transparent focus-visible:outline focus-visible:outline-[#e89b5e] cursor-pixel"
           style={{ zIndex: 50, ...def.style }}
         />
       ))}
@@ -331,7 +331,7 @@ export function RoomScene({
             setLampState(next)
             writeLampState(next)
           }}
-          className="absolute bg-transparent cursor-pointer"
+          className="absolute bg-transparent cursor-pixel"
           style={{ zIndex: 50, bottom: '19%', right: '-0.1563%', width: '19.8438%', height: '31%' }}
         />
       )}

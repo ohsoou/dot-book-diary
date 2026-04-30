@@ -192,6 +192,14 @@ describe('RoomScene', () => {
     expect(btn.style.left).toBe('42.0313%')
   })
 
+  it('all hitbox buttons have cursor-pixel class', () => {
+    render(<RoomScene theme="day" />)
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
+      const btn = screen.getByRole('button', { name: label })
+      expect(btn.className).toContain('cursor-pixel')
+    }
+  })
+
   it('renders rug sprite with correct properties and z-index below bear', () => {
     const { container } = render(<RoomScene theme="day" />)
 
@@ -239,6 +247,12 @@ describe('lamp toggle (night theme)', () => {
   it('day theme: does not render 램프 전원 button', () => {
     render(<RoomScene theme="day" />)
     expect(screen.queryByRole('button', { name: '램프 전원' })).toBeNull()
+  })
+
+  it('lamp button has cursor-pixel class (night theme)', () => {
+    render(<RoomScene theme="night" />)
+    const lampBtn = screen.getByRole('button', { name: '램프 전원' })
+    expect(lampBtn.className).toContain('cursor-pixel')
   })
 
   it('restores lamp off state from localStorage on mount', async () => {
