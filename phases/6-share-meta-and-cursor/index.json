@@ -7,7 +7,8 @@
       "name": "og-image-bear",
       "status": "completed",
       "started_at": "2026-04-30T13:28:26+0900",
-      "summary": "layout.tsx에 metadataBase + openGraph(Bear.png) + twitter:card 추가, ADR-030 등록, layout.metadata.test.ts 신규 — 빌드 및 전체 테스트(506) 통과"
+      "summary": "layout.tsx에 metadataBase + openGraph(Bear.png) + twitter:card 추가, ADR-030 등록, layout.metadata.test.ts 신규 — 빌드 및 전체 테스트(506) 통과",
+      "completed_at": "2026-04-30T13:32:55+0900"
     },
     {
       "step": 1,
