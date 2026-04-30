@@ -1,0 +1,18 @@
+{
+  "project": "dot-book-diary",
+  "phase": "7-auth-error-code-dispatch",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-and-error-mapper",
+      "status": "completed",
+      "summary": "ADR-030 추가, ARCHITECTURE §11.1 AppErrorCode 유니온·§11.2 HTTP 표 동기화·§11.5 Supabase Auth 에러 매핑 섹션 신규, src/lib/auth/error-codes.ts 매퍼 + 테스트 12개 신규"
+    },
+    {
+      "step": 1,
+      "name": "apply-mapper-to-actions",
+      "status": "completed",
+      "summary": "signUpAction 메시지 분기 → mapSupabaseAuthError() 호출로 교체, LoginForm 메시지 분기 교체, auth.test.ts 3개·LoginForm.test.tsx 2개 code 기반 케이스 추가"
+    }
+  ]
+}

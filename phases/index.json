@@ -38,6 +38,10 @@
       "dir": "6-share-meta-and-cursor",
       "status": "completed",
       "completed_at": "2026-04-30T13:35:08+0900"
+    },
+    {
+      "dir": "7-auth-error-code-dispatch",
+      "status": "completed"
     }
   ]
 }

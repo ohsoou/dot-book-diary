@@ -118,6 +118,38 @@ describe('LoginForm', () => {
     expect(link).toHaveAttribute('href', '/signup')
   })
 
+  it('code: invalid_credentials → 자격증명 에러 메시지 (code 우선 매칭)', async () => {
+    mockSignInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: { code: 'invalid_credentials', message: 'some message' },
+    })
+
+    render(<LoginForm />)
+    fireEvent.change(screen.getByLabelText('이메일'), { target: { value: 'user@example.com' } })
+    fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'WrongPass1' } })
+    fireEvent.click(screen.getByRole('button', { name: /로그인/ }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/이메일 또는 비밀번호/)).toBeInTheDocument()
+    })
+  })
+
+  it('code: email_not_confirmed → 이메일 확인 안내 (code 우선 매칭)', async () => {
+    mockSignInWithPassword.mockResolvedValue({
+      data: { user: null },
+      error: { code: 'email_not_confirmed', message: 'some message' },
+    })
+
+    render(<LoginForm />)
+    fireEvent.change(screen.getByLabelText('이메일'), { target: { value: 'user@example.com' } })
+    fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'Password1' } })
+    fireEvent.click(screen.getByRole('button', { name: /로그인/ }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/이메일을 확인해 주세요/)).toBeInTheDocument()
+    })
+  })
+
   it('error=link_expired prop 전달 시 링크 만료 에러 메시지를 표시한다', () => {
     render(<LoginForm error="link_expired" />)
     expect(screen.getByText(/링크가 만료됐어요/)).toBeInTheDocument()

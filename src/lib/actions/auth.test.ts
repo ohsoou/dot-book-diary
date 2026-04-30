@@ -138,4 +138,55 @@ describe('signUpAction', () => {
       expect(result.error.code).toBe('UPSTREAM_FAILED')
     }
   })
+
+  it('code: user_already_exists → EMAIL_TAKEN (code 우선 매칭)', async () => {
+    mockSignUp.mockResolvedValue({
+      data: null,
+      error: { code: 'user_already_exists', message: 'User already registered' },
+    })
+
+    const result = await signUpAction({
+      email: 'existing@example.com',
+      password: 'Password1',
+      nickname: '책곰이',
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('EMAIL_TAKEN')
+    }
+  })
+
+  it('code: weak_password → WEAK_PASSWORD (code 우선 매칭)', async () => {
+    mockSignUp.mockResolvedValue({
+      data: null,
+      error: { code: 'weak_password', message: 'Password should be at least 8 characters' },
+    })
+
+    const result = await signUpAction({
+      email: 'user@example.com',
+      password: 'Password1',
+      nickname: '책곰이',
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('WEAK_PASSWORD')
+    }
+  })
+
+  it('알 수 없는 code → UPSTREAM_FAILED', async () => {
+    mockSignUp.mockResolvedValue({
+      data: null,
+      error: { code: 'unexpected_error', message: 'something went wrong' },
+    })
+
+    const result = await signUpAction({
+      email: 'user@example.com',
+      password: 'Password1',
+      nickname: '책곰이',
+    })
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('UPSTREAM_FAILED')
+    }
+  })
 })
