@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source not "../../phases";
+@source not "../../docs";
 
 @font-face {
   font-family: "Galmuri11";

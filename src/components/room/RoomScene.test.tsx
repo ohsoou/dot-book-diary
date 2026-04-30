@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RoomScene } from './RoomScene'
-import { BearStateProvider } from './BearStateContext'
 
 const mockPush = vi.fn()
 
@@ -143,12 +142,12 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).toBeNull()
   })
 
-  it('uses correct per-theme filename for bookstack sprite (case mismatch)', () => {
+  it('uses correct filename for bookstack sprite', () => {
     const { container: dayContainer } = render(<RoomScene theme="day" />)
     expect(dayContainer.querySelector('img[src="/sprites/day/Bookstack.png"]')).not.toBeNull()
 
     const { container: nightContainer } = render(<RoomScene theme="night" />)
-    expect(nightContainer.querySelector('img[src="/sprites/night/BookStack.png"]')).not.toBeNull()
+    expect(nightContainer.querySelector('img[src="/sprites/night/Bookstack.png"]')).not.toBeNull()
   })
 
   it('renders Bear_sleeping.png when bearAsset="Bear_sleeping.png" with day theme', () => {

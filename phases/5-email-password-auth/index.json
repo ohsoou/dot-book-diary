@@ -45,7 +45,10 @@
     {
       "step": 5,
       "name": "cleanup-and-final-verify",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T08:44:01+0900",
+      "summary": "OTP/OAuth 잔재 0건 확인, RoomScene 스프라이트 파일명 정규화(Background.png, Bookstack.png), phases/ 디렉토리 Tailwind 스캔 제외(@source not), 미사용 import/변수 제거 — bun build·lint·test 모두 통과",
+      "completed_at": "2026-04-30T09:00:00+0900"
     }
   ],
   "created_at": "2026-04-30T08:18:43+0900"

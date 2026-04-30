@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { ToggleTabs } from '@/components/ui/ToggleTabs'
 import { updateThemePreferenceAction } from '@/lib/actions/profile'
-import { updatePreferences } from '@/lib/storage/preferences'
 import { resolveTheme } from '@/lib/theme'
 import type { ThemePreference } from '@/lib/theme'
 

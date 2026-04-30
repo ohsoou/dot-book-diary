@@ -33,7 +33,7 @@ interface HitboxConfig {
 }
 
 const SPRITE_FILES: Record<string, string> = {
-  background:   'Background_special.png',
+  background:   'Background.png',
   outsideView:  'Outside_view.png',
   window:       'Window.png',
   hangingPlant: 'Hanging_plant.png',
@@ -155,8 +155,6 @@ const HITBOX_DEFS: HitboxConfig[] = [
     style: { bottom: '1.25%', left: '42.0313%', width: '32.8125%', height: '42.25%' },
   },
 ]
-
-const SCENE_STYLE: React.CSSProperties = {}
 
 interface SpriteImageProps {
   src: string
