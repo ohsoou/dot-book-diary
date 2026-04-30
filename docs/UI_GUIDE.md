@@ -604,7 +604,7 @@ step 6에서 제거됨. 설정 진입점은 step 7에서 곰 캐릭터 hitbox로
 
 클릭 가능한 sprite 영역(hitbox button)에 `cursor-pixel` 클래스를 적용한다.
 
-- 에셋: `public/Pointer.png`
-- CSS: `cursor: url('/Pointer.png') 0 0, pointer`
+- 에셋: `public/Pointer.svg`
+- CSS: `cursor: url('/Pointer.svg') 0 0, pointer`
 - 적용 대상: RoomScene의 모든 hitbox button, 램프 button
 - 비인터랙티브 영역(배경 이미지, 장식 sprite)에는 적용하지 않는다

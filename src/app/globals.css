@@ -129,7 +129,7 @@ img.pixel {
 .hitbox-bob.delay-3 { animation-delay: 0.9s; }
 
 .cursor-pixel {
-  cursor: url('/Pointer.png') 0 0, pointer;
+  cursor: url('/Pointer.svg') 0 0, pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

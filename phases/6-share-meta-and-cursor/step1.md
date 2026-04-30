@@ -14,10 +14,10 @@
 `RoomScene` 내 클릭 가능한 영역(hitbox)은 투명 `<button>` 요소로 구현된다.
 현재 이 버튼들은 기본 커서를 사용한다 (`cursor: auto`).
 
-사용자가 클릭 가능한 영역에 호버했을 때 픽셀 아트 스타일의 커스텀 포인터(`public/Pointer.png`)가 표시되도록 한다.
+사용자가 클릭 가능한 영역에 호버했을 때 픽셀 아트 스타일의 커스텀 포인터(`public/Pointer.svg`)가 표시되도록 한다.
 
-**에셋 위치**: `public/Pointer.png` (이미 존재 확인됨)
-**공개 URL**: `/Pointer.png`
+**에셋 위치**: `public/Pointer.svg` (이미 존재 확인됨)
+**공개 URL**: `/Pointer.svg`
 
 **적용 대상**:
 1. `HITBOX_DEFS`의 모든 hitbox `<button>` (다이어리, 책장, 캘린더, 책 등록, 설정 — 5개)
@@ -36,11 +36,11 @@ Tailwind 임의값 문법(`cursor-[url(...)]`)은 사용하지 않는다 — CSS
 
 ```css
 .cursor-pixel {
-  cursor: url('/Pointer.png') 0 0, pointer;
+  cursor: url('/Pointer.svg') 0 0, pointer;
 }
 ```
 
-- hotspot `0 0`: 포인터 이미지의 좌상단이 클릭 지점이 됨. `Pointer.png`가 화살표 형태이면 적절.
+- hotspot `0 0`: 포인터 이미지의 좌상단이 클릭 지점이 됨. `Pointer.svg`가 화살표 형태이면 적절.
 - fallback `pointer`: 커스텀 이미지 로드 실패 시 기본 손가락 커서.
 
 ### 2. `docs/UI_GUIDE.md` — Cursor 섹션 추가 (없는 경우에만)
@@ -53,7 +53,7 @@ Tailwind 임의값 문법(`cursor-[url(...)]`)은 사용하지 않는다 — CSS
 클릭 가능한 sprite 영역(hitbox button)에 `cursor-pixel` 클래스를 적용한다.
 
 - 에셋: `public/Pointer.png`
-- CSS: `cursor: url('/Pointer.png') 0 0, pointer`
+- CSS: `cursor: url('/Pointer.svg') 0 0, pointer`
 - 적용 대상: RoomScene의 모든 hitbox button, 램프 button
 - 비인터랙티브 영역(배경 이미지, 장식 sprite)에는 적용하지 않는다
 ```
@@ -107,7 +107,7 @@ bun test
 
 1. AC 커맨드를 순서대로 실행한다.
 2. `bun dev` 후 `/`에서 수동 확인:
-   - 곰, 다이어리, 책장, 창문, 책더미 영역에 마우스 올렸을 때 `Pointer.png` 커서 표시됨.
+   - 곰, 다이어리, 책장, 창문, 책더미 영역에 마우스 올렸을 때 `Pointer.svg` 커서 표시됨.
    - 배경 이미지 영역은 기본 커서 유지.
 3. `phases/6-share-meta-and-cursor/index.json`의 step 1을 업데이트한다.
 4. 커밋:
@@ -117,6 +117,6 @@ bun test
 ## 금지사항
 
 - `SpriteImage` 컴포넌트에 cursor 스타일을 적용하지 마라 — 이미지는 `aria-hidden`이고 클릭을 받지 않는다. hitbox button에만 적용한다.
-- `cursor-[url('/Pointer.png')_0_0,_pointer]` 형태의 Tailwind 임의값 문법을 사용하지 마라 — globals.css 클래스를 사용한다.
+- `cursor-[url('/Pointer.svg')_0_0,_pointer]` 형태의 Tailwind 임의값 문법을 사용하지 마라 — globals.css 클래스를 사용한다.
 - 기존 hitbox button의 `focus-visible:outline` 스타일을 제거하지 마라 — 접근성 포커스 표시기다.
 - 기존 테스트를 삭제하거나 skip하지 마라.
