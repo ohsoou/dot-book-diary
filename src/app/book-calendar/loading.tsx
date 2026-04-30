@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function BookCalendarLoading() {
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <Skeleton w="w-8" h="h-7" />
         <Skeleton w="w-24" h="h-5" />

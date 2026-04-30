@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function DiaryEntryLoading() {
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Skeleton w="w-16" h="h-4" />
       </div>
