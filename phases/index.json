@@ -36,7 +36,8 @@
     },
     {
       "dir": "6-share-meta-and-cursor",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-04-30T13:35:08+0900"
     }
   ]
 }
