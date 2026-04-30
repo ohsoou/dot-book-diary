@@ -520,3 +520,48 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
   - `bear-idle` 애니메이션이 클릭 어포던스 역할을 겸함 (`hitbox-bob` 미적용).
   - Setting.png day/night 자산 삭제. SPRITE_DEFS에서 `setting` 항목 제거.
   - ADR-025(hitbox 어포던스)의 sprite 매핑 표가 갱신됨.
+
+## ADR-030: SNS 공유 썸네일로 Bear.png 채택
+
+**결정**: og:image로 `public/sprites/day/Bear.png`를 사용한다.
+
+**이유**: 앱 아이덴티티를 대표하는 이미지가 곰 캐릭터이며, 이미 day 스프라이트로 고해상도 PNG가 존재한다. 별도 1200×630 합성본 제작은 현재 스코프 밖이다.
+
+**결과·제약**:
+- `src/app/layout.tsx`의 `metadata.openGraph.images`에 절대 URL로 설정.
+- `metadataBase`는 `NEXT_PUBLIC_APP_URL` 기반으로 설정.
+- 이미지 비율이 1:1에 가까워 SNS 플랫폼별 크롭이 발생할 수 있음 — 허용 범위.
+- 카카오톡은 OG 캐시를 가지므로 URL 변경 시 https://developers.kakao.com/tool/clear/og 에서 수동 갱신 필요.
+
+## ADR-029: 이메일+비밀번호 인증 채택, 매직링크/OTP/OAuth 제거
+
+**결정**: 로그인 방식을 이메일+비밀번호 단일 경로로 변경한다. 매직링크(OTP)와 Google OAuth는 제거한다.
+
+**이유**: 매직링크는 로그인할 때마다 이메일 메일함을 열어 링크를 클릭해야 해서 사용자 마찰이 과도하다. 단순 개인 독서 기록 앱에 불필요한 절차다. 비밀번호 기반은 한 번 가입 후 확인 메일 1회 클릭으로 계정을 활성화하고, 이후로는 비밀번호만 사용한다.
+
+**결과·제약**:
+- `/signup` 페이지 신규 추가 (이메일 + 비밀번호 + 닉네임)
+- `/forgot-password` + `/reset-password` 페이지 신규 추가
+- `src/lib/actions/auth.ts` 신규 (signUpAction)
+- `src/lib/validation/auth.ts` 신규 (emailSchema, passwordSchema, nicknameSchema)
+- `src/components/auth/LoginForm.tsx` 재작성 (signInWithPassword 사용)
+- `src/components/auth/SignupForm.tsx` 신규
+- `src/app/auth/callback/route.ts` 단순화 (OAuth 분기 제거, 닉네임 저장 추가)
+- Supabase 대시보드 설정 필요: "Confirm email" ON, Magic Link/Google provider OFF
+- `NEXT_PUBLIC_APP_URL` 환경변수 기반 콜백 URL (기존과 동일)
+
+## ADR-030: Supabase Auth 에러는 `error.code` 기반으로 분기, 메시지 매칭은 fallback
+
+**결정**: Supabase auth가 던진 에러를 `AppErrorCode`로 변환할 때 `error.code`(공식 안정 식별자)를 1순위로 사용하고, 메시지 문자열 `.includes()`는 2순위 fallback으로만 사용한다. 변환 로직은 `src/lib/auth/error-codes.ts`의 `mapSupabaseAuthError()` 한 함수로 단일화한다.
+
+**이유**:
+- GoTrue 서버 메시지는 다듬어질 수 있어 메시지 매칭이 조용히 깨진다.
+- supabase-js의 `AuthApiError`는 `code`/`status`를 항상 채워주며 공식 문서가 안정 식별자로 권장한다.
+- 매퍼를 단일화하면 회원가입·로그인 양쪽이 같은 문구 정책을 따를 수 있다.
+
+**결과·제약**:
+- `src/lib/auth/error-codes.ts` 신규: `mapSupabaseAuthError(error) → { code: AppErrorCode; message: string }`.
+- `signUpAction`(server)과 `LoginForm`(client) 두 곳 모두 매퍼만 호출한다. 메시지 분기 로직은 매퍼 안으로만 둔다.
+- 매퍼는 `'server-only'`를 임포트하지 않는다 — client/server 양쪽에서 사용한다.
+- 매핑 대상 코드: `user_already_exists`/`email_exists` → `EMAIL_TAKEN`, `weak_password` → `WEAK_PASSWORD`, `invalid_credentials` → `INVALID_CREDENTIALS`, `email_not_confirmed` → `EMAIL_NOT_CONFIRMED`. 그 외는 `UPSTREAM_FAILED`.
+- 사용자 노출 문구는 PRD §7 US-5의 정의를 따른다.

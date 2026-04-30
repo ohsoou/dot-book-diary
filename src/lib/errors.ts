@@ -5,7 +5,11 @@ export type AppErrorCode =
   | 'UPSTREAM_FAILED'
   | 'RATE_LIMITED'
   | 'UNAUTHORIZED'
-  | 'UNSUPPORTED_ENV';
+  | 'UNSUPPORTED_ENV'
+  | 'EMAIL_TAKEN'
+  | 'INVALID_CREDENTIALS'
+  | 'WEAK_PASSWORD'
+  | 'EMAIL_NOT_CONFIRMED';
 
 export class AppError extends Error {
   constructor(

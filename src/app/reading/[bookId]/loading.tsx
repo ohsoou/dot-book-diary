@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export default function ReadingLoading() {
   return (
-    <main className="min-h-dvh bg-[#2a1f17] px-4 py-6 max-w-2xl mx-auto">
+    <main className="min-h-dvh bg-[var(--color-bg)] px-4 py-6 max-w-2xl mx-auto">
       <div className="flex gap-4 mb-6">
         <Skeleton w="w-24" h="h-36" />
         <div className="flex flex-col gap-2 flex-1">

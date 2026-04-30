@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RoomScene } from './RoomScene'
-import { BearStateProvider } from './BearStateContext'
 
 const mockPush = vi.fn()
 
@@ -143,12 +142,12 @@ describe('RoomScene', () => {
     expect(container.querySelector('img[src="/sprites/day/Bear.png"]')).toBeNull()
   })
 
-  it('uses correct per-theme filename for bookstack sprite (case mismatch)', () => {
+  it('uses correct filename for bookstack sprite', () => {
     const { container: dayContainer } = render(<RoomScene theme="day" />)
     expect(dayContainer.querySelector('img[src="/sprites/day/Bookstack.png"]')).not.toBeNull()
 
     const { container: nightContainer } = render(<RoomScene theme="night" />)
-    expect(nightContainer.querySelector('img[src="/sprites/night/BookStack.png"]')).not.toBeNull()
+    expect(nightContainer.querySelector('img[src="/sprites/night/Bookstack.png"]')).not.toBeNull()
   })
 
   it('renders Bear_sleeping.png when bearAsset="Bear_sleeping.png" with day theme', () => {
@@ -191,6 +190,14 @@ describe('RoomScene', () => {
     const btn = screen.getByRole('button', { name: '설정' })
     expect(btn.style.bottom).toBe('1.25%')
     expect(btn.style.left).toBe('42.0313%')
+  })
+
+  it('all hitbox buttons have cursor-pixel class', () => {
+    render(<RoomScene theme="day" />)
+    for (const label of ['다이어리', '책장', '캘린더', '책 등록', '설정']) {
+      const btn = screen.getByRole('button', { name: label })
+      expect(btn.className).toContain('cursor-pixel')
+    }
   })
 
   it('renders rug sprite with correct properties and z-index below bear', () => {
@@ -240,6 +247,12 @@ describe('lamp toggle (night theme)', () => {
   it('day theme: does not render 램프 전원 button', () => {
     render(<RoomScene theme="day" />)
     expect(screen.queryByRole('button', { name: '램프 전원' })).toBeNull()
+  })
+
+  it('lamp button has cursor-pixel class (night theme)', () => {
+    render(<RoomScene theme="night" />)
+    const lampBtn = screen.getByRole('button', { name: '램프 전원' })
+    expect(lampBtn.className).toContain('cursor-pixel')
   })
 
   it('restores lamp off state from localStorage on mount', async () => {

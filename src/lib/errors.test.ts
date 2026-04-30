@@ -41,11 +41,36 @@ describe('AppError', () => {
       'RATE_LIMITED',
       'UNAUTHORIZED',
       'UNSUPPORTED_ENV',
+      'EMAIL_TAKEN',
+      'INVALID_CREDENTIALS',
+      'WEAK_PASSWORD',
+      'EMAIL_NOT_CONFIRMED',
     ];
     codes.forEach((code) => {
       const err = new AppError(code, 'test');
       expect(err.code).toBe(code);
     });
+  });
+
+  it('should create EMAIL_TAKEN error correctly', () => {
+    const err = new AppError('EMAIL_TAKEN', '이미 가입된 이메일이에요');
+    expect(err).toBeInstanceOf(AppError);
+    expect(err.code).toBe('EMAIL_TAKEN');
+  });
+
+  it('should create EMAIL_NOT_CONFIRMED error correctly', () => {
+    const err = new AppError('EMAIL_NOT_CONFIRMED', '메일을 확인해 주세요');
+    expect(err.code).toBe('EMAIL_NOT_CONFIRMED');
+  });
+
+  it('should create INVALID_CREDENTIALS error correctly', () => {
+    const err = new AppError('INVALID_CREDENTIALS', '이메일 또는 비밀번호가 일치하지 않아요');
+    expect(err.code).toBe('INVALID_CREDENTIALS');
+  });
+
+  it('should create WEAK_PASSWORD error correctly', () => {
+    const err = new AppError('WEAK_PASSWORD', '비밀번호는 8자 이상이어야 해요');
+    expect(err.code).toBe('WEAK_PASSWORD');
   });
 });
 

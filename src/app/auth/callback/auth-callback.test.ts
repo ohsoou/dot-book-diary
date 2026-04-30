@@ -44,19 +44,23 @@ describe('GET /auth/callback', () => {
     expect(redirectedUrl).toContain('/login?error=link_expired')
   })
 
-  it('providerError가 있으면 /login?error=oauth_failed로 redirect한다', async () => {
+  it('code 교환 실패 시 /login?error=link_expired로 redirect한다', async () => {
+    mockExchangeCodeForSession.mockResolvedValue({ error: { message: 'invalid or expired code' } })
+
     const { GET } = await import('./route')
     const { NextResponse } = await import('next/server')
 
-    await GET(makeRequest({ error: 'access_denied' }))
+    await GET(makeRequest({ code: 'invalid-code' }))
 
     const redirectedUrl = String((NextResponse.redirect as ReturnType<typeof vi.fn>).mock.calls[0]?.[0])
-    expect(redirectedUrl).toContain('/login?error=oauth_failed')
+    expect(redirectedUrl).toContain('/login?error=link_expired')
   })
 
-  it('code 교환 성공 시 profile upsert를 호출하고 /로 redirect한다', async () => {
+  it('성공 시 user_metadata.nickname이 있으면 profiles upsert에 nickname이 포함된다', async () => {
     mockExchangeCodeForSession.mockResolvedValue({ error: null })
-    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', user_metadata: { nickname: '테스트닉네임' } } },
+    })
 
     const mockUpsert = vi.fn().mockResolvedValue({ error: null })
     mockFrom.mockReturnValue({ upsert: mockUpsert })
@@ -68,16 +72,37 @@ describe('GET /auth/callback', () => {
 
     expect(mockExchangeCodeForSession).toHaveBeenCalledWith('valid-code')
     expect(mockUpsert).toHaveBeenCalledWith(
-      { user_id: 'user-1' },
-      expect.objectContaining({ onConflict: 'user_id', ignoreDuplicates: true }),
+      { user_id: 'user-1', nickname: '테스트닉네임' },
+      { onConflict: 'user_id' },
     )
     const redirectedUrl = String((NextResponse.redirect as ReturnType<typeof vi.fn>).mock.calls[0]?.[0])
     expect(redirectedUrl).toMatch(/^http.+\/$/)
   })
 
+  it("성공 시 user_metadata.nickname이 없으면 profiles upsert에 '책곰이'가 포함된다", async () => {
+    mockExchangeCodeForSession.mockResolvedValue({ error: null })
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', user_metadata: {} } },
+    })
+
+    const mockUpsert = vi.fn().mockResolvedValue({ error: null })
+    mockFrom.mockReturnValue({ upsert: mockUpsert })
+
+    const { GET } = await import('./route')
+
+    await GET(makeRequest({ code: 'valid-code' }))
+
+    expect(mockUpsert).toHaveBeenCalledWith(
+      { user_id: 'user-1', nickname: '책곰이' },
+      { onConflict: 'user_id' },
+    )
+  })
+
   it('profile upsert 실패 시 /login?error=profile_setup_failed로 redirect한다', async () => {
     mockExchangeCodeForSession.mockResolvedValue({ error: null })
-    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', user_metadata: {} } },
+    })
 
     const mockUpsert = vi.fn().mockResolvedValue({ error: { message: 'db error' } })
     mockFrom.mockReturnValue({ upsert: mockUpsert })

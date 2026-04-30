@@ -287,19 +287,28 @@ Client ReadingSessionForm
         └─ return { ok: true }
 ```
 
-### 6.4 로그인 (매직링크)
+### 6.4 로그인 (이메일+비밀번호)
 ```
-Client /login
-  └─> supabase.auth.signInWithOtp({ email, emailRedirectTo: `${origin}/auth/callback` })
-        (메일 발송)
-사용자가 링크 클릭
+**회원가입**:
+Client /signup
+  └─> signUpAction({ email, password, nickname })
+        (supabase.auth.signUp + user_metadata.nickname 저장)
+        (확인 메일 발송, emailRedirectTo: origin/auth/callback)
+
+사용자가 확인 메일 링크 클릭
   └─> GET /auth/callback?code=...
         ├─ supabase.auth.exchangeCodeForSession(code)
-        ├─ profiles upsert (fallback: handle_new_user 트리거가 이미 생성)
+        ├─ profiles upsert (user_metadata.nickname 포함, 없으면 '책곰이' 폴백)
         └─ redirect('/')
+
+**로그인**:
+Client /login
+  └─> supabase.auth.signInWithPassword({ email, password })
+        ├─ 성공 → 세션 쿠키 설정 → redirect('/')
+        └─ 실패 → 에러 메시지 표시 (INVALID_CREDENTIALS 또는 EMAIL_NOT_CONFIRMED)
+
 실패 시:
-  - 매직링크/OTP 교환 실패 → redirect('/login?error=link_expired')
-  - OAuth provider callback 실패 → redirect('/login?error=oauth_failed')
+  - code 없음/만료 → redirect('/login?error=link_expired')
   - profiles upsert fallback 실패 → redirect('/login?error=profile_setup_failed')
 ```
 
@@ -534,7 +543,11 @@ export type AppErrorCode =
   | 'UPSTREAM_FAILED'
   | 'RATE_LIMITED'
   | 'UNAUTHORIZED'
-  | 'UNSUPPORTED_ENV';
+  | 'UNSUPPORTED_ENV'
+  | 'EMAIL_TAKEN'          // auth: 이미 가입된 이메일
+  | 'INVALID_CREDENTIALS'  // auth: 이메일 또는 비밀번호 불일치
+  | 'WEAK_PASSWORD'        // auth: 비밀번호 강도 부족
+  | 'EMAIL_NOT_CONFIRMED'; // auth: 이메일 확인 전 로그인 시도
 
 export class AppError extends Error {
   constructor(
@@ -553,9 +566,13 @@ export class AppError extends Error {
 | 코드 | HTTP |
 |------|------|
 | VALIDATION_FAILED | 400 |
+| WEAK_PASSWORD | 400 |
 | UNAUTHORIZED | 401 |
+| INVALID_CREDENTIALS | 401 |
+| EMAIL_NOT_CONFIRMED | 401 |
 | NOT_FOUND | 404 |
 | DUPLICATE_ISBN | 409 |
+| EMAIL_TAKEN | 409 |
 | RATE_LIMITED | 429 |
 | UPSTREAM_FAILED | 502 |
 | (그 외) | 500 |
@@ -575,6 +592,12 @@ type ActionResult<T> =
 - 일반 Client fetch 실패: `useToast().error(message)`.
 - 권한 실패: `/login?reason=expired`.
 - `/api/books/search`, `/api/books/isbn` 성공 응답은 항상 `{ data: ... }`, 실패 응답은 항상 `{ error: { code, message } }`를 사용한다.
+
+### 11.5 Supabase Auth 에러 매핑
+- Supabase가 던진 auth 에러는 반드시 `src/lib/auth/error-codes.ts`의 `mapSupabaseAuthError()`를 통과시킨다. 호출부에서 `error.message.includes(...)`로 직접 분기하지 않는다.
+- 매퍼는 `error.code` 우선 매칭(공식 안정 식별자) → 메시지 매칭 fallback → `UPSTREAM_FAILED` 순으로 동작한다.
+- 사용자 노출 문구의 진실원은 PRD §7 US-5다. 매퍼는 PRD 문구를 그대로 반환한다.
+- 적용 지점: `signUpAction`(server), `LoginForm`(client). `auth/callback/route.ts`와 비밀번호 재설정 흐름은 별도 정책(쿼리 파라미터/일관 안내문)을 유지한다.
 
 ## 12. 입력 검증 규약
 - 모든 외부 경계에서 zod `parse`.
@@ -606,13 +629,16 @@ export const config = {
 - 인증이 필요한 쓰기 동작(Server Action, Auth callback 후 profile 보정 등)만 `UNAUTHORIZED` 또는 `/login?reason=expired`로 처리한다.
 
 ## 15. 인증·콜백 라우트
-- `/login/page.tsx`: 매직링크 입력 + Google OAuth 버튼. 하단에 `?error=...` 해석 영역.
-- `/auth/callback/route.ts`: `code` 교환 → 세션 쿠키 설정 → `redirect('/')`.
+- `/login/page.tsx`: 이메일+비밀번호 입력 폼, 비밀번호 분실 링크(`/forgot-password`), 회원가입 링크(`/signup`). 하단에 `?error=...` 해석 영역.
+- `/signup/page.tsx`: 이메일+비밀번호+닉네임 입력 폼. 제출 후 확인 메일 안내 화면으로 전환.
+- `/auth/callback/route.ts`: `code` 교환 → profiles upsert(닉네임 포함) → `redirect('/')`.
+- `/forgot-password/page.tsx`: 이메일 입력 → `resetPasswordForEmail()` 호출 → 안내 화면.
+- `/reset-password/page.tsx`: 새 비밀번호 입력 → `updateUser({ password })` 호출 → `/login`으로 redirect.
 - 에러 매핑:
-  - `code` 없음 또는 OTP/매직링크 교환 실패 → `/login?error=link_expired`
-  - OAuth provider callback 자체 실패 또는 provider 에러 파라미터 수신 → `/login?error=oauth_failed`
+  - `code` 없음 또는 교환 실패 → `/login?error=link_expired`
   - 세션 수립 후 `profiles` upsert fallback 실패 → `/login?error=profile_setup_failed`
-- 매직링크 `emailRedirectTo`는 `new URL('/auth/callback', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
+- `emailRedirectTo`는 `new URL('/auth/callback', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
+- `resetPasswordForEmail`의 `redirectTo`는 `new URL('/reset-password', process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin).toString()`.
 
 ## 15.1 Unsaved Changes Hook
 - `src/lib/hooks/useUnsavedChanges.ts`의 계약은 `useUnsavedChanges(isDirty: boolean): void`로 고정한다.

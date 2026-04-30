@@ -25,7 +25,10 @@
 | `/diary` | 인용·독후감 목록 및 작성 |
 | `/book-calendar` | 월간 독서 캘린더 |
 | `/settings` | 닉네임, 테마, 로그인/로그아웃 |
-| `/login` | 이메일 매직링크 + Google OAuth |
+| `/login` | 이메일+비밀번호 로그인 |
+| `/signup` | 이메일+비밀번호+닉네임 회원가입 |
+| `/forgot-password` | 비밀번호 재설정 메일 요청 |
+| `/reset-password` | 비밀번호 재설정 |
 
 ## 요구사항
 
@@ -68,6 +71,22 @@ bun dev
 | `bun run test` | Vitest 테스트 실행 |
 | `bun db:migrate` | Supabase 스키마 배포 (`supabase db push --linked`) |
 | `bun db:types` | Supabase TypeScript 타입 생성 |
+
+## Supabase 대시보드 설정
+
+개발 또는 배포 전 아래 설정을 Supabase 대시보드에서 1회 적용해야 합니다.
+
+1. Authentication → Providers → Email
+   - Enable Email provider: ON
+   - Confirm email: **ON** (가입 후 메일 클릭 후 로그인 가능)
+   - Secure email change: ON
+2. Authentication → Providers → Google: **OFF** (사용 안 함)
+3. Authentication → URL Configuration → Redirect URLs에 추가:
+   - `http://localhost:3000/auth/callback` (개발)
+   - `http://localhost:3000/reset-password` (개발)
+   - `{NEXT_PUBLIC_APP_URL}/auth/callback` (프로덕션)
+   - `{NEXT_PUBLIC_APP_URL}/reset-password` (프로덕션)
+4. 카카오톡 OG 캐시 갱신: https://developers.kakao.com/tool/clear/og
 
 ## 기술 스택
 

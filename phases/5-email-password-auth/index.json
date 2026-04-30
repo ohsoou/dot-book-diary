@@ -1,0 +1,56 @@
+{
+  "project": "dot-book-diary",
+  "phase": "5-email-password-auth",
+  "steps": [
+    {
+      "step": 0,
+      "name": "docs-and-error-codes",
+      "status": "completed",
+      "started_at": "2026-04-30T08:18:43+0900",
+      "summary": "ADR-029 추가, PRD/ARCHITECTURE/UI_GUIDE/README 문서 업데이트, errors.ts에 EMAIL_TAKEN/INVALID_CREDENTIALS/WEAK_PASSWORD/EMAIL_NOT_CONFIRMED 에러 코드 추가 및 테스트 작성",
+      "completed_at": "2026-04-30T08:23:19+0900"
+    },
+    {
+      "step": 1,
+      "name": "signup-page",
+      "status": "completed",
+      "started_at": "2026-04-30T08:23:19+0900",
+      "summary": "signUpSchema(validation/auth.ts), signUpAction(actions/auth.ts), SignupForm 컴포넌트, /signup 페이지 신규 구현 — 테스트 36개(validation 18 + action 8 + component 10) 모두 통과",
+      "completed_at": "2026-04-30T08:31:30+0900"
+    },
+    {
+      "step": 2,
+      "name": "callback-rewrite-and-profile",
+      "status": "completed",
+      "started_at": "2026-04-30T08:31:30+0900",
+      "summary": "route.ts에서 providerError/oauth_failed 분기 제거, profile upsert에 user_metadata.nickname(폴백 '책곰이') 포함, ignoreDuplicates 제거 — 테스트 5개 통과",
+      "completed_at": "2026-04-30T08:35:02+0900"
+    },
+    {
+      "step": 3,
+      "name": "login-form-password",
+      "status": "completed",
+      "started_at": "2026-04-30T08:35:02+0900",
+      "summary": "LoginForm 재작성 — signInWithOtp/OAuth 완전 제거, signInWithPassword 기반으로 교체, /forgot-password·/signup 링크 추가 — 테스트 11개 통과",
+      "completed_at": "2026-04-30T08:39:59+0900"
+    },
+    {
+      "step": 4,
+      "name": "password-reset-flow",
+      "status": "completed",
+      "started_at": "2026-04-30T08:39:59+0900",
+      "summary": "ForgotPasswordForm(/forgot-password) + ResetPasswordForm(/reset-password) 구현 — 이메일 존재 여부 노출 방지(항상 성공 메시지), passwordSchema 클라이언트 검증, updateUser 성공 시 /login 이동 — 테스트 14개 통과",
+      "completed_at": "2026-04-30T08:44:01+0900"
+    },
+    {
+      "step": 5,
+      "name": "cleanup-and-final-verify",
+      "status": "completed",
+      "started_at": "2026-04-30T08:44:01+0900",
+      "summary": "OTP/OAuth 잔재 0건 확인, RoomScene 스프라이트 파일명 정규화(Background.png, Bookstack.png), phases/ 디렉토리 Tailwind 스캔 제외(@source not), 미사용 import/변수 제거 — bun build·lint·test 모두 통과",
+      "completed_at": "2026-04-30T09:00:00+0900"
+    }
+  ],
+  "created_at": "2026-04-30T08:18:43+0900",
+  "completed_at": "2026-04-30T13:27:27+0900"
+}

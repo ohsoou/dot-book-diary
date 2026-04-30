@@ -11,6 +11,18 @@ import type { ThemePreference } from '@/lib/theme'
 export const metadata: Metadata = {
   title: { default: '도트 북 다이어리', template: '%s · 도트 북 다이어리' },
   description: '따뜻한 도트 방에서 쓰는 독서 기록',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  openGraph: {
+    title: '도트 북 다이어리',
+    description: '따뜻한 도트 방에서 쓰는 독서 기록',
+    images: ['/sprites/day/Bear.png'],
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    images: ['/sprites/day/Bear.png'],
+  },
   robots: { index: true, follow: true },
   icons: { icon: '/favicon.ico' },
 }
