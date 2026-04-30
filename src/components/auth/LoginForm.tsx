@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
+import { mapSupabaseAuthError } from '@/lib/auth/error-codes'
 
 const ERROR_MESSAGES: Record<string, string> = {
   link_expired: '링크가 만료됐어요. 다시 로그인해 주세요.',
@@ -43,13 +44,8 @@ export function LoginForm({ error, reason }: LoginFormProps) {
     setPending(false)
 
     if (signInError) {
-      if (signInError.message.includes('Invalid login credentials')) {
-        setLocalError('이메일 또는 비밀번호가 일치하지 않아요.')
-      } else if (signInError.message.includes('Email not confirmed')) {
-        setLocalError('이메일을 확인해 주세요. 메일함에서 인증 링크를 클릭해 주세요.')
-      } else {
-        setLocalError('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.')
-      }
+      const { message } = mapSupabaseAuthError(signInError)
+      setLocalError(message)
       return
     }
 

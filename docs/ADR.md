@@ -549,3 +549,19 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
 - `src/app/auth/callback/route.ts` 단순화 (OAuth 분기 제거, 닉네임 저장 추가)
 - Supabase 대시보드 설정 필요: "Confirm email" ON, Magic Link/Google provider OFF
 - `NEXT_PUBLIC_APP_URL` 환경변수 기반 콜백 URL (기존과 동일)
+
+## ADR-030: Supabase Auth 에러는 `error.code` 기반으로 분기, 메시지 매칭은 fallback
+
+**결정**: Supabase auth가 던진 에러를 `AppErrorCode`로 변환할 때 `error.code`(공식 안정 식별자)를 1순위로 사용하고, 메시지 문자열 `.includes()`는 2순위 fallback으로만 사용한다. 변환 로직은 `src/lib/auth/error-codes.ts`의 `mapSupabaseAuthError()` 한 함수로 단일화한다.
+
+**이유**:
+- GoTrue 서버 메시지는 다듬어질 수 있어 메시지 매칭이 조용히 깨진다.
+- supabase-js의 `AuthApiError`는 `code`/`status`를 항상 채워주며 공식 문서가 안정 식별자로 권장한다.
+- 매퍼를 단일화하면 회원가입·로그인 양쪽이 같은 문구 정책을 따를 수 있다.
+
+**결과·제약**:
+- `src/lib/auth/error-codes.ts` 신규: `mapSupabaseAuthError(error) → { code: AppErrorCode; message: string }`.
+- `signUpAction`(server)과 `LoginForm`(client) 두 곳 모두 매퍼만 호출한다. 메시지 분기 로직은 매퍼 안으로만 둔다.
+- 매퍼는 `'server-only'`를 임포트하지 않는다 — client/server 양쪽에서 사용한다.
+- 매핑 대상 코드: `user_already_exists`/`email_exists` → `EMAIL_TAKEN`, `weak_password` → `WEAK_PASSWORD`, `invalid_credentials` → `INVALID_CREDENTIALS`, `email_not_confirmed` → `EMAIL_NOT_CONFIRMED`. 그 외는 `UPSTREAM_FAILED`.
+- 사용자 노출 문구는 PRD §7 US-5의 정의를 따른다.

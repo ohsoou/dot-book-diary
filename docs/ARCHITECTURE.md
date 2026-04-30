@@ -543,7 +543,11 @@ export type AppErrorCode =
   | 'UPSTREAM_FAILED'
   | 'RATE_LIMITED'
   | 'UNAUTHORIZED'
-  | 'UNSUPPORTED_ENV';
+  | 'UNSUPPORTED_ENV'
+  | 'EMAIL_TAKEN'          // auth: 이미 가입된 이메일
+  | 'INVALID_CREDENTIALS'  // auth: 이메일 또는 비밀번호 불일치
+  | 'WEAK_PASSWORD'        // auth: 비밀번호 강도 부족
+  | 'EMAIL_NOT_CONFIRMED'; // auth: 이메일 확인 전 로그인 시도
 
 export class AppError extends Error {
   constructor(
@@ -562,9 +566,13 @@ export class AppError extends Error {
 | 코드 | HTTP |
 |------|------|
 | VALIDATION_FAILED | 400 |
+| WEAK_PASSWORD | 400 |
 | UNAUTHORIZED | 401 |
+| INVALID_CREDENTIALS | 401 |
+| EMAIL_NOT_CONFIRMED | 401 |
 | NOT_FOUND | 404 |
 | DUPLICATE_ISBN | 409 |
+| EMAIL_TAKEN | 409 |
 | RATE_LIMITED | 429 |
 | UPSTREAM_FAILED | 502 |
 | (그 외) | 500 |
@@ -584,6 +592,12 @@ type ActionResult<T> =
 - 일반 Client fetch 실패: `useToast().error(message)`.
 - 권한 실패: `/login?reason=expired`.
 - `/api/books/search`, `/api/books/isbn` 성공 응답은 항상 `{ data: ... }`, 실패 응답은 항상 `{ error: { code, message } }`를 사용한다.
+
+### 11.5 Supabase Auth 에러 매핑
+- Supabase가 던진 auth 에러는 반드시 `src/lib/auth/error-codes.ts`의 `mapSupabaseAuthError()`를 통과시킨다. 호출부에서 `error.message.includes(...)`로 직접 분기하지 않는다.
+- 매퍼는 `error.code` 우선 매칭(공식 안정 식별자) → 메시지 매칭 fallback → `UPSTREAM_FAILED` 순으로 동작한다.
+- 사용자 노출 문구의 진실원은 PRD §7 US-5다. 매퍼는 PRD 문구를 그대로 반환한다.
+- 적용 지점: `signUpAction`(server), `LoginForm`(client). `auth/callback/route.ts`와 비밀번호 재설정 흐름은 별도 정책(쿼리 파라미터/일관 안내문)을 유지한다.
 
 ## 12. 입력 검증 규약
 - 모든 외부 경계에서 zod `parse`.
