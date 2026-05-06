@@ -1,0 +1,9 @@
+{
+  "project": "dot-book-diary",
+  "phase": "9-client-actions-facade",
+  "steps": [
+    { "step": 0, "name": "use-book-actions-hook", "status": "pending" },
+    { "step": 1, "name": "use-reading-session-actions-hook", "status": "pending" },
+    { "step": 2, "name": "use-diary-actions-and-finalize", "status": "pending" }
+  ]
+}

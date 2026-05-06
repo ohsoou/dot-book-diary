@@ -33,7 +33,7 @@ interface HitboxConfig {
 }
 
 const SPRITE_FILES: Record<string, string> = {
-  background:   'Background_special.png',
+  background:   'Background.png',
   outsideView:  'Outside_view.png',
   window:       'Window.png',
   hangingPlant: 'Hanging_plant.png',

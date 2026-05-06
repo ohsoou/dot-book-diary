@@ -1,0 +1,9 @@
+{
+  "project": "dot-book-diary",
+  "phase": "12-aladin-route-protection",
+  "steps": [
+    { "step": 0, "name": "rate-limiter-utility", "status": "pending" },
+    { "step": 1, "name": "apply-to-aladin-routes", "status": "pending" },
+    { "step": 2, "name": "caching-and-revalidate-tuning", "status": "pending" }
+  ]
+}

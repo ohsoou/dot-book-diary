@@ -1,0 +1,9 @@
+{
+  "project": "dot-book-diary",
+  "phase": "11-book-status-rating",
+  "steps": [
+    { "step": 0, "name": "types-and-migrations", "status": "pending" },
+    { "step": 1, "name": "store-and-actions", "status": "pending" },
+    { "step": 2, "name": "ui-status-tabs-and-rating", "status": "pending" }
+  ]
+}

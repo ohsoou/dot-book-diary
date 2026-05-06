@@ -1,0 +1,9 @@
+{
+  "project": "dot-book-diary",
+  "phase": "10-store-aggregation-search",
+  "steps": [
+    { "step": 0, "name": "store-types-and-interface", "status": "pending" },
+    { "step": 1, "name": "local-store-aggregation", "status": "pending" },
+    { "step": 2, "name": "remote-store-aggregation", "status": "pending" }
+  ]
+}
