@@ -7,7 +7,7 @@
       "name": "books-action-tests",
       "status": "completed",
       "started_at": "2026-05-06T14:24:29+0900",
-      "completed_at": "2026-05-06T14:27:30+0900",
+      "completed_at": "2026-05-06T14:28:53+0900",
       "summary": "books.ts 4개 액션(listBooksAction/addBookAction/deleteBookAction/updateBookAction)에 대한 테스트 16개 추가, vi.mock으로 getStore·revalidatePath 격리, AppError·UPSTREAM_FAILED·정상 경로·revalidate 호출 검증"
     },
     {
