@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "use-reading-session-actions-hook",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-06T14:43:31+0900",
+      "summary": "useReadingSessionActions 훅 신규(useReadingSessionActions.ts), 테스트 12건(useReadingSessionActions.test.ts), ReadingSessionForm을 facade 호출로 마이그레이션(server action/LocalStore 직접 호출 제거) — 603 tests passed",
+      "completed_at": "2026-05-06T14:49:22+0900"
     },
     {
       "step": 2,
