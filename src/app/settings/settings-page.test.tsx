@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
+import { version as appVersion } from '../../../package.json'
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -113,7 +114,7 @@ describe('SettingsPage', () => {
 
     it('버전을 표시한다', async () => {
       await renderPage()
-      expect(screen.getByText('v1.0.0')).toBeDefined()
+      expect(screen.getByText(`v${appVersion}`)).toBeDefined()
     })
 
     it('카피라이트를 표시한다', async () => {
