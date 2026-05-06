@@ -7,7 +7,8 @@
       "name": "use-book-actions-hook",
       "status": "completed",
       "started_at": "2026-05-06T14:40:33+0900",
-      "summary": "useBookActions 훅 신규(src/lib/client-actions/useBookActions.ts), 테스트 12건(useBookActions.test.ts), AddBookTabs를 actions.addBook() 단일 호출로 마이그레이션 — 590 tests passed"
+      "summary": "useBookActions 훅 신규(src/lib/client-actions/useBookActions.ts), 테스트 12건(useBookActions.test.ts), AddBookTabs를 actions.addBook() 단일 호출로 마이그레이션 — 590 tests passed",
+      "completed_at": "2026-05-06T14:43:31+0900"
     },
     {
       "step": 1,
