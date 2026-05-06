@@ -1,10 +1,9 @@
 'use client'
 
-import { listBooksAction } from '@/lib/actions/books'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { Book } from '@/types'
-import { useStore } from '@/lib/storage/use-store'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
 
 interface BookPickerProps {
   value: string | undefined
@@ -13,16 +12,14 @@ interface BookPickerProps {
 }
 
 export function BookPicker({ value, onChange, isLoggedIn }: BookPickerProps) {
-  const store = useStore()
+  const bookActions = useBookActions({ isLoggedIn })
   const [books, setBooks] = useState<Book[] | null>(null)
 
   useEffect(() => {
-    if (isLoggedIn) {
-      listBooksAction().then(resp => setBooks(resp.ok ? resp.data : [])).catch(() => setBooks([]))
-    } else {
-      store.listBooks().then(setBooks).catch(() => setBooks([]))
-    }
-  }, [isLoggedIn, store])
+    bookActions.listBooks().then(resp => setBooks(resp.ok ? resp.data : [])).catch(() => setBooks([]))
+  // bookActions reference is stable within a render cycle; deps are intentional
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn])
 
   if (books === null) {
     return <p className="text-xs text-[#a08866]">불러오는 중...</p>

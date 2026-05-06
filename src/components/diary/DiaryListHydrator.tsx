@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import type { Book, DiaryEntry } from '@/types'
-import { LocalStore } from '@/lib/storage/LocalStore'
 import { getPreferences } from '@/lib/storage/preferences'
+import { useDiaryActions } from '@/lib/client-actions/useDiaryActions'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { DiaryList } from './DiaryList'
 
 export function DiaryListHydrator() {
+  const diaryActions = useDiaryActions({ isLoggedIn: false })
+  const bookActions = useBookActions({ isLoggedIn: false })
   const [entries, setEntries] = useState<DiaryEntry[] | undefined>(undefined)
   const [books, setBooks] = useState<Book[]>([])
 
@@ -17,14 +20,17 @@ export function DiaryListHydrator() {
         setEntries([])
         return
       }
-      const store = new LocalStore()
-      Promise.all([store.listDiaryEntries(), store.listBooks()])
-        .then(([entryList, bookList]) => {
+      Promise.all([diaryActions.listEntries(), bookActions.listBooks()])
+        .then(([entryResult, bookResult]) => {
+          const entryList = entryResult.ok ? entryResult.data : []
+          const bookList = bookResult.ok ? bookResult.data : []
           setEntries(entryList.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
           setBooks(bookList)
         })
         .catch(() => setEntries([]))
     })
+  // facades are stable within the component lifecycle; deps are intentional
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (entries === undefined) {

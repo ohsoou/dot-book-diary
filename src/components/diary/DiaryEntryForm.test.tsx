@@ -20,18 +20,36 @@ vi.mock('@/lib/hooks/useUnsavedChanges', () => ({
   useUnsavedChanges: () => ({ isDirty: false, setIsDirty: mockSetIsDirty }),
 }))
 
-// Server Actions
+// useDiaryActions facade
 const mockAddEntry = vi.fn()
 const mockUpdateEntry = vi.fn()
 const mockDeleteEntry = vi.fn()
+const mockListEntries = vi.fn()
+const mockGetEntry = vi.fn()
 
-vi.mock('@/lib/actions/diary-entries', () => ({
-  addDiaryEntryAction: (...args: unknown[]) => mockAddEntry(...args),
-  updateDiaryEntryAction: (...args: unknown[]) => mockUpdateEntry(...args),
-  deleteDiaryEntryAction: (...args: unknown[]) => mockDeleteEntry(...args),
+vi.mock('@/lib/client-actions/useDiaryActions', () => ({
+  useDiaryActions: () => ({
+    addEntry: (...args: unknown[]) => mockAddEntry(...args),
+    updateEntry: (...args: unknown[]) => mockUpdateEntry(...args),
+    deleteEntry: (...args: unknown[]) => mockDeleteEntry(...args),
+    listEntries: (...args: unknown[]) => mockListEntries(...args),
+    getEntry: (...args: unknown[]) => mockGetEntry(...args),
+  }),
 }))
 
-// storage preferences — 컴포넌트가 @/lib/storage/preferences에서 직접 import
+// useBookActions facade (used by BookPicker)
+const mockListBooks = vi.fn()
+vi.mock('@/lib/client-actions/useBookActions', () => ({
+  useBookActions: () => ({
+    listBooks: (...args: unknown[]) => mockListBooks(...args),
+    addBook: vi.fn(),
+    updateBook: vi.fn(),
+    deleteBook: vi.fn(),
+    findBookByIsbn: vi.fn(),
+  }),
+}))
+
+// storage preferences
 const mockGetDraft = vi.fn()
 const mockSetDraft = vi.fn()
 const mockClearDraft = vi.fn()
@@ -40,21 +58,6 @@ vi.mock('@/lib/storage/preferences', () => ({
   getDiaryDraft: (...args: unknown[]) => mockGetDraft(...args),
   setDiaryDraft: (...args: unknown[]) => mockSetDraft(...args),
   clearDiaryDraft: (...args: unknown[]) => mockClearDraft(...args),
-}))
-
-// LocalStore mock (for guest path)
-const mockLocalAddEntry = vi.fn()
-const mockLocalUpdateEntry = vi.fn()
-const mockLocalDeleteEntry = vi.fn()
-const mockLocalListBooks = vi.fn()
-
-vi.mock('@/lib/storage/LocalStore', () => ({
-  LocalStore: vi.fn().mockImplementation(() => ({
-    addDiaryEntry: (...args: unknown[]) => mockLocalAddEntry(...args),
-    updateDiaryEntry: (...args: unknown[]) => mockLocalUpdateEntry(...args),
-    deleteDiaryEntry: (...args: unknown[]) => mockLocalDeleteEntry(...args),
-    listBooks: (...args: unknown[]) => mockLocalListBooks(...args),
-  })),
 }))
 
 const makeEntry = (overrides: Partial<DiaryEntry> = {}): DiaryEntry => ({
@@ -71,7 +74,10 @@ beforeEach(() => {
   mockGetDraft.mockResolvedValue(null)
   mockSetDraft.mockResolvedValue(undefined)
   mockClearDraft.mockResolvedValue(undefined)
-  mockLocalListBooks.mockResolvedValue([])
+  mockListBooks.mockResolvedValue({ ok: true, data: [] })
+  mockAddEntry.mockResolvedValue({ ok: true, data: makeEntry() })
+  mockUpdateEntry.mockResolvedValue({ ok: true, data: makeEntry() })
+  mockDeleteEntry.mockResolvedValue({ ok: true, data: undefined })
 })
 
 afterEach(() => {
@@ -93,7 +99,6 @@ describe('DiaryEntryForm', () => {
     it('초기값과 동일하면 setIsDirty(false)를 호출한다', async () => {
       render(<DiaryEntryForm draftId="new" initialBody="기존 내용" isLoggedIn={false} />)
 
-      // dirty=false → setIsDirty(false)
       await waitFor(() => {
         expect(mockSetIsDirty).toHaveBeenCalledWith(false)
       })
@@ -104,7 +109,6 @@ describe('DiaryEntryForm', () => {
     it('30초 경과 시 setDiaryDraft를 호출한다', async () => {
       const user = userEvent.setup()
 
-      // setInterval을 spy하여 콜백을 직접 캡처
       let capturedCallback: (() => void) | null = null
       const setIntervalSpy = vi
         .spyOn(globalThis, 'setInterval')
@@ -117,7 +121,6 @@ describe('DiaryEntryForm', () => {
 
       await user.type(screen.getByLabelText('내용'), '자동저장 테스트')
 
-      // autosave 콜백 직접 실행
       act(() => {
         capturedCallback?.()
       })
@@ -196,13 +199,27 @@ describe('DiaryEntryForm', () => {
   })
 
   describe('저장 성공 후 draft 제거', () => {
-    it('비회원 저장 성공 시 clearDiaryDraft를 호출한다', async () => {
+    it('저장 성공 시 clearDiaryDraft를 호출한다', async () => {
       const user = userEvent.setup()
-      mockLocalAddEntry.mockResolvedValue(makeEntry({ body: '저장 내용' }))
+      mockAddEntry.mockResolvedValue({ ok: true, data: makeEntry({ body: '저장 내용' }) })
 
       render(<DiaryEntryForm draftId="new" isLoggedIn={false} />)
 
       await user.type(screen.getByLabelText('내용'), '저장 내용')
+      await user.click(screen.getByRole('button', { name: '저장' }))
+
+      await waitFor(() => {
+        expect(mockClearDraft).toHaveBeenCalledWith('new')
+      })
+    })
+
+    it('회원도 저장 성공 시 clearDiaryDraft를 호출한다', async () => {
+      const user = userEvent.setup()
+      mockAddEntry.mockResolvedValue({ ok: true, data: makeEntry() })
+
+      render(<DiaryEntryForm draftId="new" isLoggedIn={true} />)
+
+      await user.type(screen.getByLabelText('내용'), '회원 저장')
       await user.click(screen.getByRole('button', { name: '저장' }))
 
       await waitFor(() => {
@@ -233,7 +250,7 @@ describe('DiaryEntryForm', () => {
 
   describe('bookId 관리', () => {
     it('initialBookId 없으면 BookPicker는 빈 상태(책 없음)를 표시한다', async () => {
-      mockLocalListBooks.mockResolvedValue([])
+      mockListBooks.mockResolvedValue({ ok: true, data: [] })
 
       render(<DiaryEntryForm draftId="new" isLoggedIn={false} />)
 
@@ -243,14 +260,17 @@ describe('DiaryEntryForm', () => {
     })
 
     it('initialBookId가 있으면 BookPicker에 해당 책이 선택된 상태로 렌더된다', async () => {
-      mockLocalListBooks.mockResolvedValue([
-        {
-          id: 'book-1',
-          title: '연결 책',
-          createdAt: '2026-04-01T00:00:00Z',
-          updatedAt: '2026-04-01T00:00:00Z',
-        },
-      ])
+      mockListBooks.mockResolvedValue({
+        ok: true,
+        data: [
+          {
+            id: 'book-1',
+            title: '연결 책',
+            createdAt: '2026-04-01T00:00:00Z',
+            updatedAt: '2026-04-01T00:00:00Z',
+          },
+        ],
+      })
 
       render(<DiaryEntryForm draftId="new" initialBookId="book-1" isLoggedIn={false} />)
 
@@ -262,14 +282,17 @@ describe('DiaryEntryForm', () => {
 
     it('bookId 변경 시 isDirty가 true가 된다', async () => {
       const user = userEvent.setup()
-      mockLocalListBooks.mockResolvedValue([
-        {
-          id: 'book-1',
-          title: '연결 책',
-          createdAt: '2026-04-01T00:00:00Z',
-          updatedAt: '2026-04-01T00:00:00Z',
-        },
-      ])
+      mockListBooks.mockResolvedValue({
+        ok: true,
+        data: [
+          {
+            id: 'book-1',
+            title: '연결 책',
+            createdAt: '2026-04-01T00:00:00Z',
+            updatedAt: '2026-04-01T00:00:00Z',
+          },
+        ],
+      })
 
       render(<DiaryEntryForm draftId="new" isLoggedIn={false} />)
 
