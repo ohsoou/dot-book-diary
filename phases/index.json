@@ -51,8 +51,9 @@
     },
     {
       "dir": "9-client-actions-facade",
-      "status": "error",
-      "failed_at": "2026-05-06T14:55:35+0900"
+      "status": "completed",
+      "failed_at": "2026-05-06T14:55:35+0900",
+      "completed_at": "2026-05-07T08:26:30+0900"
     },
     {
       "dir": "10-store-aggregation-search",
