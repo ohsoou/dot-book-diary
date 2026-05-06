@@ -15,7 +15,7 @@
       "name": "diary-entries-action-tests",
       "status": "completed",
       "started_at": "2026-05-06T14:28:53+0900",
-      "completed_at": "2026-05-06T14:32:40+0900",
+      "completed_at": "2026-05-06T14:33:27+0900",
       "summary": "diary-entries.ts 3개 액션(addDiaryEntryAction/updateDiaryEntryAction/deleteDiaryEntryAction)에 대한 테스트 18개 추가, bookId 빈문자열→undefined 정규화, parseOptionalInt NaN·소수 처리, zod 검증 실패 fieldErrors 매핑, AppError·UPSTREAM_FAILED·revalidatePath 분기 검증"
     },
     {
