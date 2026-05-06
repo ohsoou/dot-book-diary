@@ -21,28 +21,28 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-// Server Actions
+// Facade hooks
 const mockAddSession = vi.fn()
 const mockUpdateSession = vi.fn()
 const mockDeleteSession = vi.fn()
 const mockDeleteBook = vi.fn()
 const mockUpdateBook = vi.fn()
 
-vi.mock('@/lib/actions/reading-sessions', () => ({
-  addReadingSessionAction: (...args: unknown[]) => mockAddSession(...args),
-  updateReadingSessionAction: (...args: unknown[]) => mockUpdateSession(...args),
-  deleteReadingSessionAction: (...args: unknown[]) => mockDeleteSession(...args),
+vi.mock('@/lib/client-actions/useReadingSessionActions', () => ({
+  useReadingSessionActions: vi.fn(),
 }))
 
-vi.mock('@/lib/actions/books', () => ({
-  deleteBookAction: (...args: unknown[]) => mockDeleteBook(...args),
-  updateBookAction: (...args: unknown[]) => mockUpdateBook(...args),
+vi.mock('@/lib/client-actions/useBookActions', () => ({
+  useBookActions: vi.fn(),
 }))
 
 // date mock: 고정된 날짜 반환
 vi.mock('@/lib/date', () => ({
   formatLocalYmd: () => '2026-04-20',
 }))
+
+import { useReadingSessionActions } from '@/lib/client-actions/useReadingSessionActions'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
 
 const makeBook = (overrides: Partial<Book> = {}): Book => ({
   id: 'book-1',
@@ -74,6 +74,19 @@ beforeEach(() => {
   mockDeleteSession.mockResolvedValue({ ok: true, data: undefined } satisfies ActionResult<void>)
   mockDeleteBook.mockResolvedValue({ ok: true, data: undefined } satisfies ActionResult<void>)
   mockUpdateBook.mockResolvedValue({ ok: true, data: makeBook({ targetDate: '2026-05-01' }) } satisfies ActionResult<Book>)
+
+  vi.mocked(useReadingSessionActions).mockReturnValue({
+    addSession: mockAddSession,
+    updateSession: mockUpdateSession,
+    deleteSession: mockDeleteSession,
+  })
+  vi.mocked(useBookActions).mockReturnValue({
+    listBooks: vi.fn(),
+    addBook: vi.fn(),
+    findBookByIsbn: vi.fn(),
+    updateBook: mockUpdateBook,
+    deleteBook: mockDeleteBook,
+  })
 })
 
 describe('ReadingSessionForm', () => {
@@ -110,7 +123,7 @@ describe('ReadingSessionForm', () => {
     await user.click(screen.getByRole('button', { name: '수정 저장' }))
 
     await waitFor(() => {
-      expect(mockUpdateSession).toHaveBeenCalledWith('session-1', null, expect.any(FormData))
+      expect(mockUpdateSession).toHaveBeenCalledWith('session-1', expect.anything())
     })
   })
 

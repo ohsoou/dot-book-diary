@@ -12,14 +12,8 @@ import { GoalProgress } from './GoalProgress'
 import { Button } from '@/components/ui/Button'
 import { FieldError } from '@/components/ui/FieldError'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import {
-  addReadingSessionAction,
-  updateReadingSessionAction,
-  deleteReadingSessionAction,
-} from '@/lib/actions/reading-sessions'
-import { deleteBookAction, updateBookAction } from '@/lib/actions/books'
-import { LocalStore } from '@/lib/storage/LocalStore'
-import type { ActionResult } from '@/lib/errors'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
+import { useReadingSessionActions } from '@/lib/client-actions/useReadingSessionActions'
 
 interface ReadingSessionFormProps {
   book: Book
@@ -61,19 +55,12 @@ function parseOptionalInt(value: string): number | undefined {
   return isNaN(n) ? undefined : Math.trunc(n)
 }
 
-function buildFormData(bookId: string, fields: FormFields): FormData {
-  const fd = new FormData()
-  fd.set('bookId', bookId)
-  fd.set('readDate', fields.readDate)
-  if (fields.startPage !== '') fd.set('startPage', fields.startPage)
-  if (fields.endPage !== '') fd.set('endPage', fields.endPage)
-  if (fields.durationMinutes !== '') fd.set('durationMinutes', fields.durationMinutes)
-  return fd
-}
-
 export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn }: ReadingSessionFormProps) {
   const router = useRouter()
   const today = formatLocalYmd(new Date())
+
+  const bookActions = useBookActions({ isLoggedIn })
+  const sessionActions = useReadingSessionActions({ isLoggedIn })
 
   const [sessions, setSessions] = useState<ReadingSession[]>(initialSessions)
   const [currentBook, setCurrentBook] = useState<Book>(book)
@@ -93,24 +80,13 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
   const handleTargetDateSave = useCallback(() => {
     const newTargetDate = targetDateInput.trim() || undefined
     startTargetDateTransition(async () => {
-      let result: ActionResult<Book>
-      if (isLoggedIn) {
-        result = await updateBookAction(currentBook.id, { targetDate: newTargetDate })
-      } else {
-        const store = new LocalStore()
-        try {
-          const updated = await store.updateBook(currentBook.id, { targetDate: newTargetDate })
-          result = { ok: true, data: updated }
-        } catch {
-          result = { ok: false, error: { code: 'UPSTREAM_FAILED', message: '저장에 실패했어요' } }
-        }
-      }
+      const result = await bookActions.updateBook(currentBook.id, { targetDate: newTargetDate })
       if (result.ok) {
         setCurrentBook(result.data)
         setTargetDateInput(result.data.targetDate ?? '')
       }
     })
-  }, [currentBook.id, isLoggedIn, targetDateInput])
+  }, [bookActions, currentBook.id, targetDateInput])
 
   const handleFieldChange = useCallback((key: keyof FormFields, value: string) => {
     setFields((prev) => ({ ...prev, [key]: value }))
@@ -158,42 +134,21 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
       e.preventDefault()
       if (!validateFields()) return
 
-      const fd = buildFormData(book.id, fields)
-
       startTransition(async () => {
-        let result: ActionResult<ReadingSession>
-
-        if (isLoggedIn) {
-          if (editingId) {
-            result = await updateReadingSessionAction(editingId, null, fd)
-          } else {
-            result = await addReadingSessionAction(null, fd)
-          }
-        } else {
-          const store = new LocalStore()
-          try {
-            if (editingId) {
-              const updated = await store.updateReadingSession(editingId, {
-                readDate: fields.readDate,
-                startPage: parseOptionalInt(fields.startPage),
-                endPage: parseOptionalInt(fields.endPage),
-                durationMinutes: parseOptionalInt(fields.durationMinutes),
-              })
-              result = { ok: true, data: updated }
-            } else {
-              const added = await store.addReadingSession({
-                bookId: book.id,
-                readDate: fields.readDate,
-                startPage: parseOptionalInt(fields.startPage),
-                endPage: parseOptionalInt(fields.endPage),
-                durationMinutes: parseOptionalInt(fields.durationMinutes),
-              })
-              result = { ok: true, data: added }
-            }
-          } catch {
-            result = { ok: false, error: { code: 'UPSTREAM_FAILED', message: '저장에 실패했어요' } }
-          }
-        }
+        const result = editingId
+          ? await sessionActions.updateSession(editingId, {
+              readDate: fields.readDate,
+              startPage: parseOptionalInt(fields.startPage),
+              endPage: parseOptionalInt(fields.endPage),
+              durationMinutes: parseOptionalInt(fields.durationMinutes),
+            })
+          : await sessionActions.addSession({
+              bookId: book.id,
+              readDate: fields.readDate,
+              startPage: parseOptionalInt(fields.startPage),
+              endPage: parseOptionalInt(fields.endPage),
+              durationMinutes: parseOptionalInt(fields.durationMinutes),
+            })
 
         if (result.ok) {
           if (editingId) {
@@ -213,24 +168,13 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
         }
       })
     },
-    [book.id, editingId, fields, isLoggedIn, today, validateFields],
+    [book.id, editingId, fields, sessionActions, today, validateFields],
   )
 
   const handleDeleteSession = useCallback(
     async (id: string) => {
       startTransition(async () => {
-        let result: ActionResult<void>
-        if (isLoggedIn) {
-          result = await deleteReadingSessionAction(id)
-        } else {
-          const store = new LocalStore()
-          try {
-            await store.deleteReadingSession(id)
-            result = { ok: true, data: undefined }
-          } catch {
-            result = { ok: false, error: { code: 'UPSTREAM_FAILED', message: '삭제에 실패했어요' } }
-          }
-        }
+        const result = await sessionActions.deleteSession(id)
         if (result.ok) {
           setSessions((prev) => prev.filter((s) => s.id !== id))
           if (editingId === id) cancelEdit()
@@ -238,29 +182,18 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
         setDeletingSessionId(null)
       })
     },
-    [isLoggedIn, editingId, cancelEdit],
+    [sessionActions, editingId, cancelEdit],
   )
 
   const handleDeleteBook = useCallback(async () => {
     startTransition(async () => {
-      let result: ActionResult<void>
-      if (isLoggedIn) {
-        result = await deleteBookAction(book.id)
-      } else {
-        const store = new LocalStore()
-        try {
-          await store.deleteBook(book.id)
-          result = { ok: true, data: undefined }
-        } catch {
-          result = { ok: false, error: { code: 'UPSTREAM_FAILED', message: '삭제에 실패했어요' } }
-        }
-      }
+      const result = await bookActions.deleteBook(book.id)
       if (result.ok) {
         router.push('/bookshelf')
       }
       setShowBookDeleteDialog(false)
     })
-  }, [book.id, isLoggedIn, router])
+  }, [bookActions, book.id, router])
 
   return (
     <div className="flex flex-col gap-6">
