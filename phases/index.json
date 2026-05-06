@@ -43,6 +43,26 @@
       "dir": "7-auth-error-code-dispatch",
       "status": "completed",
       "completed_at": "2026-04-30T14:52:32+0900"
+    },
+    {
+      "dir": "8-action-server-tests",
+      "status": "pending"
+    },
+    {
+      "dir": "9-client-actions-facade",
+      "status": "pending"
+    },
+    {
+      "dir": "10-store-aggregation-search",
+      "status": "pending"
+    },
+    {
+      "dir": "11-book-status-rating",
+      "status": "pending"
+    },
+    {
+      "dir": "12-aladin-route-protection",
+      "status": "pending"
     }
   ]
 }
