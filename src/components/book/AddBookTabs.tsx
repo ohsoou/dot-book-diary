@@ -1,12 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ToggleTabs } from '@/components/ui/ToggleTabs'
 import { BookSearchForm } from './BookSearchForm'
-import { LocalStore } from '@/lib/storage/LocalStore'
-import { addBookAction } from '@/lib/actions/books'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
 import { useToast } from '@/components/ui/Toast'
 import type { ActionResult } from '@/lib/errors'
 import type { Book, BookSearchResult } from '@/types'
@@ -23,7 +22,7 @@ export function AddBookTabs({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [activeTab, setActiveTab] = useState<Tab>('검색')
   const router = useRouter()
   const { addToast } = useToast()
-  const store = useMemo(() => new LocalStore(), [])
+  const actions = useBookActions({ isLoggedIn })
 
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab as Tab)
@@ -31,37 +30,9 @@ export function AddBookTabs({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   const handleAddBook = useCallback(
     async (input: BookSearchResult): Promise<ActionResult<Book>> => {
-      if (isLoggedIn) {
-        return addBookAction(input)
-      }
-      // 비회원: LocalStore에서 직접 처리
-      try {
-        if (input.isbn) {
-          const existing = await store.findBookByIsbn(input.isbn)
-          if (existing) {
-            return {
-              ok: false,
-              error: { code: 'DUPLICATE_ISBN', message: '이미 책장에 있는 책이에요' },
-            }
-          }
-        }
-        const book = await store.addBook({
-          isbn: input.isbn,
-          title: input.title,
-          author: input.author,
-          publisher: input.publisher,
-          coverUrl: input.coverUrl,
-          totalPages: input.totalPages,
-        })
-        return { ok: true, data: book }
-      } catch {
-        return {
-          ok: false,
-          error: { code: 'UPSTREAM_FAILED', message: '책 추가에 실패했어요' },
-        }
-      }
+      return actions.addBook(input)
     },
-    [isLoggedIn, store],
+    [actions],
   )
 
   const handleScanResult = useCallback(
