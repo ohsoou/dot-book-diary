@@ -2,8 +2,23 @@
   "project": "dot-book-diary",
   "phase": "9-client-actions-facade",
   "steps": [
-    { "step": 0, "name": "use-book-actions-hook", "status": "pending" },
-    { "step": 1, "name": "use-reading-session-actions-hook", "status": "pending" },
-    { "step": 2, "name": "use-diary-actions-and-finalize", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "use-book-actions-hook",
+      "status": "completed",
+      "started_at": "2026-05-06T14:40:33+0900",
+      "summary": "useBookActions 훅 신규(src/lib/client-actions/useBookActions.ts), 테스트 12건(useBookActions.test.ts), AddBookTabs를 actions.addBook() 단일 호출로 마이그레이션 — 590 tests passed"
+    },
+    {
+      "step": 1,
+      "name": "use-reading-session-actions-hook",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "use-diary-actions-and-finalize",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-06T14:40:33+0900"
 }
