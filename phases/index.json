@@ -46,7 +46,8 @@
     },
     {
       "dir": "8-action-server-tests",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-05-06T14:35:46+0900"
     },
     {
       "dir": "9-client-actions-facade",
