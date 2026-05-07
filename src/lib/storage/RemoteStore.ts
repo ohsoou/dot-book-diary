@@ -13,6 +13,14 @@ import type {
 import type { Store } from './Store';
 import { AppError } from '@/lib/errors';
 import { bookSchema, readingSessionSchema, diaryEntrySchema } from '@/lib/validation';
+import { formatLocalYmd } from '@/lib/date';
+import { escapeLikePattern } from '@/lib/escape';
+
+/** YYYY-MM-DD → days since Unix epoch (UTC, DST-safe) */
+function daysSince(ymd: string): number {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return Math.floor(Date.UTC(y!, m! - 1, d!) / 86400000);
+}
 
 /**
  * Supabase Postgres 기반 Store 구현.
@@ -350,28 +358,173 @@ export class RemoteStore implements Store {
 
   // ── Aggregation & search ───────────────────────────────────────────────────
 
-  async getReadingStats(_period?: ReadingStatsPeriod): Promise<ReadingStats> {
-    throw new Error('not implemented — see phase 10 step 2');
+  async getReadingStats(period?: ReadingStatsPeriod): Promise<ReadingStats> {
+    const userId = await this.getUserId();
+    let q = this.supabase
+      .from('reading_sessions')
+      .select('duration_minutes, start_page, end_page, read_date, book_id')
+      .eq('user_id', userId);
+
+    if (period) {
+      q = q.gte('read_date', period.from).lte('read_date', period.to);
+    }
+
+    const { data, error } = await q;
+    if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+
+    const sessions = (data ?? []) as StatsRow[];
+    let totalMinutes = 0;
+    let totalPagesRead = 0;
+    const dates = new Set<string>();
+    const bookIds = new Set<string>();
+
+    for (const s of sessions) {
+      totalMinutes += s.duration_minutes ?? 0;
+      if (s.start_page !== null && s.end_page !== null) {
+        totalPagesRead += Math.max(0, s.end_page - s.start_page);
+      }
+      dates.add(s.read_date);
+      bookIds.add(s.book_id);
+    }
+
+    return {
+      totalMinutes,
+      totalSessions: sessions.length,
+      totalPagesRead,
+      daysActive: dates.size,
+      booksTouched: bookIds.size,
+    };
   }
 
   async getReadingStreak(): Promise<ReadingStreak> {
-    throw new Error('not implemented — see phase 10 step 2');
+    const userId = await this.getUserId();
+    const { data, error } = await this.supabase
+      .from('reading_sessions')
+      .select('read_date')
+      .eq('user_id', userId)
+      .order('read_date', { ascending: false });
+
+    if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+
+    const rows = (data ?? []) as StreakRow[];
+
+    if (rows.length === 0) {
+      return { current: 0, longest: 0, lastReadDate: null };
+    }
+
+    const dateSet = new Set(rows.map((r) => r.read_date));
+    const sortedDates = Array.from(dateSet).sort();
+    const lastReadDate = sortedDates[sortedDates.length - 1] ?? null;
+
+    let longest = 1;
+    let run = 1;
+    for (let i = 1; i < sortedDates.length; i++) {
+      if (daysSince(sortedDates[i]!) - daysSince(sortedDates[i - 1]!) === 1) {
+        run++;
+        if (run > longest) longest = run;
+      } else {
+        run = 1;
+      }
+    }
+
+    const today = formatLocalYmd(new Date());
+    let current = 0;
+    if (dateSet.has(today)) {
+      current = 1;
+      const cursor = new Date();
+      while (true) {
+        cursor.setDate(cursor.getDate() - 1);
+        if (!dateSet.has(formatLocalYmd(cursor))) break;
+        current++;
+      }
+    }
+
+    return { current, longest, lastReadDate };
   }
 
-  async listSessionsGroupedByDate(_period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
-    throw new Error('not implemented — see phase 10 step 2');
+  async listSessionsGroupedByDate(period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
+    const userId = await this.getUserId();
+    const { data, error } = await this.supabase
+      .from('reading_sessions')
+      .select('read_date, duration_minutes, book_id')
+      .eq('user_id', userId)
+      .gte('read_date', period.from)
+      .lte('read_date', period.to)
+      .order('read_date', { ascending: true });
+
+    if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+
+    const rows = (data ?? []) as GroupRow[];
+    const groups = new Map<string, { totalMinutes: number; bookIds: string[] }>();
+
+    for (const s of rows) {
+      if (!groups.has(s.read_date)) {
+        groups.set(s.read_date, { totalMinutes: 0, bookIds: [] });
+      }
+      const g = groups.get(s.read_date)!;
+      g.totalMinutes += s.duration_minutes ?? 0;
+      if (!g.bookIds.includes(s.book_id)) {
+        g.bookIds.push(s.book_id);
+      }
+    }
+
+    return Array.from(groups.entries())
+      .map(([date, g]) => ({ date, totalMinutes: g.totalMinutes, bookIds: g.bookIds }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 
-  async searchDiaryEntries(_query: DiarySearchQuery): Promise<DiaryEntry[]> {
-    throw new Error('not implemented — see phase 10 step 2');
+  async searchDiaryEntries(query: DiarySearchQuery): Promise<DiaryEntry[]> {
+    const userId = await this.getUserId();
+
+    let q = this.supabase
+      .from('diary_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(query.limit ?? 50);
+
+    if (query.q) q = q.ilike('body', `%${escapeLikePattern(query.q)}%`);
+    if (query.bookId) q = q.eq('book_id', query.bookId);
+    if (query.entryType) q = q.eq('entry_type', query.entryType);
+    if (query.from) q = q.gte('created_at', `${query.from}T00:00:00`);
+    if (query.to) q = q.lte('created_at', `${query.to}T23:59:59`);
+
+    const { data, error } = await q;
+    if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+    return (data ?? []).map(rowToDiaryEntry);
   }
 
   async countBooks(): Promise<number> {
-    throw new Error('not implemented — see phase 10 step 2');
+    const userId = await this.getUserId();
+    const { count, error } = await this.supabase
+      .from('books')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+    return count ?? 0;
   }
 }
 
 // ── Row 매핑 헬퍼 ────────────────────────────────────────────────────────────
+
+type StatsRow = {
+  duration_minutes: number | null;
+  start_page: number | null;
+  end_page: number | null;
+  read_date: string;
+  book_id: string;
+};
+
+type StreakRow = {
+  read_date: string;
+};
+
+type GroupRow = {
+  read_date: string;
+  duration_minutes: number | null;
+  book_id: string;
+};
 
 type BookRow = {
   id: string;
