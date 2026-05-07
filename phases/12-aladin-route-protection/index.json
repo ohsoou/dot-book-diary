@@ -2,8 +2,23 @@
   "project": "dot-book-diary",
   "phase": "12-aladin-route-protection",
   "steps": [
-    { "step": 0, "name": "rate-limiter-utility", "status": "pending" },
-    { "step": 1, "name": "apply-to-aladin-routes", "status": "pending" },
-    { "step": 2, "name": "caching-and-revalidate-tuning", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "rate-limiter-utility",
+      "status": "completed",
+      "started_at": "2026-05-08T08:50:16+0900",
+      "summary": "src/lib/rate-limit.ts 토큰 버킷 유틸 신규(checkAndConsume/__resetRateLimitStore) + rate-limit.test.ts 10개 케이스 + errors.test.ts RATE_LIMITED 케이스 추가"
+    },
+    {
+      "step": 1,
+      "name": "apply-to-aladin-routes",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "caching-and-revalidate-tuning",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-08T08:50:16+0900"
 }
