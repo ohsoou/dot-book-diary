@@ -12,6 +12,7 @@ import { GoalProgress } from './GoalProgress'
 import { Button } from '@/components/ui/Button'
 import { FieldError } from '@/components/ui/FieldError'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useToast } from '@/components/ui/Toast'
 import { useBookActions } from '@/lib/client-actions/useBookActions'
 import { useReadingSessionActions } from '@/lib/client-actions/useReadingSessionActions'
 
@@ -58,6 +59,7 @@ function parseOptionalInt(value: string): number | undefined {
 export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn }: ReadingSessionFormProps) {
   const router = useRouter()
   const today = formatLocalYmd(new Date())
+  const { addToast } = useToast()
 
   const bookActions = useBookActions({ isLoggedIn })
   const sessionActions = useReadingSessionActions({ isLoggedIn })
@@ -65,6 +67,7 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
   const [sessions, setSessions] = useState<ReadingSession[]>(initialSessions)
   const [currentBook, setCurrentBook] = useState<Book>(book)
   const [targetDateInput, setTargetDateInput] = useState(book.targetDate ?? '')
+  const [memoValue, setMemoValue] = useState(book.memo ?? '')
   const [fields, setFields] = useState<FormFields>(emptyFields(today))
   const [editingId, setEditingId] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
@@ -72,6 +75,9 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
   const [showBookDeleteDialog, setShowBookDeleteDialog] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [isTargetDatePending, startTargetDateTransition] = useTransition()
+  const [isStatusPending, startStatusTransition] = useTransition()
+  const [isRatingPending, startRatingTransition] = useTransition()
+  const [, startMemoTransition] = useTransition()
 
   useEffect(() => {
     setSessions(initialSessions)
@@ -87,6 +93,46 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
       }
     })
   }, [bookActions, currentBook.id, targetDateInput])
+
+  const handleStatusToggle = useCallback(() => {
+    const newStatus = currentBook.status === 'finished' ? 'reading' : 'finished'
+    startStatusTransition(async () => {
+      const result = await bookActions.updateBook(currentBook.id, { status: newStatus })
+      if (result.ok) {
+        setCurrentBook(result.data)
+      } else {
+        addToast({ message: result.error.message, variant: 'error' })
+      }
+    })
+  }, [bookActions, currentBook.id, currentBook.status, addToast])
+
+  const handleRating = useCallback(
+    (rating: number) => {
+      startRatingTransition(async () => {
+        const result = await bookActions.updateBook(currentBook.id, { rating })
+        if (result.ok) {
+          setCurrentBook(result.data)
+        } else {
+          addToast({ message: result.error.message, variant: 'error' })
+        }
+      })
+    },
+    [bookActions, currentBook.id, addToast],
+  )
+
+  const handleMemoSave = useCallback(() => {
+    const memo = memoValue || undefined
+    const currentMemo = currentBook.memo || undefined
+    if (memo === currentMemo) return
+    startMemoTransition(async () => {
+      const result = await bookActions.updateBook(currentBook.id, { memo })
+      if (result.ok) {
+        setCurrentBook(result.data)
+      } else {
+        addToast({ message: result.error.message, variant: 'error' })
+      }
+    })
+  }, [bookActions, currentBook.id, currentBook.memo, memoValue, addToast])
 
   const handleFieldChange = useCallback((key: keyof FormFields, value: string) => {
     setFields((prev) => ({ ...prev, [key]: value }))
@@ -214,6 +260,55 @@ export function ReadingSessionForm({ book, sessions: initialSessions, isLoggedIn
           </Button>
         </div>
       </div>
+
+      {/* 완독 표시 / 별점 / 메모 */}
+      <section className="flex flex-col gap-4">
+        <div>
+          <Button
+            type="button"
+            variant={currentBook.status === 'finished' ? 'secondary' : 'primary'}
+            size="sm"
+            pending={isStatusPending}
+            pendingLabel="저장 중..."
+            onClick={handleStatusToggle}
+          >
+            {currentBook.status === 'finished' ? '완독 취소' : '완독 표시'}
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[var(--color-text-secondary)]">별점</span>
+          <div className="flex gap-1" role="group" aria-label="별점">
+            {([1, 2, 3, 4, 5] as const).map((n) => (
+              <button
+                key={n}
+                type="button"
+                aria-label={`${n}점`}
+                onClick={() => handleRating(n)}
+                disabled={isRatingPending}
+                className="text-lg leading-none text-[var(--color-accent)] hover:opacity-70 transition-opacity duration-100 ease-linear disabled:opacity-40"
+              >
+                {n <= (currentBook.rating ?? 0) ? '★' : '☆'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-[var(--color-text-secondary)] block mb-1" htmlFor="bookMemo">
+            한 줄 메모
+          </label>
+          <textarea
+            id="bookMemo"
+            maxLength={500}
+            value={memoValue}
+            onChange={(e) => setMemoValue(e.target.value)}
+            onBlur={handleMemoSave}
+            placeholder="이 책에 대한 메모를 남겨 보세요"
+            className="bg-[var(--color-bg-input)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm px-3 py-2 w-full focus:outline-none focus:border-[var(--color-border-focus)] resize-y min-h-[80px] placeholder:text-[var(--color-text-disabled)]"
+          />
+        </div>
+      </section>
 
       {/* 독서 타이머 */}
       <ReadingTimer

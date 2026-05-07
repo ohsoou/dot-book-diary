@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { BookGrid } from './BookGrid'
 import type { Book } from '@/types'
@@ -26,6 +27,7 @@ vi.mock('next/link', () => ({
 const makeBook = (id: string, title: string, extra: Partial<Book> = {}): Book => ({
   id,
   title,
+  status: 'reading',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
   ...extra,
@@ -70,5 +72,72 @@ describe('BookGrid', () => {
     render(<BookGrid books={books} />)
     const text = document.body.textContent ?? ''
     expect(text).not.toMatch(/D-/)
+  })
+
+  // 상태 필터 탭 테스트
+  it('초기 전체 탭에서 모든 책을 노출한다', () => {
+    const books = [
+      makeBook('1', '책 A', { status: 'reading' }),
+      makeBook('2', '책 B', { status: 'want' }),
+      makeBook('3', '책 C', { status: 'finished' }),
+    ]
+    render(<BookGrid books={books} />)
+    expect(screen.getByText('책 A')).toBeDefined()
+    expect(screen.getByText('책 B')).toBeDefined()
+    expect(screen.getByText('책 C')).toBeDefined()
+  })
+
+  it("'읽고 싶은' 탭 클릭 시 want 상태인 책만 노출한다", async () => {
+    const user = userEvent.setup()
+    const books = [
+      makeBook('1', '책 A', { status: 'reading' }),
+      makeBook('2', '책 B', { status: 'want' }),
+    ]
+    render(<BookGrid books={books} />)
+
+    await user.click(screen.getByRole('tab', { name: '읽고 싶은' }))
+
+    expect(screen.queryByText('책 A')).toBeNull()
+    expect(screen.getByText('책 B')).toBeDefined()
+  })
+
+  it("'완독' 탭 클릭 시 finished 상태인 책만 노출한다", async () => {
+    const user = userEvent.setup()
+    const books = [
+      makeBook('1', '책 A', { status: 'reading' }),
+      makeBook('2', '책 B', { status: 'finished' }),
+    ]
+    render(<BookGrid books={books} />)
+
+    await user.click(screen.getByRole('tab', { name: '완독' }))
+
+    expect(screen.queryByText('책 A')).toBeNull()
+    expect(screen.getByText('책 B')).toBeDefined()
+  })
+
+  it('필터 결과가 없으면 EmptyState를 렌더한다', async () => {
+    const user = userEvent.setup()
+    const books = [makeBook('1', '책 A', { status: 'reading' })]
+    render(<BookGrid books={books} />)
+
+    await user.click(screen.getByRole('tab', { name: '완독' }))
+
+    expect(screen.getByText('이 분류에 책이 없어요')).toBeDefined()
+  })
+
+  it('탭을 전체로 되돌리면 모든 책이 다시 노출된다', async () => {
+    const user = userEvent.setup()
+    const books = [
+      makeBook('1', '책 A', { status: 'reading' }),
+      makeBook('2', '책 B', { status: 'finished' }),
+    ]
+    render(<BookGrid books={books} />)
+
+    await user.click(screen.getByRole('tab', { name: '완독' }))
+    expect(screen.queryByText('책 A')).toBeNull()
+
+    await user.click(screen.getByRole('tab', { name: '전체' }))
+    expect(screen.getByText('책 A')).toBeDefined()
+    expect(screen.getByText('책 B')).toBeDefined()
   })
 })

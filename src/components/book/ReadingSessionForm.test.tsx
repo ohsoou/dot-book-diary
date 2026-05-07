@@ -21,6 +21,13 @@ vi.mock('next/link', () => ({
   ),
 }))
 
+// Toast
+const mockAddToast = vi.fn()
+vi.mock('@/components/ui/Toast', () => ({
+  useToast: () => ({ addToast: mockAddToast }),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 // Facade hooks
 const mockAddSession = vi.fn()
 const mockUpdateSession = vi.fn()
@@ -48,6 +55,7 @@ const makeBook = (overrides: Partial<Book> = {}): Book => ({
   id: 'book-1',
   title: '테스트 책',
   author: '저자',
+  status: 'reading',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
   ...overrides,
@@ -211,5 +219,78 @@ describe('ReadingSessionForm', () => {
     // 일수 라벨 또는 상태 라벨이 있어야 함
     const text = document.body.textContent ?? ''
     expect(text).toMatch(/일 남음|오늘까지|일 지남|순항|조금 밀림|며칠 더 필요해요/)
+  })
+
+  // 완독 표시 / 별점 / 메모 테스트
+  it('"완독 표시" 클릭 시 updateBook을 { status: "finished" }로 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook({ status: 'reading' })} sessions={[]} isLoggedIn={true} />)
+
+    await user.click(screen.getByRole('button', { name: '완독 표시' }))
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith('book-1', { status: 'finished' })
+    })
+  })
+
+  it('"완독 취소"(already finished) 클릭 시 updateBook을 { status: "reading" }로 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook({ status: 'finished' })} sessions={[]} isLoggedIn={true} />)
+
+    await user.click(screen.getByRole('button', { name: '완독 취소' }))
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith('book-1', { status: 'reading' })
+    })
+  })
+
+  it('별점 클릭 시 해당 rating으로 updateBook을 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook()} sessions={[]} isLoggedIn={true} />)
+
+    await user.click(screen.getByRole('button', { name: '3점' }))
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith('book-1', { rating: 3 })
+    })
+  })
+
+  it('메모 onBlur 시 updateBook을 memo 값으로 호출한다', async () => {
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook()} sessions={[]} isLoggedIn={true} />)
+
+    const textarea = screen.getByLabelText('한 줄 메모')
+    await user.click(textarea)
+    await user.type(textarea, '좋은 책이에요')
+    await user.tab()
+
+    await waitFor(() => {
+      expect(mockUpdateBook).toHaveBeenCalledWith('book-1', { memo: '좋은 책이에요' })
+    })
+  })
+
+  it('메모 textarea는 maxLength=500 속성을 가진다', () => {
+    render(<ReadingSessionForm book={makeBook()} sessions={[]} isLoggedIn={true} />)
+    const textarea = screen.getByLabelText('한 줄 메모') as HTMLTextAreaElement
+    expect(textarea.maxLength).toBe(500)
+  })
+
+  it('updateBook 실패 시 토스트로 에러를 노출한다', async () => {
+    mockUpdateBook.mockResolvedValueOnce({
+      ok: false,
+      error: { code: 'UPSTREAM_FAILED', message: '서버 오류가 생겼어요' },
+    } satisfies ActionResult<Book>)
+
+    const user = userEvent.setup()
+    render(<ReadingSessionForm book={makeBook({ status: 'reading' })} sessions={[]} isLoggedIn={true} />)
+
+    await user.click(screen.getByRole('button', { name: '완독 표시' }))
+
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith({
+        message: '서버 오류가 생겼어요',
+        variant: 'error',
+      })
+    })
   })
 })
