@@ -13,6 +13,13 @@ import type { Store } from './Store';
 import { KEYS, CURRENT_SCHEMA_VERSION } from './keys';
 import { bookSchema, readingSessionSchema, diaryEntrySchema } from '@/lib/validation';
 import { AppError } from '@/lib/errors';
+import { formatLocalYmd } from '@/lib/date';
+
+/** YYYY-MM-DD → days since Unix epoch (UTC, DST-safe) */
+function daysSince(ymd: string): number {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return Math.floor(Date.UTC(y!, m! - 1, d!) / 86400000);
+}
 
 function uuid(): string {
   return crypto.randomUUID();
@@ -227,23 +234,124 @@ export class LocalStore implements Store {
 
   // ── Aggregation & search ───────────────────────────────────────────────────
 
-  async getReadingStats(_period?: ReadingStatsPeriod): Promise<ReadingStats> {
-    throw new Error('not implemented — see phase 10 step 1');
+  async getReadingStats(period?: ReadingStatsPeriod): Promise<ReadingStats> {
+    const sessions = await this.listReadingSessions(
+      period ? { from: period.from, to: period.to } : undefined,
+    );
+
+    const dates = new Set<string>();
+    const bookIds = new Set<string>();
+    let totalMinutes = 0;
+    let totalPagesRead = 0;
+
+    for (const s of sessions) {
+      totalMinutes += s.durationMinutes ?? 0;
+      if (s.startPage !== undefined && s.endPage !== undefined) {
+        totalPagesRead += Math.max(0, s.endPage - s.startPage);
+      }
+      dates.add(s.readDate);
+      bookIds.add(s.bookId);
+    }
+
+    return {
+      totalMinutes,
+      totalSessions: sessions.length,
+      totalPagesRead,
+      daysActive: dates.size,
+      booksTouched: bookIds.size,
+    };
   }
 
   async getReadingStreak(): Promise<ReadingStreak> {
-    throw new Error('not implemented — see phase 10 step 1');
+    const sessions = await this.listAll();
+
+    if (sessions.length === 0) {
+      return { current: 0, longest: 0, lastReadDate: null };
+    }
+
+    const dateSet = new Set(sessions.map((s) => s.readDate));
+    const sortedDates = Array.from(dateSet).sort();
+    const lastReadDate = sortedDates[sortedDates.length - 1] ?? null;
+
+    // Longest streak: find max run of consecutive calendar days
+    let longest = 1;
+    let run = 1;
+    for (let i = 1; i < sortedDates.length; i++) {
+      if (daysSince(sortedDates[i]!) - daysSince(sortedDates[i - 1]!) === 1) {
+        run++;
+        if (run > longest) longest = run;
+      } else {
+        run = 1;
+      }
+    }
+
+    // Current streak: count consecutive days backwards from today (today must be in set)
+    const today = formatLocalYmd(new Date());
+    let current = 0;
+    if (dateSet.has(today)) {
+      current = 1;
+      const cursor = new Date();
+      while (true) {
+        cursor.setDate(cursor.getDate() - 1);
+        if (!dateSet.has(formatLocalYmd(cursor))) break;
+        current++;
+      }
+    }
+
+    return { current, longest, lastReadDate };
   }
 
-  async listSessionsGroupedByDate(_period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
-    throw new Error('not implemented — see phase 10 step 1');
+  async listSessionsGroupedByDate(period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
+    const sessions = await this.listReadingSessions({ from: period.from, to: period.to });
+
+    const groups = new Map<string, { totalMinutes: number; bookIds: string[] }>();
+
+    for (const s of sessions) {
+      if (!groups.has(s.readDate)) {
+        groups.set(s.readDate, { totalMinutes: 0, bookIds: [] });
+      }
+      const g = groups.get(s.readDate)!;
+      g.totalMinutes += s.durationMinutes ?? 0;
+      if (!g.bookIds.includes(s.bookId)) {
+        g.bookIds.push(s.bookId);
+      }
+    }
+
+    return Array.from(groups.entries())
+      .map(([date, g]) => ({ date, totalMinutes: g.totalMinutes, bookIds: g.bookIds }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 
-  async searchDiaryEntries(_query: DiarySearchQuery): Promise<DiaryEntry[]> {
-    throw new Error('not implemented — see phase 10 step 1');
+  async searchDiaryEntries(query: DiarySearchQuery): Promise<DiaryEntry[]> {
+    // cursor is ignored in LocalStore — data volume is small, cursor-based pagination is not needed
+    let entries = await this.listDiaryEntries({
+      bookId: query.bookId,
+      entryType: query.entryType,
+    });
+
+    if (query.q) {
+      const q = query.q.toLowerCase();
+      entries = entries.filter((e) => e.body.toLowerCase().includes(q));
+    }
+
+    if (query.from) {
+      const from = query.from;
+      entries = entries.filter((e) => e.createdAt.slice(0, 10) >= from);
+    }
+
+    if (query.to) {
+      const to = query.to;
+      entries = entries.filter((e) => e.createdAt.slice(0, 10) <= to);
+    }
+
+    entries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+    const limit = query.limit ?? 50;
+    return entries.slice(0, limit);
   }
 
   async countBooks(): Promise<number> {
-    throw new Error('not implemented — see phase 10 step 1');
+    const books = await this.listBooks();
+    return books.length;
   }
 }
