@@ -27,5 +27,6 @@
       "summary": "RemoteStore에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드 구현(Supabase 쿼리 + 클라이언트 reduce), escape.ts에 escapeLikePattern 헬퍼 추가, RemoteStore.test.ts에 신규 테스트 25개(총 42개) 추가 — step 1과 결과 형태 일치 검증 완료"
     }
   ],
-  "created_at": "2026-05-07T09:55:59+0900"
+  "created_at": "2026-05-07T09:55:59+0900",
+  "completed_at": "2026-05-07T10:11:57+0900"
 }
