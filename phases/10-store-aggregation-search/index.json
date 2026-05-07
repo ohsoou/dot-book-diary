@@ -7,7 +7,8 @@
       "name": "store-types-and-interface",
       "status": "completed",
       "started_at": "2026-05-07T09:55:59+0900",
-      "summary": "ReadingStatsPeriod/ReadingStats/ReadingStreak/DiarySearchQuery/SessionsByDate 타입 5종을 types/index.ts에 추가하고, Store 인터페이스에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드를 추가, LocalStore·RemoteStore에 throw stub으로 구현 완료"
+      "summary": "ReadingStatsPeriod/ReadingStats/ReadingStreak/DiarySearchQuery/SessionsByDate 타입 5종을 types/index.ts에 추가하고, Store 인터페이스에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드를 추가, LocalStore·RemoteStore에 throw stub으로 구현 완료",
+      "completed_at": "2026-05-07T09:58:21+0900"
     },
     {
       "step": 1,
