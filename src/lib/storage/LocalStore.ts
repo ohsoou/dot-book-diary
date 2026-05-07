@@ -1,5 +1,14 @@
 import { get, set, createStore, type UseStore } from 'idb-keyval';
-import type { Book, ReadingSession, DiaryEntry } from '@/types';
+import type {
+  Book,
+  ReadingSession,
+  DiaryEntry,
+  ReadingStats,
+  ReadingStatsPeriod,
+  ReadingStreak,
+  DiarySearchQuery,
+  SessionsByDate,
+} from '@/types';
 import type { Store } from './Store';
 import { KEYS, CURRENT_SCHEMA_VERSION } from './keys';
 import { bookSchema, readingSessionSchema, diaryEntrySchema } from '@/lib/validation';
@@ -214,5 +223,27 @@ export class LocalStore implements Store {
   async deleteDiaryEntry(id: string): Promise<void> {
     const entries = await this.listAllEntries();
     await set(KEYS.DIARY_ENTRIES, entries.filter((e) => e.id !== id), this.idbStore);
+  }
+
+  // ── Aggregation & search ───────────────────────────────────────────────────
+
+  async getReadingStats(_period?: ReadingStatsPeriod): Promise<ReadingStats> {
+    throw new Error('not implemented — see phase 10 step 1');
+  }
+
+  async getReadingStreak(): Promise<ReadingStreak> {
+    throw new Error('not implemented — see phase 10 step 1');
+  }
+
+  async listSessionsGroupedByDate(_period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
+    throw new Error('not implemented — see phase 10 step 1');
+  }
+
+  async searchDiaryEntries(_query: DiarySearchQuery): Promise<DiaryEntry[]> {
+    throw new Error('not implemented — see phase 10 step 1');
+  }
+
+  async countBooks(): Promise<number> {
+    throw new Error('not implemented — see phase 10 step 1');
   }
 }

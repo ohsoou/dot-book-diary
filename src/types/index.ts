@@ -62,3 +62,38 @@ export type GuestPreferences = {
   guestBannerDismissed?: boolean;
   themePreference?: 'system' | 'day' | 'night';
 };
+
+export type ReadingStatsPeriod = {
+  from: string; // YYYY-MM-DD inclusive
+  to: string; // YYYY-MM-DD inclusive
+};
+
+export type ReadingStats = {
+  totalMinutes: number;
+  totalSessions: number;
+  totalPagesRead: number; // sum of (endPage - startPage) where both defined
+  daysActive: number; // distinct readDate count
+  booksTouched: number; // distinct bookId count
+};
+
+export type ReadingStreak = {
+  current: number; // 오늘 기준 연속 독서일
+  longest: number; // 전체 기간 최장 연속
+  lastReadDate: string | null;
+};
+
+export type DiarySearchQuery = {
+  q?: string; // case-insensitive 부분 일치 (body 대상)
+  bookId?: string;
+  entryType?: DiaryEntry['entryType'];
+  from?: string; // YYYY-MM-DD
+  to?: string; // YYYY-MM-DD
+  limit?: number; // default 50
+  cursor?: string; // 직전 페이지의 마지막 entry id (회원 환경 페이지네이션)
+};
+
+export type SessionsByDate = {
+  date: string; // YYYY-MM-DD
+  totalMinutes: number;
+  bookIds: string[];
+};

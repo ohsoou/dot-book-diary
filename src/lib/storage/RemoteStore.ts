@@ -1,6 +1,15 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Book, ReadingSession, DiaryEntry } from '@/types';
+import type {
+  Book,
+  ReadingSession,
+  DiaryEntry,
+  ReadingStats,
+  ReadingStatsPeriod,
+  ReadingStreak,
+  DiarySearchQuery,
+  SessionsByDate,
+} from '@/types';
 import type { Store } from './Store';
 import { AppError } from '@/lib/errors';
 import { bookSchema, readingSessionSchema, diaryEntrySchema } from '@/lib/validation';
@@ -337,6 +346,28 @@ export class RemoteStore implements Store {
       .eq('user_id', userId);
 
     if (error) throw new AppError('UPSTREAM_FAILED', error.message, error);
+  }
+
+  // ── Aggregation & search ───────────────────────────────────────────────────
+
+  async getReadingStats(_period?: ReadingStatsPeriod): Promise<ReadingStats> {
+    throw new Error('not implemented — see phase 10 step 2');
+  }
+
+  async getReadingStreak(): Promise<ReadingStreak> {
+    throw new Error('not implemented — see phase 10 step 2');
+  }
+
+  async listSessionsGroupedByDate(_period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
+    throw new Error('not implemented — see phase 10 step 2');
+  }
+
+  async searchDiaryEntries(_query: DiarySearchQuery): Promise<DiaryEntry[]> {
+    throw new Error('not implemented — see phase 10 step 2');
+  }
+
+  async countBooks(): Promise<number> {
+    throw new Error('not implemented — see phase 10 step 2');
   }
 }
 
