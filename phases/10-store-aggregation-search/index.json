@@ -15,7 +15,7 @@
       "name": "local-store-aggregation",
       "status": "completed",
       "started_at": "2026-05-07T09:58:21+0900",
-      "completed_at": "2026-05-07T10:04:00+0900",
+      "completed_at": "2026-05-07T10:04:29+0900",
       "summary": "LocalStore에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드 구현(메모리 reduce 방식), LocalStore.test.ts에 신규 테스트 24개 추가 — 기존 회귀 없음"
     },
     {
