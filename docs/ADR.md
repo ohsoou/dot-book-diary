@@ -565,3 +565,18 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
 - 매퍼는 `'server-only'`를 임포트하지 않는다 — client/server 양쪽에서 사용한다.
 - 매핑 대상 코드: `user_already_exists`/`email_exists` → `EMAIL_TAKEN`, `weak_password` → `WEAK_PASSWORD`, `invalid_credentials` → `INVALID_CREDENTIALS`, `email_not_confirmed` → `EMAIL_NOT_CONFIRMED`. 그 외는 `UPSTREAM_FAILED`.
 - 사용자 노출 문구는 PRD §7 US-5의 정의를 따른다.
+
+## ADR-031: Book 도메인에 status/rating/finishedAt/memo 필드 추가
+
+- **상태**: Accepted
+- **날짜**: 2026-05-07
+- **컨텍스트**: `Book` 타입에 독서 상태(`status`), 평점(`rating`), 완독일(`finishedAt`), 메모(`memo`) 필드가 없어 책장이 단일 덩어리로 관리된다. 책을 "읽고싶음/읽는중/완독"으로 분류하고 완독 후 평가를 남기는 것은 독서 앱의 기본 기능이다.
+- **결정**: `Book.status: 'want' | 'reading' | 'finished'`(default `'reading'`), `rating?: 1-5 정수`, `finishedAt?: string`(YYYY-MM-DD), `memo?: string`(최대 500자) 추가.
+- **대안**:
+  - `BookStatus` 테이블 분리: 1:1 관계에 테이블 추가 비용 > 이득. `Book` 컬럼 확장으로 충분.
+  - `rating`을 `reading_sessions`에 붙이기: 세션별 평점은 설계 복잡도↑. 책 단위 평점이 사용자 의도에 맞음.
+- **결과·제약**:
+  - `BookSearchResult`(알라딘 검색 결과)에는 추가하지 않음 — 검색 결과는 status/rating 미보유.
+  - LocalStore schema v2로 마이그레이션. 기존 책은 `status: 'reading'`으로 채움.
+  - Supabase ALTER TABLE은 `supabase/migrations/{timestamp}_book_status_rating.sql`로 작성. `bun db:migrate`는 사용자가 수동 실행.
+  - `finishedAt`은 YYYY-MM-DD 형식, `status === 'finished'`일 때 의미있음(강제 연동은 하지 않음, UI 단에서 자동 설정).

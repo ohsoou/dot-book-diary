@@ -1,3 +1,5 @@
+export type BookStatus = 'want' | 'reading' | 'finished';
+
 export type Book = {
   id: string;
   isbn?: string;
@@ -7,6 +9,10 @@ export type Book = {
   coverUrl?: string;
   totalPages?: number;
   targetDate?: string; // YYYY-MM-DD
+  status: BookStatus;
+  rating?: number; // 1~5 정수
+  finishedAt?: string; // YYYY-MM-DD
+  memo?: string; // 최대 500자
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 };

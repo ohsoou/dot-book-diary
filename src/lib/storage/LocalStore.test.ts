@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
-import { createStore } from 'idb-keyval';
+import { createStore, set } from 'idb-keyval';
 import { LocalStore } from './LocalStore';
 import { formatLocalYmd } from '@/lib/date';
+import { KEYS } from './keys';
 
 function addDays(dateStr: string, days: number): string {
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -508,5 +509,134 @@ describe('LocalStore - countBooks', () => {
     await store.addBook({ title: '유지할 책' });
     await store.deleteBook(book.id);
     expect(await store.countBooks()).toBe(1);
+  });
+});
+
+describe('LocalStore - Books status/rating/finishedAt/memo', () => {
+  it('addBook 시 status 기본값은 reading이다', async () => {
+    const book = await store.addBook({ title: '기본 상태 책' });
+    expect(book.status).toBe('reading');
+  });
+
+  it('addBook 시 status를 want로 지정할 수 있다', async () => {
+    const book = await store.addBook({ title: '읽고싶은 책', status: 'want' });
+    expect(book.status).toBe('want');
+  });
+
+  it('addBook 시 status를 finished로 지정할 수 있다', async () => {
+    const book = await store.addBook({ title: '완독한 책', status: 'finished' });
+    expect(book.status).toBe('finished');
+  });
+
+  it('addBook 시 잘못된 status는 VALIDATION_FAILED 에러가 발생한다', async () => {
+    await expect(
+      store.addBook({ title: '잘못된 상태', status: 'invalid' as never }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
+  it('addBook 시 rating 1~5 정수를 저장할 수 있다', async () => {
+    const book = await store.addBook({ title: '별점 책', rating: 4 });
+    expect(book.rating).toBe(4);
+  });
+
+  it('addBook 시 rating이 0이면 VALIDATION_FAILED 에러가 발생한다', async () => {
+    await expect(
+      store.addBook({ title: '범위 초과 평점', rating: 0 }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
+  it('addBook 시 rating이 6이면 VALIDATION_FAILED 에러가 발생한다', async () => {
+    await expect(
+      store.addBook({ title: '범위 초과 평점', rating: 6 }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
+  it('addBook 시 finishedAt을 저장할 수 있다', async () => {
+    const book = await store.addBook({ title: '완독일 책', finishedAt: '2026-05-01' });
+    expect(book.finishedAt).toBe('2026-05-01');
+  });
+
+  it('addBook 시 memo 최대 500자를 저장할 수 있다', async () => {
+    const memo = 'a'.repeat(500);
+    const book = await store.addBook({ title: '메모 책', memo });
+    expect(book.memo).toBe(memo);
+  });
+
+  it('addBook 시 memo가 500자를 초과하면 VALIDATION_FAILED 에러가 발생한다', async () => {
+    await expect(
+      store.addBook({ title: '메모 초과', memo: 'a'.repeat(501) }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
+  it('updateBook으로 status를 finished로 변경할 수 있다', async () => {
+    const book = await store.addBook({ title: '책' });
+    const updated = await store.updateBook(book.id, { status: 'finished', finishedAt: '2026-05-07' });
+    expect(updated.status).toBe('finished');
+    expect(updated.finishedAt).toBe('2026-05-07');
+  });
+});
+
+describe('LocalStore - v1→v2 마이그레이션', () => {
+  it('v1 schema의 책(status 없음)이 v2로 마이그레이션될 때 status가 reading으로 채워진다', async () => {
+    // 독립된 IDB 환경 생성
+    const idb = new IDBFactory();
+    (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = idb;
+    const idbStore = createStore('dot-book-diary', 'kv');
+
+    // v1 데이터 시뮬레이션: schema_version=1, status 없는 책
+    const v1Books = [
+      { id: 'book-1', title: '오래된 책1', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' },
+      { id: 'book-2', title: '오래된 책2', isbn: '9781234567890', createdAt: '2024-02-01T00:00:00.000Z', updatedAt: '2024-02-01T00:00:00.000Z' },
+    ];
+    await set(KEYS.BOOKS, v1Books, idbStore);
+    await set(KEYS.SCHEMA_VERSION, 1, idbStore);
+
+    // LocalStore 생성 → 자동으로 v2로 마이그레이션
+    const migratedStore = new LocalStore(idbStore);
+    const books = await migratedStore.listBooks();
+
+    expect(books).toHaveLength(2);
+    for (const book of books) {
+      expect(book.status).toBe('reading');
+    }
+  });
+
+  it('마이그레이션이 멱등하다: v2 데이터를 v2로 다시 열어도 데이터 손상 없음', async () => {
+    const idb = new IDBFactory();
+    (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = idb;
+    const idbStore = createStore('dot-book-diary', 'kv');
+
+    // 이미 v2인 데이터
+    const store1 = new LocalStore(idbStore);
+    await store1.addBook({ title: 'v2 책', status: 'finished', rating: 5 });
+
+    // 같은 idbStore로 새 LocalStore 생성
+    const store2 = new LocalStore(idbStore);
+    const books = await store2.listBooks();
+
+    expect(books).toHaveLength(1);
+    expect(books[0]?.status).toBe('finished');
+    expect(books[0]?.rating).toBe(5);
+  });
+
+  it('v1 책에 이미 status가 있으면 덮어쓰지 않는다', async () => {
+    const idb = new IDBFactory();
+    (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = idb;
+    const idbStore = createStore('dot-book-diary', 'kv');
+
+    const mixedBooks = [
+      { id: 'book-1', title: 'status 없는 책', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' },
+      { id: 'book-2', title: 'status 있는 책', status: 'want', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' },
+    ];
+    await set(KEYS.BOOKS, mixedBooks, idbStore);
+    await set(KEYS.SCHEMA_VERSION, 1, idbStore);
+
+    const migratedStore = new LocalStore(idbStore);
+    const books = await migratedStore.listBooks();
+
+    const noStatus = books.find((b) => b.id === 'book-1');
+    const hasStatus = books.find((b) => b.id === 'book-2');
+    expect(noStatus?.status).toBe('reading'); // 기본값으로 채워짐
+    expect(hasStatus?.status).toBe('want');   // 기존 값 유지
   });
 });

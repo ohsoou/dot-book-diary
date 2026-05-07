@@ -103,6 +103,10 @@ export class RemoteStore implements Store {
         cover_url: parsed.data.coverUrl ?? null,
         total_pages: parsed.data.totalPages ?? null,
         target_date: parsed.data.targetDate ?? null,
+        status: parsed.data.status,
+        rating: parsed.data.rating ?? null,
+        finished_at: parsed.data.finishedAt ?? null,
+        memo: parsed.data.memo ?? null,
       })
       .select()
       .single();
@@ -131,6 +135,10 @@ export class RemoteStore implements Store {
         ...(patch.coverUrl !== undefined && { cover_url: patch.coverUrl ?? null }),
         ...(patch.totalPages !== undefined && { total_pages: patch.totalPages ?? null }),
         ...(patch.targetDate !== undefined && { target_date: patch.targetDate ?? null }),
+        ...(patch.status !== undefined && { status: patch.status }),
+        ...(patch.rating !== undefined && { rating: patch.rating ?? null }),
+        ...(patch.finishedAt !== undefined && { finished_at: patch.finishedAt ?? null }),
+        ...(patch.memo !== undefined && { memo: patch.memo ?? null }),
       })
       .eq('id', id)
       .eq('user_id', userId)
@@ -535,6 +543,10 @@ type BookRow = {
   cover_url: string | null;
   total_pages: number | null;
   target_date: string | null;
+  status: string;
+  rating: number | null;
+  finished_at: string | null;
+  memo: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -549,6 +561,10 @@ function rowToBook(row: BookRow): Book {
     coverUrl: row.cover_url ?? undefined,
     totalPages: row.total_pages ?? undefined,
     targetDate: row.target_date ?? undefined,
+    status: (row.status as Book['status']) ?? 'reading',
+    rating: row.rating ?? undefined,
+    finishedAt: row.finished_at ?? undefined,
+    memo: row.memo ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

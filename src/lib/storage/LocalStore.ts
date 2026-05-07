@@ -42,15 +42,14 @@ export class LocalStore implements Store {
   }
 
   private async runMigrations(storedVersion: number): Promise<void> {
-    if (storedVersion < CURRENT_SCHEMA_VERSION) {
-      // 미래 마이그레이션 케이스를 여기에 추가한다.
-      // 현재 버전이 1이므로 아직 마이그레이션 로직 없음.
-      // switch (storedVersion) {
-      //   case 1: // 1 -> 2 마이그레이션 로직
-      //     break;
-      // }
-      await set(KEYS.SCHEMA_VERSION, CURRENT_SCHEMA_VERSION, this.idbStore);
+    if (storedVersion < 2) {
+      // v1 → v2: Book에 status 필드 추가. 기존 책은 'reading'으로 채운다.
+      type LegacyBook = Book & { status?: Book['status'] };
+      const books = (await get<LegacyBook[]>(KEYS.BOOKS, this.idbStore)) ?? [];
+      const migrated: Book[] = books.map((b) => ({ ...b, status: b.status ?? 'reading' }));
+      await set(KEYS.BOOKS, migrated, this.idbStore);
     }
+    await set(KEYS.SCHEMA_VERSION, CURRENT_SCHEMA_VERSION, this.idbStore);
   }
 
   private init(): Promise<void> {

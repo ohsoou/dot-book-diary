@@ -6,6 +6,10 @@ import { formatLocalYmd } from './date';
 
 export const themePreferenceSchema = z.enum(['system', 'day', 'night']);
 
+export const bookStatusSchema = z.enum(['want', 'reading', 'finished'], {
+  message: "status는 'want', 'reading', 'finished' 중 하나여야 합니다",
+});
+
 export const bookSchema = z.object({
   isbn: z.string().optional(),
   title: z.string().min(1, { message: '제목을 입력해 주세요' }).max(500, { message: '제목은 500자 이내로 입력해 주세요' }),
@@ -14,6 +18,10 @@ export const bookSchema = z.object({
   coverUrl: z.string().url({ message: '올바른 URL을 입력해 주세요' }).optional(),
   totalPages: z.number().int().min(1, { message: '총 페이지는 1 이상이어야 합니다' }).optional(),
   targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: '목표 완독일은 YYYY-MM-DD 형식이어야 합니다' }).optional(),
+  status: bookStatusSchema.default('reading'),
+  rating: z.number().int().min(1, { message: '평점은 1 이상이어야 합니다' }).max(5, { message: '평점은 5 이하여야 합니다' }).optional(),
+  finishedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: '완독일은 YYYY-MM-DD 형식이어야 합니다' }).optional(),
+  memo: z.string().max(500, { message: '메모는 500자 이내로 입력해 주세요' }).optional(),
 });
 
 export const readingSessionSchema = z

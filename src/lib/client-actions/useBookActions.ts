@@ -69,6 +69,7 @@ export function useBookActions(opts: { isLoggedIn: boolean }): UseBookActions {
             publisher: input.publisher,
             coverUrl: input.coverUrl,
             totalPages: input.totalPages,
+            status: 'reading',
           })
           return { ok: true, data: book }
         } catch (err) {

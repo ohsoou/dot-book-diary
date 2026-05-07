@@ -49,6 +49,7 @@ export async function addBookAction(
       publisher: input.publisher,
       coverUrl: input.coverUrl,
       totalPages: input.totalPages,
+      status: 'reading',
     })
 
     revalidatePath('/bookshelf')
