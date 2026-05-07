@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-05-07T13:16:11+0900",
       "summary": "LocalStore.updateBook + RemoteStore.updateBook에 auto-finishedAt 로직 추가 (status='finished' && finishedAt 미지정 시 오늘 날짜 자동 세팅). updateBookAction에 bookSchema.partial() 검증 추가 (rating/status/memo 유효성 검사). LocalStore.test.ts 8 케이스 + RemoteStore.test.ts 8 케이스 + books.test.ts 6 케이스 추가. bun build && bun lint && bun run test 전체 통과 (713 tests).",
-      "completed_at": "2026-05-07T13:30:00+0900"
+      "completed_at": "2026-05-07T13:27:24+0900"
     },
     {
       "step": 2,
