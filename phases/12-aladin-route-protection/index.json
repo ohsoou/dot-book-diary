@@ -7,7 +7,8 @@
       "name": "rate-limiter-utility",
       "status": "completed",
       "started_at": "2026-05-08T08:50:16+0900",
-      "summary": "src/lib/rate-limit.ts 토큰 버킷 유틸 신규(checkAndConsume/__resetRateLimitStore) + rate-limit.test.ts 10개 케이스 + errors.test.ts RATE_LIMITED 케이스 추가"
+      "summary": "src/lib/rate-limit.ts 토큰 버킷 유틸 신규(checkAndConsume/__resetRateLimitStore) + rate-limit.test.ts 10개 케이스 + errors.test.ts RATE_LIMITED 케이스 추가",
+      "completed_at": "2026-05-08T08:53:40+0900"
     },
     {
       "step": 1,
