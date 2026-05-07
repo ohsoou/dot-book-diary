@@ -106,7 +106,13 @@ export class LocalStore implements Store {
     const books = await this.listBooks();
     const idx = books.findIndex((b) => b.id === id);
     if (idx === -1) throw new AppError('NOT_FOUND', `Book ${id} not found`);
-    const updated: Book = { ...books[idx]!, ...patch, id, updatedAt: now() };
+
+    const effectivePatch = { ...patch };
+    if (patch.status === 'finished' && patch.finishedAt === undefined) {
+      effectivePatch.finishedAt = formatLocalYmd(new Date());
+    }
+
+    const updated: Book = { ...books[idx]!, ...effectivePatch, id, updatedAt: now() };
     const next = [...books];
     next[idx] = updated;
     await set(KEYS.BOOKS, next, this.idbStore);

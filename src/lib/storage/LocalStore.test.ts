@@ -576,6 +576,63 @@ describe('LocalStore - Books status/rating/finishedAt/memo', () => {
   });
 });
 
+describe('LocalStore - updateBook auto-finishedAt (step 1)', () => {
+  it('status를 finished로 변경하고 finishedAt 미지정 시 오늘 날짜로 자동 세팅된다', async () => {
+    const today = formatLocalYmd(new Date());
+    const book = await store.addBook({ title: '책' });
+    const updated = await store.updateBook(book.id, { status: 'finished' });
+    expect(updated.status).toBe('finished');
+    expect(updated.finishedAt).toBe(today);
+  });
+
+  it('status를 finished로 변경하고 finishedAt 명시 시 명시값을 우선한다', async () => {
+    const book = await store.addBook({ title: '책' });
+    const updated = await store.updateBook(book.id, { status: 'finished', finishedAt: '2026-01-01' });
+    expect(updated.status).toBe('finished');
+    expect(updated.finishedAt).toBe('2026-01-01');
+  });
+
+  it('status가 finished에서 reading으로 변경되어도 finishedAt은 보존된다', async () => {
+    const book = await store.addBook({ title: '책' });
+    await store.updateBook(book.id, { status: 'finished', finishedAt: '2026-01-01' });
+    const updated = await store.updateBook(book.id, { status: 'reading' });
+    expect(updated.status).toBe('reading');
+    expect(updated.finishedAt).toBe('2026-01-01');
+  });
+
+  it('updateBook에서 rating=6을 넘기면 store 단계에서 통과된다 (검증은 action 책임)', async () => {
+    const book = await store.addBook({ title: '책' });
+    // store는 rating 범위를 검증하지 않는다 — action 레이어에서 zod로 거름
+    const updated = await store.updateBook(book.id, { rating: 6 as never });
+    expect(updated.rating).toBe(6);
+  });
+
+  it('updateBook에서 memo 501자를 넘기면 store 단계에서 통과된다 (검증은 action 책임)', async () => {
+    const book = await store.addBook({ title: '책' });
+    const memo = 'a'.repeat(501);
+    // store는 memo 길이를 검증하지 않는다 — action 레이어에서 zod로 거름
+    const updated = await store.updateBook(book.id, { memo });
+    expect(updated.memo).toBe(memo);
+  });
+
+  it('findBookByIsbn은 status가 finished인 책도 정상적으로 검색한다', async () => {
+    await store.addBook({ title: '완독한 책', isbn: '9781234567890', status: 'finished' });
+    const found = await store.findBookByIsbn('9781234567890');
+    expect(found).not.toBeNull();
+    expect(found?.status).toBe('finished');
+  });
+
+  it('addBook 시 status를 명시하지 않으면 reading이 기본값이다', async () => {
+    const book = await store.addBook({ title: '기본 상태 책2' });
+    expect(book.status).toBe('reading');
+  });
+
+  it('addBook 시 status를 want로 지정하면 그대로 저장된다', async () => {
+    const book = await store.addBook({ title: '읽고싶은 책2', status: 'want' });
+    expect(book.status).toBe('want');
+  });
+});
+
 describe('LocalStore - v1→v2 마이그레이션', () => {
   it('v1 schema의 책(status 없음)이 v2로 마이그레이션될 때 status가 reading으로 채워진다', async () => {
     // 독립된 IDB 환경 생성

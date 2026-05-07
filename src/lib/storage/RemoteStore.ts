@@ -125,20 +125,26 @@ export class RemoteStore implements Store {
     patch: Partial<Omit<Book, 'id' | 'createdAt' | 'updatedAt'>>,
   ): Promise<Book> {
     const userId = await this.getUserId();
+
+    const effectivePatch = { ...patch };
+    if (patch.status === 'finished' && patch.finishedAt === undefined) {
+      effectivePatch.finishedAt = formatLocalYmd(new Date());
+    }
+
     const { data, error } = await this.supabase
       .from('books')
       .update({
-        ...(patch.isbn !== undefined && { isbn: patch.isbn }),
-        ...(patch.title !== undefined && { title: patch.title }),
-        ...(patch.author !== undefined && { author: patch.author ?? null }),
-        ...(patch.publisher !== undefined && { publisher: patch.publisher ?? null }),
-        ...(patch.coverUrl !== undefined && { cover_url: patch.coverUrl ?? null }),
-        ...(patch.totalPages !== undefined && { total_pages: patch.totalPages ?? null }),
-        ...(patch.targetDate !== undefined && { target_date: patch.targetDate ?? null }),
-        ...(patch.status !== undefined && { status: patch.status }),
-        ...(patch.rating !== undefined && { rating: patch.rating ?? null }),
-        ...(patch.finishedAt !== undefined && { finished_at: patch.finishedAt ?? null }),
-        ...(patch.memo !== undefined && { memo: patch.memo ?? null }),
+        ...(effectivePatch.isbn !== undefined && { isbn: effectivePatch.isbn }),
+        ...(effectivePatch.title !== undefined && { title: effectivePatch.title }),
+        ...(effectivePatch.author !== undefined && { author: effectivePatch.author ?? null }),
+        ...(effectivePatch.publisher !== undefined && { publisher: effectivePatch.publisher ?? null }),
+        ...(effectivePatch.coverUrl !== undefined && { cover_url: effectivePatch.coverUrl ?? null }),
+        ...(effectivePatch.totalPages !== undefined && { total_pages: effectivePatch.totalPages ?? null }),
+        ...(effectivePatch.targetDate !== undefined && { target_date: effectivePatch.targetDate ?? null }),
+        ...(effectivePatch.status !== undefined && { status: effectivePatch.status }),
+        ...(effectivePatch.rating !== undefined && { rating: effectivePatch.rating ?? null }),
+        ...(effectivePatch.finishedAt !== undefined && { finished_at: effectivePatch.finishedAt ?? null }),
+        ...(effectivePatch.memo !== undefined && { memo: effectivePatch.memo ?? null }),
       })
       .eq('id', id)
       .eq('user_id', userId)

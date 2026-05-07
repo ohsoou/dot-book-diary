@@ -23,6 +23,7 @@ const mockBook: Book = {
   publisher: '출판사',
   coverUrl: 'https://example.com/cover.jpg',
   totalPages: 300,
+  status: 'reading',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 }
@@ -308,5 +309,68 @@ describe('updateBookAction', () => {
     if (!result.ok) {
       expect(result.error.code).toBe('UPSTREAM_FAILED')
     }
+  })
+
+  it('rating이 6이면 VALIDATION_FAILED와 fieldErrors.rating을 반환한다', async () => {
+    const store = makeStore()
+    vi.mocked(getStore).mockResolvedValue(store)
+
+    const result = await updateBookAction('book-1', { rating: 6 })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('VALIDATION_FAILED')
+      expect(result.error.fieldErrors?.rating).toBeDefined()
+    }
+    expect(store.updateBook).not.toHaveBeenCalled()
+  })
+
+  it('status가 유효하지 않은 값이면 VALIDATION_FAILED와 fieldErrors.status를 반환한다', async () => {
+    const store = makeStore()
+    vi.mocked(getStore).mockResolvedValue(store)
+
+    const result = await updateBookAction('book-1', { status: 'invalid' as never })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('VALIDATION_FAILED')
+      expect(result.error.fieldErrors?.status).toBeDefined()
+    }
+    expect(store.updateBook).not.toHaveBeenCalled()
+  })
+
+  it('memo가 501자이면 VALIDATION_FAILED와 fieldErrors.memo를 반환한다', async () => {
+    const store = makeStore()
+    vi.mocked(getStore).mockResolvedValue(store)
+
+    const result = await updateBookAction('book-1', { memo: 'a'.repeat(501) })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.code).toBe('VALIDATION_FAILED')
+      expect(result.error.fieldErrors?.memo).toBeDefined()
+    }
+    expect(store.updateBook).not.toHaveBeenCalled()
+  })
+
+  it('rating과 status가 포함된 정상 patch는 revalidatePath를 호출한다', async () => {
+    const store = makeStore()
+    vi.mocked(getStore).mockResolvedValue(store)
+
+    const result = await updateBookAction('book-1', { rating: 4, status: 'finished' })
+
+    expect(result.ok).toBe(true)
+    expect(revalidatePath).toHaveBeenCalledWith('/bookshelf')
+    expect(revalidatePath).toHaveBeenCalledWith('/reading/book-1')
+  })
+
+  it('빈 patch {}는 safeParse를 통과하고 store.updateBook을 호출한다', async () => {
+    const store = makeStore()
+    vi.mocked(getStore).mockResolvedValue(store)
+
+    const result = await updateBookAction('book-1', {})
+
+    expect(result.ok).toBe(true)
+    expect(store.updateBook).toHaveBeenCalledWith('book-1', {})
   })
 })
