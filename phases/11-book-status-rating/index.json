@@ -7,7 +7,8 @@
       "name": "types-and-migrations",
       "status": "completed",
       "started_at": "2026-05-07T13:08:32+0900",
-      "summary": "BookStatus 타입 추가 + Book에 status/rating/finishedAt/memo 필드 추가 + bookSchema 확장 + LocalStore v1→v2 마이그레이션 + SQL 파일 생성(20260507000000_book_status_rating.sql). 사용자가 bun db:migrate 후 bun db:types 실행 후 step 1 진행."
+      "summary": "BookStatus 타입 추가 + Book에 status/rating/finishedAt/memo 필드 추가 + bookSchema 확장 + LocalStore v1→v2 마이그레이션 + SQL 파일 생성(20260507000000_book_status_rating.sql). 사용자가 bun db:migrate 후 bun db:types 실행 후 step 1 진행.",
+      "completed_at": "2026-05-07T13:16:11+0900"
     },
     {
       "step": 1,
