@@ -62,7 +62,8 @@
     },
     {
       "dir": "11-book-status-rating",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-05-07T13:38:29+0900"
     },
     {
       "dir": "12-aladin-route-protection",
