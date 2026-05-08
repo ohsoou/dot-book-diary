@@ -15,7 +15,7 @@
       "name": "bookshelf-add-book-cta",
       "status": "completed",
       "started_at": "2026-05-08T14:55:27+0900",
-      "completed_at": "2026-05-08T14:57:30+0900",
+      "completed_at": "2026-05-08T14:57:38+0900",
       "summary": "bookshelf 헤더에 /add-book Primary Link 추가, 테스트 3건 통과"
     },
     {
