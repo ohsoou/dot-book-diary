@@ -580,3 +580,22 @@ MVP 속도와 정서적 완성도를 동시에 노린다. 외부 의존성은 �
   - LocalStore schema v2로 마이그레이션. 기존 책은 `status: 'reading'`으로 채움.
   - Supabase ALTER TABLE은 `supabase/migrations/{timestamp}_book_status_rating.sql`로 작성. `bun db:migrate`는 사용자가 수동 실행.
   - `finishedAt`은 YYYY-MM-DD 형식, `status === 'finished'`일 때 의미있음(강제 연동은 하지 않음, UI 단에서 자동 설정).
+
+## ADR-032: 홈 hitbox 진입점 1회 온보딩 모달 도입
+
+- **상태**: Accepted
+- **날짜**: 2026-05-08
+- **컨텍스트**: 홈 화면의 5개 hitbox(다이어리/책장/캘린더/책 등록/설정)는 시각적 어포던스(`hitbox-bob` 모션)만 있어 첫 방문자가 어디로 이동하는지 직관적으로 알기 어렵다. PRD §8.1은 "튜토리얼 툴팁 없음"을 원칙으로 정했으나, 이는 과도한 코치마크 남용을 막기 위한 규정이었지 최소한의 진입점 안내까지 금지한 의도는 아니었다.
+- **결정**: 5개 hitbox 진입점에 한해, 첫 방문 시 1회 전체 모달(`HomeGuide`)로 안내한다. 닫힌 이후 `dbd:preferences.homeGuideDismissed=true`로 IndexedDB에 저장하여 재노출하지 않는다. 회원·비회원 모두 동일 IndexedDB 키로 통제한다(기기별 독립 1회 노출).
+- **역할 분리**:
+  - `GuestBanner`: 비회원 대상 정서 메시지("이 방은 당신의 거예요") + 로그인 유도.
+  - `HomeGuide`: 회원·비회원 공통, 기능 진입점(hitbox → 경로) 안내.
+- **대안**:
+  - 핀포인트 오버레이(hitbox 위에 직접 라벨): RoomScene 좌표와 실시간 동기화 비용↑, 반응형에서 좌표 어긋남 위험.
+  - 코치마크(순서대로 하나씩 강조): 구현 복잡도↑, 픽셀 정서 훼손.
+  - 상시 노출 도움말 버튼: 핵심 원칙(정서가 기능보다 먼저)과 충돌.
+- **결과/제약**:
+  - `GuestPreferences` 타입에 `homeGuideDismissed?: boolean` 1필드 추가.
+  - IndexedDB(`dbd:preferences`)에서만 관리. RLS·Supabase와 무관.
+  - 비회원이 로그인해도 이미 dismissed면 재노출하지 않음(기기별 경험 독립, v1.1 동기화 범위 외).
+  - PRD §8.1의 "그 외 툴팁/코치마크 금지" 원칙은 유지한다.

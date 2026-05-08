@@ -69,6 +69,10 @@
       "dir": "12-aladin-route-protection",
       "status": "completed",
       "completed_at": "2026-05-08T09:07:51+0900"
+    },
+    {
+      "dir": "13-onboarding-and-bookshelf-cta",
+      "status": "pending"
     }
   ]
 }

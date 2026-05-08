@@ -315,6 +315,30 @@ bg-[#3a2a1a] border border-[#8b6f4a] px-4 py-3
 - `guestBannerDismissed=true`이면 렌더하지 않는다.
 - 닫기 시 `updatePreferences({ guestBannerDismissed: true })`.
 
+### HomeGuide
+
+홈 화면 5개 hitbox 진입점을 첫 방문 시 1회 안내하는 모달. `dbd:preferences.homeGuideDismissed`가 false일 때만 노출.
+
+```
+오버레이: fixed inset-0 bg-black/60 z-30
+컨텐츠:   bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-40
+          shadow-[2px_2px_0_#1a100a]
+위치:     화면 중앙 (fixed + transform -50%)
+```
+
+리스트 항목 (5개):
+- 핀: 8×8px `bg-[#e89b5e] border border-[#1a100a]` 인라인 블록
+- 라벨: `text-sm text-[#f4e4c1]`
+- 안내: `text-xs text-[#a08866]`
+
+닫기 버튼: Primary 스타일, 카피 "방을 둘러볼게요"
+
+금지:
+- `rounded-*` 금지
+- `backdrop-blur` 금지
+- `gradient` 금지
+- box-shadow glow 금지
+
 ### UnsupportedEnvScreen
 
 ```
