@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "apply-to-aladin-routes",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-08T08:53:40+0900",
+      "completed_at": "2026-05-08T09:01:00+0900",
+      "summary": "_guard.ts(Origin/Referer 화이트리스트+IP 토큰버킷) 신규 + search(rate:30)/isbn(rate:60) 라우트 적용 + _guard.test.ts 8케이스 + route.test.ts 각 3케이스 추가"
     },
     {
       "step": 2,
