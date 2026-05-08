@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // server-only mock
 vi.mock('server-only', () => ({}));
@@ -16,7 +16,7 @@ vi.mock('@/lib/isbn', async (importOriginal) => {
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const { searchByKeyword, fetchByIsbn } = await import('@/lib/aladin');
+const { searchByKeyword, fetchByIsbn, __resetAladinCaches } = await import('@/lib/aladin');
 
 function makeAladinResponse(items: object[]): Response {
   return new Response(JSON.stringify({ item: items }), {
@@ -37,6 +37,7 @@ const sampleItem = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  __resetAladinCaches();
 });
 
 describe('searchByKeyword', () => {
@@ -101,6 +102,61 @@ describe('searchByKeyword', () => {
     await expect(searchByKeyword('레이트리밋')).rejects.toMatchObject({
       code: 'RATE_LIMITED',
     });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('캐싱', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('같은 키워드 재호출 시 fetch가 1회만 호출된다', async () => {
+    mockFetch.mockResolvedValueOnce(makeAladinResponse([sampleItem]));
+
+    await searchByKeyword('클린 코드');
+    await searchByKeyword('클린 코드');
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('다른 키워드는 새 fetch를 실행한다', async () => {
+    mockFetch.mockImplementation(() => Promise.resolve(makeAladinResponse([sampleItem])));
+
+    await searchByKeyword('클린 코드');
+    await searchByKeyword('리팩터링');
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('TTL 만료 후 새 fetch를 실행한다', async () => {
+    vi.useFakeTimers();
+    mockFetch.mockImplementation(() => Promise.resolve(makeAladinResponse([sampleItem])));
+
+    await searchByKeyword('클린 코드');
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(10 * 60 * 1000 + 1); // 검색 캐시 TTL 10분 초과
+
+    await searchByKeyword('클린 코드');
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('ISBN-10과 ISBN-13이 동일 캐시 키로 공유된다', async () => {
+    mockFetch.mockResolvedValueOnce(makeAladinResponse([sampleItem]));
+
+    await fetchByIsbn('9780306406157'); // ISBN-13 조회 → 캐시 저장
+    await fetchByIsbn('0306406152');   // ISBN-10 → 변환 후 동일 키 → 캐시 히트
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('null 결과도 캐싱해 같은 미존재 ISBN 재조회 시 fetch를 1회만 실행한다', async () => {
+    mockFetch.mockResolvedValueOnce(makeAladinResponse([]));
+
+    const r1 = await fetchByIsbn('9780000000000');
+    expect(r1).toBeNull();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    const r2 = await fetchByIsbn('9780000000000');
+    expect(r2).toBeNull();
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });
