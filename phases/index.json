@@ -67,7 +67,8 @@
     },
     {
       "dir": "12-aladin-route-protection",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-05-08T09:07:51+0900"
     }
   ]
 }
