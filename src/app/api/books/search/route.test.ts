@@ -11,9 +11,24 @@ vi.mock('@/lib/aladin', () => ({
   searchByKeyword: mockSearchByKeyword,
 }));
 
+const mockCheckAndConsume = vi.fn();
+vi.mock('@/lib/rate-limit', () => ({
+  checkAndConsume: mockCheckAndConsume,
+  __resetRateLimitStore: vi.fn(),
+}));
+
 const { GET } = await import('@/app/api/books/search/route');
 
-function makeRequest(q?: string): NextRequest {
+function makeRequest(q?: string, extraHeaders?: HeadersInit): NextRequest {
+  const url = q !== undefined
+    ? `http://localhost/api/books/search?q=${encodeURIComponent(q)}`
+    : 'http://localhost/api/books/search';
+  return new NextRequest(url, {
+    headers: { origin: 'http://localhost:3000', ...extraHeaders },
+  });
+}
+
+function makeRequestNoOrigin(q?: string): NextRequest {
   const url = q !== undefined
     ? `http://localhost/api/books/search?q=${encodeURIComponent(q)}`
     : 'http://localhost/api/books/search';
@@ -22,6 +37,12 @@ function makeRequest(q?: string): NextRequest {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockCheckAndConsume.mockReturnValue({
+    allowed: true,
+    remaining: 29,
+    retryAfterMs: 0,
+    resetAt: Date.now() + 60_000,
+  });
 });
 
 describe('GET /api/books/search', () => {
@@ -73,5 +94,36 @@ describe('GET /api/books/search', () => {
 
     const res = await GET(makeRequest('테스트'));
     expect(res.status).toBe(502);
+  });
+
+  describe('가드 통합', () => {
+    it('가드 통과 후 aladin 검색이 호출된다', async () => {
+      const mockResult = [{ title: '책 제목', isbn: '9781234567890' }];
+      mockSearchByKeyword.mockResolvedValueOnce(mockResult);
+
+      const res = await GET(makeRequest('책 제목'));
+      expect(res.status).toBe(200);
+      expect(mockSearchByKeyword).toHaveBeenCalledOnce();
+    });
+
+    it('가드 실패(origin 없음) 시 aladin 호출 안 됨', async () => {
+      const res = await GET(makeRequestNoOrigin('책 제목'));
+      expect(res.status).toBe(403);
+      expect(mockSearchByKeyword).not.toHaveBeenCalled();
+    });
+
+    it('rate limit 초과 시 429 + Retry-After 헤더 반환', async () => {
+      mockCheckAndConsume.mockReturnValueOnce({
+        allowed: false,
+        remaining: 0,
+        retryAfterMs: 5_000,
+        resetAt: Date.now() + 60_000,
+      });
+
+      const res = await GET(makeRequest('테스트'));
+      expect(res.status).toBe(429);
+      expect(res.headers.get('retry-after')).not.toBeNull();
+      expect(mockSearchByKeyword).not.toHaveBeenCalled();
+    });
   });
 });

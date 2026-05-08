@@ -11,9 +11,24 @@ vi.mock('@/lib/aladin', () => ({
   fetchByIsbn: mockFetchByIsbn,
 }));
 
+const mockCheckAndConsume = vi.fn();
+vi.mock('@/lib/rate-limit', () => ({
+  checkAndConsume: mockCheckAndConsume,
+  __resetRateLimitStore: vi.fn(),
+}));
+
 const { GET } = await import('@/app/api/books/isbn/route');
 
-function makeRequest(isbn?: string): NextRequest {
+function makeRequest(isbn?: string, extraHeaders?: HeadersInit): NextRequest {
+  const url = isbn !== undefined
+    ? `http://localhost/api/books/isbn?isbn=${encodeURIComponent(isbn)}`
+    : 'http://localhost/api/books/isbn';
+  return new NextRequest(url, {
+    headers: { origin: 'http://localhost:3000', ...extraHeaders },
+  });
+}
+
+function makeRequestNoOrigin(isbn?: string): NextRequest {
   const url = isbn !== undefined
     ? `http://localhost/api/books/isbn?isbn=${encodeURIComponent(isbn)}`
     : 'http://localhost/api/books/isbn';
@@ -22,6 +37,12 @@ function makeRequest(isbn?: string): NextRequest {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockCheckAndConsume.mockReturnValue({
+    allowed: true,
+    remaining: 59,
+    retryAfterMs: 0,
+    resetAt: Date.now() + 60_000,
+  });
 });
 
 describe('GET /api/books/isbn', () => {
@@ -70,5 +91,36 @@ describe('GET /api/books/isbn', () => {
 
     const res = await GET(makeRequest('9788966260959'));
     expect(res.status).toBe(502);
+  });
+
+  describe('가드 통합', () => {
+    it('가드 통과 후 aladin ISBN 조회가 호출된다', async () => {
+      const mockResult = { title: '클린 코드', isbn: '9788966260959' };
+      mockFetchByIsbn.mockResolvedValueOnce(mockResult);
+
+      const res = await GET(makeRequest('9788966260959'));
+      expect(res.status).toBe(200);
+      expect(mockFetchByIsbn).toHaveBeenCalledOnce();
+    });
+
+    it('가드 실패(origin 없음) 시 aladin 호출 안 됨', async () => {
+      const res = await GET(makeRequestNoOrigin('9788966260959'));
+      expect(res.status).toBe(403);
+      expect(mockFetchByIsbn).not.toHaveBeenCalled();
+    });
+
+    it('rate limit 초과 시 429 + Retry-After 헤더 반환', async () => {
+      mockCheckAndConsume.mockReturnValueOnce({
+        allowed: false,
+        remaining: 0,
+        retryAfterMs: 3_000,
+        resetAt: Date.now() + 60_000,
+      });
+
+      const res = await GET(makeRequest('9788966260959'));
+      expect(res.status).toBe(429);
+      expect(res.headers.get('retry-after')).not.toBeNull();
+      expect(mockFetchByIsbn).not.toHaveBeenCalled();
+    });
   });
 });
