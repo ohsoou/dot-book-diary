@@ -66,6 +66,7 @@ export type GuestPreferences = {
   nickname?: string;
   localArchived?: boolean;
   guestBannerDismissed?: boolean;
+  homeGuideDismissed?: boolean;
   themePreference?: 'system' | 'day' | 'night';
 };
 

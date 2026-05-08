@@ -12,6 +12,7 @@ import { getLastReadAtFromSupabase } from '@/lib/last-read'
 import { computeBearState } from '@/lib/bear-state'
 import type { BearStateContextValue } from '@/components/room/BearStateContext'
 import { getDisplayNickname } from '@/lib/nickname'
+import { HomeGuide } from '@/components/onboarding/HomeGuide'
 
 export const metadata: Metadata = {
   title: '홈',
@@ -63,6 +64,7 @@ export default async function HomePage() {
         <BearStateHydrator isGuest={isGuest} />
         <div className="flex flex-col items-stretch justify-center">
           {isGuest && <GuestBanner />}
+          <HomeGuide />
           <BearSpeechBubble />
         </div>
         <div className="room-scene-wrapper flex items-center justify-center overflow-hidden">
