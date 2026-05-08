@@ -23,7 +23,7 @@
       "name": "caching-and-revalidate-tuning",
       "status": "completed",
       "started_at": "2026-05-08T09:01:28+0900",
-      "completed_at": "2026-05-08T09:07:00+0900",
+      "completed_at": "2026-05-08T09:07:51+0900",
       "summary": "LruCache<K,V>(max/ttlMs, LRU eviction, TTL 만료) 신규 + lru-cache.test.ts 7케이스 + aladin.ts에 SEARCH_CACHE(10분)/ISBN_CACHE(60분) 적용 및 next.revalidate 제거(cache:no-store) + aladin.test.ts 캐시 케이스 5개 추가"
     }
   ],
