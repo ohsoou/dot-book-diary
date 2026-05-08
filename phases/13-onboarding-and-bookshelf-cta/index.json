@@ -7,7 +7,8 @@
       "name": "docs-and-policy",
       "status": "completed",
       "started_at": "2026-05-08T14:53:09+0900",
-      "summary": "PRD §8.1·UI_GUIDE HomeGuide 섹션·ADR-032 추가 완료"
+      "summary": "PRD §8.1·UI_GUIDE HomeGuide 섹션·ADR-032 추가 완료",
+      "completed_at": "2026-05-08T14:55:27+0900"
     },
     {
       "step": 1,
