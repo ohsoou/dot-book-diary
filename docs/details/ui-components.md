@@ -1,0 +1,471 @@
+<!-- execute.py 자동 주입 대상 아님. step.md "읽어야 할 파일"에 명시적으로 추가할 것. -->
+
+## 컴포넌트 사양
+
+### Button
+
+```
+Primary:   bg-[#e89b5e] border border-[#1a100a] text-[#2a1f17] px-3 py-2
+           hover:bg-[#f0a96c] active:translate-y-px
+           disabled: opacity-50 cursor-not-allowed
+
+Secondary: bg-transparent border border-[#8b6f4a] text-[#d7c199] px-3 py-2
+           hover:border-[#e89b5e] hover:text-[#f4e4c1]
+           disabled: opacity-40 cursor-not-allowed
+
+Danger:    bg-transparent border border-[#c85a54] text-[#c85a54] px-3 py-2
+           hover:bg-[#c85a54] hover:text-[#f4e4c1]
+           disabled: opacity-40 cursor-not-allowed
+
+Text:      text-[#d7c199] hover:text-[#f4e4c1] underline-offset-2 hover:underline
+```
+
+- **크기**: 기본 `px-3 py-2`. 소형 `px-2 py-1` (삭제 버튼 등).
+- `transition-colors duration-100 ease-linear` 적용.
+- `rounded-*` 금지.
+- `pending` 상태: 텍스트 변경 ("저장 중...") + `disabled`.
+
+### BottomNav (Global)
+
+```
+위치: fixed bottom-0 inset-x-0 h-[64px] z-10
+배경: bg-[#3a2a1a] border-t border-[#1a100a] grid-cols-5
+아이템: flex flex-col items-center justify-center gap-1 text-xs
+Active: text-[var(--color-accent)]
+Inactive: text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]
+```
+
+### PixelFrame
+
+```tsx
+<div className="outline outline-1 outline-[#1a100a] outline-offset-2">
+  {children}
+</div>
+```
+
+### ToggleTabs
+
+```
+테두리: border border-[#1a100a] flex
+버튼: flex-1 px-3 py-2 text-sm
+Selected: bg-[#e89b5e] text-[#2a1f17]
+Unselected: bg-transparent text-[#d7c199] hover:text-[#f4e4c1]
+```
+
+### Card
+
+```
+bg-[#3a2a1a] border border-[#1a100a] p-4 shadow-[1px_1px_0_#1a100a]
+```
+
+- `rounded-*` 금지.
+- 중첩 카드는 가능하면 피할 것.
+
+### 입력 필드
+
+```
+bg-[#2a1f17] border border-[#1a100a] text-[#f4e4c1] px-3 py-2
+focus:outline-none focus:border-[#e89b5e]
+placeholder:text-[#6b5540]
+```
+
+에러 상태:
+```
+border-[#c85a54] focus:border-[#c85a54]
+```
+
+- `textarea`: 위와 동일 + `resize-y min-h-[80px]`.
+- `select`: 위와 동일 + `appearance-none`.
+
+### FieldError
+
+```tsx
+// 각 입력 아래에 인라인 노출
+<p className="mt-1 text-xs text-[#c85a54]" role="alert">{message}</p>
+```
+
+- `role="alert"` 필수 (스크린 리더 즉시 읽기).
+- 빈 문자열일 때는 렌더하지 않는다 (`message && <FieldError>`).
+
+### Toast
+
+```
+위치: 우상단 고정. z-50.
+배경: bg-[#3a2a1a] border border-[#1a100a] shadow-[1px_1px_0_#1a100a]
+텍스트: text-sm text-[#d7c199]
+아이콘: 성공 = #7ca972, 에러 = #c85a54 (1px 도트 아이콘)
+표시 시간: 3000ms 자동 dismiss
+애니메이션: 없음 (금지)
+최대 동시 노출: 3개. 초과 시 가장 오래된 것 dismiss.
+```
+
+- `aria-live="polite"` 래퍼 필수.
+- 에러 토스트는 `aria-live="assertive"`.
+- 수동 dismiss 버튼(`×`) 제공.
+
+### ConfirmDialog / Modal
+
+```
+오버레이: fixed inset-0 bg-black/60 z-30
+컨텐츠:   bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-40
+          shadow-[2px_2px_0_#1a100a]
+위치:     화면 중앙 (fixed + transform -50%)
+```
+
+- `role="dialog"` + `aria-modal="true"` + `aria-labelledby` 필수.
+- ESC 키로 닫기 (비파괴적 action만 — confirm은 ESC 시 취소).
+- 포커스 트랩: 모달 열릴 때 첫 버튼으로 포커스 이동, 닫힐 때 트리거 버튼으로 복귀.
+- confirm 버튼은 Danger 스타일, 취소 버튼은 Secondary.
+
+### EmptyState
+
+```tsx
+<div className="flex flex-col items-center gap-4 py-16 text-center">
+  {/* 도트 아이콘 (16x16) */}
+  <p className="text-sm text-[#a08866]">{message}</p>
+  {cta && <Button variant="primary">{cta.label}</Button>}
+</div>
+```
+
+- 각 화면별 카피는 `docs/PRD.md` §8 빈 상태 카피 테이블 참조.
+- gradient/blur 배경 금지.
+
+### Skeleton
+
+```
+bg-[#3a2a1a] animate-pulse
+```
+
+- `animate-pulse`는 Tailwind 기본. `prefers-reduced-motion` 시 정지.
+- 실제 콘텐츠와 동일한 크기·위치로 배치.
+- 모양: 텍스트 라인(`h-4 w-3/4`), 카드(`h-32 w-full`), 표지(`h-36 w-24`).
+
+### GuestBanner
+
+```
+bg-[#3a2a1a] border border-[#8b6f4a] px-4 py-3
+텍스트: text-sm text-[#d7c199]
+닫기 버튼: text-[#a08866] hover:text-[#f4e4c1]
+```
+
+- 카피: "이 방은 당신의 거예요. 로그인하면 어떤 기기에서도 책장을 꺼낼 수 있어요."
+- `guestBannerDismissed=true`이면 렌더하지 않는다.
+- 닫기 시 `updatePreferences({ guestBannerDismissed: true })`.
+
+### HomeGuide
+
+홈 화면 5개 hitbox 진입점을 첫 방문 시 1회 안내하는 모달. `dbd:preferences.homeGuideDismissed`가 false일 때만 노출.
+
+```
+오버레이: fixed inset-0 bg-black/60 z-30
+컨텐츠:   bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-40
+          shadow-[2px_2px_0_#1a100a]
+위치:     화면 중앙 (fixed + transform -50%)
+```
+
+리스트 항목 (5개):
+- 핀: 8×8px `bg-[#e89b5e] border border-[#1a100a]` 인라인 블록
+- 라벨: `text-sm text-[#f4e4c1]`
+- 안내: `text-xs text-[#a08866]`
+
+닫기 버튼: Primary 스타일, 카피 "방을 둘러볼게요"
+
+금지:
+- `rounded-*` 금지
+- `backdrop-blur` 금지
+- `gradient` 금지
+- box-shadow glow 금지
+
+### UnsupportedEnvScreen
+
+```
+전체 화면 (min-h-screen) bg-[#2a1f17]
+중앙 정렬, text-sm text-[#a08866]
+메시지: "이 브라우저에서는 일부 기능이 지원되지 않아요."
+```
+
+- IndexedDB / `crypto.randomUUID` / `getUserMedia` 미지원 감지 시 노출.
+- 로그인해서 서버 저장으로 우회하도록 로그인 버튼 제공.
+
+### ThemeSelector (MVP1, `/settings`)
+
+```
+레이아웃: ToggleTabs 3칸 (system / day / night)
+라벨: "자동", "낮", "밤"
+Selected: bg-[var(--color-accent)] text-[var(--color-bg)]
+Unselected: bg-transparent text-[var(--color-text-body)] hover:text-[var(--color-text-primary)]
+```
+
+- 변경 즉시 `<html data-theme>`을 업데이트하고 preference를 저장한다(optimistic).
+- 회원 실패 시 이전 값으로 롤백 + 토스트.
+- 보조 텍스트: "밤에는 어둡게, 낮에는 밝게 보여요".
+
+### ReadingTimer (MVP1, `/reading/[bookId]` 상단)
+
+```
+컨테이너: border border-[var(--color-border)] bg-[var(--color-bg-card)] px-4 py-3
+시간 표시: text-2xl tabular-nums text-[var(--color-text-primary)] (HH:MM:SS)
+버튼 그룹: 시작 / 일시정지(재개) / 정지
+색: Primary=시작/재개, Secondary=일시정지, Danger=정지
+```
+
+- 상태별 버튼:
+  - `stopped`: [시작] 만 노출
+  - `running`: [일시정지] [정지]
+  - `paused`: [재개] [정지]
+- 다른 책의 타이머가 실행 중이면 [시작] 클릭 시 `ConfirmDialog`로 "다른 책의 타이머가 실행 중이에요. 정지하고 시작할까요?"
+- 정지 시 경과 초를 분 반올림하여 폼 `durationMinutes`에 프리필하고 해당 필드로 포커스. 자동 저장 금지.
+- 숫자 갱신은 1초 간격 `setInterval`. 상태 진실원은 `localStorage['dbd:reading_timer']`.
+
+### GoalProgress (MVP1)
+
+```
+컨테이너: border border-[var(--color-border)] px-3 py-2 flex items-center gap-3
+진행 막대: h-2 flex-1 bg-[var(--color-bg-input)] border border-[var(--color-border)]
+채움:      bg-[var(--color-accent)] (너비 = 진행률 %)
+라벨:      text-xs text-[var(--color-text-secondary)] tabular-nums
+상태 뱃지: 순항="순항" / 밀림="조금 밀림" / 지연="며칠 더 필요해요"
+```
+
+- `total_pages` 없음 → 페이지 막대 숨김, 날짜 정보만.
+- `target_date` 없음 → "목표 완독일을 정해 볼까요?" CTA.
+- `/bookshelf` 카드에서는 소형 버전(막대 + 잔여 일수)만 노출.
+
+### BearStatusBar — MVP4에서 BearSpeechBubble로 대체됨
+
+MVP2에서 letterbox 상단에 평문 라벨로 있었으나, MVP4에서 `BearSpeechBubble`로 교체됨. 파일 삭제됨.
+
+### BearSpeechBubble (MVP4, `/` 상단 전체너비 박스)
+
+위치: `page.tsx` `<main>` CSS grid(grid-rows: 1fr auto 1fr)의 **row 1**. `div.flex.flex-col.items-stretch.justify-center`로 감싸
+수직 중앙 정렬. GuestBanner가 있을 경우 위에 쌓임.
+
+```
+외부 래퍼: div.flex.flex-col.items-stretch.justify-center (row 1 wrapper)
+BearSpeechBubble 자체: w-full px-4 py-2
+내부 카드: bg-[#3a2a1a] border-2 border-[#1a100a] shadow-[2px_2px_0_#1a100a] px-4 py-3 w-full
+  헤더: text-sm font-bold text-[#f4e4c1] (닉네임)
+  본문: text-sm text-[#d7c199] (곰 상태 라벨)
+```
+
+접근성: role="status" aria-live="polite" aria-atomic="true".
+bearLabel null → unmount(빈 공간 없음).
+
+금지:
+- `rounded-*` 금지
+- `backdrop-blur` 금지
+- `gradient` 금지
+- box-shadow glow 금지
+
+### LastReadNote (MVP2, `/` 하단)
+
+위치: `page.tsx` `<main>` CSS grid의 **row 3**. `div.flex.items-center.justify-center`로 감싸 수직 중앙 정렬.
+BottomNav(fixed, 64px) 위에 표시되도록 `<main>`은 `bottom-[64px]`로 설정(4-mvp-polish step 0~).
+
+```
+컨테이너: py-1 text-center text-xs text-[var(--color-text-secondary)]
+형식: "마지막 독서: N시간 전" / "마지막 독서: 3일 전" / "마지막 독서: 방금"
+aria: <p><time dateTime={ISO 시각}>{상대 경과}</time></p>
+```
+
+- `formatElapsed` 출력:
+  - `< 1분`: "방금"
+  - `1분 ~ 1시간`: "N분 전"
+  - `1시간 ~ 24시간`: "N시간 전"
+  - `1일 ~ 7일`: "N일 전"
+  - `7일 이상`: "N주 전"
+- 독서 기록 없음: "아직 독서 기록이 없어요"
+- 비회원 초기 SSR: `null`이면 렌더 생략.
+
+---
+
+## 포커스 스타일
+
+모든 대화형 요소(button, a, input, textarea, select)에 적용:
+
+```css
+:focus-visible {
+  outline: 1px dashed #e89b5e;
+  outline-offset: 2px;
+}
+```
+
+- `outline: none` + `focus:ring-*` Tailwind 조합 사용 금지 — 링이 둥글다.
+- `:focus`(마우스) 대신 `:focus-visible`(키보드)만 스타일 적용.
+
+---
+
+## RoomScene Hitbox 어포던스 (MVP4 → MVP4.1)
+
+5개 hitbox(다이어리/책장/캘린더/책 등록/설정)의 클릭 어포던스는 **hitbox 영역과 동일 좌표에 위치한 SPRITE 이미지 자체의 idle 모션**으로 표현한다. 점선 outline과 인디케이터 점은 사용하지 않는다.
+
+### Sprite 매핑
+
+| Hitbox | SPRITE fileKey | 좌표 (640×400 기준 %) |
+|---|---|---|
+| 다이어리 | `diary`     | `bottom:4.25%, left:35.3438%, w:14.0625%, h:18%` |
+| 책장     | `wallShelf` | `top:17.25%, right:3.125%, w:21.5625%, h:17.25%` |
+| 캘린더   | `window`    | `top:17.5%, left:32.8125%, w:35.1563%, h:33.75%` |
+| 책 등록  | `bookstack` | `bottom:6.25%, right:14.0625%, w:17.5%, h:19%` |
+| 곰(설정) | `bear`      | `bottom:1.25%, left:42.0313%, w:32.8125%, h:42.25%` |
+
+### 애니메이션 규격
+
+```css
+@keyframes hitbox-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1px); }
+}
+
+.hitbox-bob         { animation: hitbox-bob 1.8s steps(2) infinite; }
+.hitbox-bob.delay-1 { animation-delay: 0.3s; }
+.hitbox-bob.delay-2 { animation-delay: 0.6s; }
+.hitbox-bob.delay-3 { animation-delay: 0.9s; }
+```
+
+- `steps(2)` — 픽셀 아트 톤 유지 (`bear-idle`과 동일 패턴)
+- delay로 4개 sprite의 phase를 분산 → 동시 움직임 방지
+- 곰(설정) hitbox: `bear` sprite에 이미 `bear-idle` 애니메이션이 적용되어 있어 `hitbox-bob`을 추가 적용하지 않는다. 클릭 어포던스는 `bear-idle` 모션이 담당.
+- `prefers-reduced-motion: reduce` 시 미적용 (기존 reducedMotion 분기 동일하게 처리)
+- hitbox `<button>`에는 `focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#e89b5e]`만 남겨 키보드 a11y 보장. 일반 hover 시 시각 변화 없음(sprite 모션이 어포던스 담당).
+
+금지:
+- glow / blur shadow 금지
+- `rounded-*` 금지
+- 램프 전원 버튼에는 적용하지 않는다 (스프라이트가 시각 단서)
+
+### Settings Sprite (4-mvp-polish → 제거됨, 4-mvp-polish step 6)
+
+4-mvp-polish step 1에서 `Setting.png` sprite를 추가하고 우상단(`top:2%, right:1.25%`)에 배치했으나,
+step 6에서 제거됨. 설정 진입점은 step 7에서 곰 캐릭터 hitbox로 대체.
+
+---
+
+## ThemeSelector (MVP1 / 4-mvp-polish)
+
+위치: `/settings` 페이지 테마 섹션.
+
+| 상태 | 렌더 |
+|---|---|
+| 회원 | `ToggleTabs`(자동/낮/밤). 변경 시 `updateThemePreferenceAction()` → Supabase 저장 |
+| 비회원 (4-mvp-polish~) | 토글 없음. "로그인하면 테마를 저장할 수 있어요." + `/login` 링크 |
+
+비회원 비활성 이유: server component(SSR)가 비회원 IndexedDB를 읽을 수 없어 새로고침 시 토글 상태와 실제 저장값이 불일치. 차후 SSR↔IndexedDB 동기화로 개선 예정(ADR-027).
+
+금지: `rounded-*`, `backdrop-blur`, `gradient` 사용 금지.
+
+---
+
+## 애니메이션 규칙
+
+- 곰 idle: 2~4 프레임 호흡, `steps(N)` easing, 2s loop.
+- 램프 불빛: 2프레임 깜빡, 4s loop.
+- 버튼/링크 트랜지션: `transition-colors duration-100 ease-linear`만 허용.
+- 페이지 전환: 기본 Next.js 전환 사용, 커스텀 fade/slide 금지.
+
+### 구현 스펙 (globals.css)
+
+```css
+@keyframes bear-idle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(1px); }
+}
+@keyframes lamp-flicker {
+  0%, 45%, 55%, 100% { opacity: 1; }
+  50%                { opacity: 0.92; }
+}
+
+.bear-idle   { animation: bear-idle 2s steps(2) infinite; }
+.lamp-flicker { animation: lamp-flicker 4s steps(2) infinite; }
+```
+
+- `translate` 허용 범위: 1px 이내. 초과 금지(§AI 슬롭 표).
+- `steps(2)`로 픽셀 스텝 느낌 유지. `ease-in-out` / `linear` 금지.
+- `prefers-reduced-motion: reduce` 시 `animation: none`(기존 규칙 유지).
+- `lamp-flicker`: 램프 off 상태(`lampState === 'off'`)에서도 비적용. `prefers-reduced-motion` 규칙과 동일하게 처리.
+
+**금지**:
+- `duration-150` 초과 transition
+- `cubic-bezier` easing
+- blur 애니메이션
+- translate 장거리 이동 (버튼 `active:translate-y-px` 1px은 허용)
+
+### prefers-reduced-motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .bear-idle,
+  .lamp-flicker {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+---
+
+## 아이콘
+
+- SVG 인라인, 픽셀 그리드(16×16)에 맞춘 도트 아이콘.
+- **SVG `<rect>` 요소의 조합**으로 픽셀을 직접 그려 구현한다. `shape-rendering="crispEdges"` 필수.
+- Heroicons / Lucide 같은 벡터 아이콘 세트 사용 전면 금지 — 벡터 곡선은 픽셀 아이덴티티와 충돌한다.
+- 아이콘 컨테이너(둥근 배경 박스)로 감싸지 않는다.
+- 아이콘에는 `aria-hidden="true"` + 주변 텍스트 또는 `aria-label` 제공.
+
+---
+
+## 이미지
+
+- 모든 도트 PNG: `image-rendering: pixelated; image-rendering: crisp-edges;` 전역 적용.
+- 책 표지(알라딘에서 받은 실제 사진): `image-rendering: auto`, `border border-[#1a100a]`, 크기 고정(`w-24 h-36`).
+- `next/image` `<Image>` 컴포넌트 사용. `alt` 필수.
+- 표지 로드 실패 시 제목 이니셜 텍스트 플레이스홀더(배경 `#3a2a1a`, 텍스트 `#a08866`).
+
+---
+
+### 인증 폼
+
+공통 규칙:
+- 모든 입력 필드: `bg-[#3a2a1a] border border-[#1a100a] px-3 py-2 text-sm text-[#d7c199] placeholder:text-[#6b5540] outline-none focus:border-[#a08866]`
+- 에러 텍스트: `text-sm text-[#c85a54] text-center`
+- 성공/안내 텍스트: `text-sm text-center text-[#a08866]`
+- pending 버튼: `disabled` + pendingLabel prop
+
+**/login 폼 필드**: 이메일, 비밀번호(password input), [로그인] 버튼, "비밀번호를 잊으셨나요?" 링크(/forgot-password), "아직 계정이 없으신가요? [회원가입]" 링크(/signup)
+
+**/signup 폼 필드**: 이메일, 비밀번호(min 8), 닉네임(max 30), [가입하기] 버튼, 성공 시 "확인 메일을 보냈어요. 메일함을 확인해 주세요." 안내, "이미 계정이 있으신가요? [로그인]" 링크
+
+**/forgot-password 폼 필드**: 이메일, [재설정 메일 받기] 버튼, 제출 후 "메일을 확인해 주세요" 안내(이메일 존재 여부 노출 금지)
+
+**/reset-password 폼 필드**: 새 비밀번호(min 8), [비밀번호 변경] 버튼, 성공 시 /login으로 redirect
+
+---
+
+## 카피 톤 & 보이스
+
+독자에게 따뜻하게 말을 건다. 기능 설명보다 정서적 공감을 우선.
+
+| 좋음 | 나쁨 |
+|---|---|
+| "아직 읽은 책이 없어요" | "데이터가 없습니다" |
+| "이 방은 당신의 거예요" | "로컬 저장 모드입니다" |
+| "오늘은 몇 페이지 읽었나요?" | "독서 세션을 추가하세요" |
+| "삭제하면 되돌릴 수 없어요" | "삭제 확인" |
+| "저장했어요" | "저장 완료" |
+
+- 물음표는 적절히 사용한다. 경고/오류 메시지에는 쓰지 않는다.
+- 버튼 라벨: 동사형 짧게. "추가", "저장", "삭제", "닫기".
+- 에러 메시지: 원인 + 다음 행동 제안. "네트워크 오류가 생겼어요. 잠시 후 다시 시도해 주세요."
+
+---
+
+### 커스텀 커서
+
+클릭 가능한 sprite 영역(hitbox button)에 `cursor-pixel` 클래스를 적용한다.
+
+- 에셋: `public/Pointer.svg`
+- CSS: `cursor: url('/Pointer.svg') 0 0, pointer`
+- 적용 대상: RoomScene의 모든 hitbox button, 램프 button
+- 비인터랙티브 영역(배경 이미지, 장식 sprite)에는 적용하지 않는다
