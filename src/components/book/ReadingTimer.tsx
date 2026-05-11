@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import * as timerLib from '@/lib/reading-timer'
-import type { TimerState } from '@/lib/reading-timer'
+import * as timerLib from '@/lib/reading/timer'
+import type { TimerState } from '@/lib/reading/timer'
 
 interface ReadingTimerProps {
   bookId: string

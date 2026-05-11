@@ -57,35 +57,38 @@ src/
 │   │   ├── new/page.tsx
 │   │   └── [id]/
 │   │       ├── page.tsx
-│   │       └── not-found.tsx
+│   │       └── loading.tsx
 │   ├── bookshelf/
 │   │   ├── page.tsx
-│   │   ├── error.tsx
 │   │   └── loading.tsx
 │   ├── book-calendar/page.tsx
 │   ├── add-book/page.tsx
 │   ├── reading/[bookId]/
 │   │   ├── page.tsx
-│   │   ├── not-found.tsx
 │   │   └── loading.tsx
 │   ├── settings/page.tsx
 │   ├── login/page.tsx
+│   ├── signup/page.tsx
+│   ├── forgot-password/page.tsx
+│   ├── reset-password/page.tsx
 │   ├── auth/
 │   │   └── callback/route.ts       # OAuth/매직링크 code 교환
 │   └── api/
 │       └── books/
+│           ├── _guard.ts
 │           ├── search/route.ts
 │           └── isbn/route.ts
 ├── components/
 │   ├── room/
-│   │   ├── RoomScene.tsx           # Client, theme + bearAsset? prop
-│   │   ├── BearStatusBar.tsx       # MVP2, 상단 letterbox 곰 상태 라벨
-│   │   ├── LastReadNote.tsx        # MVP2, 하단 letterbox 경과 시간
-│   │   ├── BearStateHydrator.tsx   # MVP2, 비회원 클라이언트 hydration
-│   │   ├── Bear.tsx                # 장식 sprite
-│   │   ├── Hitbox.tsx              # 접근성 처리된 <button>
-│   │   ├── Lamp.tsx
-│   │   └── Window.tsx
+│   │   ├── RoomScene.tsx           # Client, theme + bearAsset prop
+│   │   ├── BearSpeechBubble.tsx    # 닉네임 + 곰 상태 말풍선
+│   │   ├── BearStateContext.tsx    # Context Provider + hook
+│   │   ├── BearStateHydrator.tsx   # 비회원 클라이언트 hydration
+│   │   └── LastReadNote.tsx        # 하단 letterbox 경과 시간
+│   ├── nav/
+│   │   └── BottomNav.tsx
+│   ├── onboarding/
+│   │   └── HomeGuide.tsx
 │   ├── theme/
 │   │   └── ThemeHydrator.tsx       # Client, preference 로드 후 <html data-theme> 교체
 │   ├── settings/
@@ -107,16 +110,25 @@ src/
 │   │   └── UnsupportedEnvScreen.tsx
 │   ├── calendar/
 │   │   ├── MonthGrid.tsx
-│   │   └── DayCell.tsx
+│   │   ├── DayCell.tsx
+│   │   └── CalendarHydrator.tsx
 │   ├── diary/
-│   │   └── DiaryEntryForm.tsx
+│   │   ├── DiaryEntryForm.tsx
+│   │   ├── DiaryList.tsx
+│   │   ├── DiaryListHydrator.tsx
+│   │   ├── DiaryEntryDetail.tsx
+│   │   ├── DiaryEntryDetailHydrator.tsx
+│   │   └── BookPicker.tsx
 │   └── book/
 │       ├── BookCover.tsx
 │       ├── BookGrid.tsx
+│       ├── BookGridHydrator.tsx
 │       ├── AddBookTabs.tsx
 │       ├── BarcodeScanner.tsx
 │       ├── BookSearchForm.tsx
 │       ├── ReadingSessionForm.tsx
+│       ├── ReadingPageContent.tsx
+│       ├── ReadingPageHydrator.tsx
 │       ├── ReadingTimer.tsx        # MVP1, localStorage 지속 타이머
 │       └── GoalProgress.tsx        # MVP1, target_date 기반 진행률
 ├── lib/
@@ -131,24 +143,38 @@ src/
 │   │   ├── index.ts                # getStore() / useStore()
 │   │   ├── keys.ts                 # IndexedDB 키 상수
 │   │   └── preferences.ts          # guest preferences + diary draft
-│   ├── env.ts                      # zod 검증
-│   ├── validation.ts               # zod 도메인 스키마
-│   ├── errors.ts                   # AppError + code
-│   ├── isbn.ts                     # ISBN-10 ↔ 13
-│   ├── barcode.ts                  # @zxing/browser 래퍼
-│   ├── aladin.ts                   # server-only
-│   ├── date.ts                     # YYYY-MM-DD, 로컬 타임존
-│   ├── escape.ts                   # HTML 이스케이프
-│   ├── theme.ts                    # MVP1, resolveTheme(pref, now) → 'day' | 'night'
-│   ├── reading-timer.ts            # MVP1, localStorage 기반 단일 활성 타이머
-│   ├── bear-state.ts               # MVP2, computeBearState() 순수 함수 + formatElapsed()
-│   ├── last-read.ts                # MVP2, getLastReadAtFromStore() / getLastReadAtFromSupabase()
+│   ├── book/
+│   │   ├── aladin.ts               # server-only 알라딘 API 래퍼
+│   │   ├── isbn.ts                 # ISBN-10 ↔ 13
+│   │   └── barcode.ts              # @zxing/browser 래퍼
+│   ├── reading/
+│   │   ├── timer.ts                # localStorage 기반 단일 활성 타이머
+│   │   ├── goal.ts                 # target_date 기반 진행률 계산
+│   │   ├── last-read.ts            # getLastReadAtFromSupabase() (server-only)
+│   │   └── last-read-store.ts      # getLastReadAtFromStore() (client)
+│   ├── room/
+│   │   ├── bear-state.ts           # computeBearState() + formatElapsed()
+│   │   ├── lamp-state.ts           # localStorage 램프 on/off
+│   │   └── nickname.ts             # getDisplayNickname() 폴백 헬퍼
 │   ├── actions/                    # Server Actions
 │   │   ├── books.ts
 │   │   ├── reading-sessions.ts
 │   │   ├── diary-entries.ts
 │   │   └── profile.ts
-│   └── log.ts                      # console 래퍼
+│   ├── client-actions/             # Client-side action wrappers
+│   │   ├── useBookActions.ts
+│   │   ├── useDiaryActions.ts
+│   │   └── useReadingSessionActions.ts
+│   ├── hooks/
+│   │   └── useUnsavedChanges.ts
+│   ├── env.ts                      # zod 검증
+│   ├── validation.ts               # zod 도메인 스키마
+│   ├── errors.ts                   # AppError + code
+│   ├── date.ts                     # YYYY-MM-DD, 로컬 타임존
+│   ├── escape.ts                   # HTML 이스케이프
+│   ├── theme.ts                    # resolveTheme(pref, now) → 'day' | 'night'
+│   ├── lru-cache.ts                # LRU 캐시 유틸
+│   └── rate-limit.ts               # API 요청 제한
 ├── middleware.ts                   # Supabase 세션 refresh
 ├── types/
 │   ├── index.ts                    # Book, ReadingSession, DiaryEntry, BookSearchResult, Profile

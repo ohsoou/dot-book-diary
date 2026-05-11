@@ -20,7 +20,7 @@ export function BarcodeScanner({ onScanResult, onFallbackToSearch }: BarcodeScan
   const [flash, setFlash] = useState(false)
 
   const cleanup = () => {
-    import('@/lib/barcode').then(({ stopScanner }) => stopScanner())
+    import('@/lib/book/barcode').then(({ stopScanner }) => stopScanner())
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
   }
@@ -55,7 +55,7 @@ export function BarcodeScanner({ onScanResult, onFallbackToSearch }: BarcodeScan
         }
         setScannerState('active')
 
-        const { startScanner } = await import('@/lib/barcode')
+        const { startScanner } = await import('@/lib/book/barcode')
         if (cancelled || !videoRef.current) return
 
         await startScanner(

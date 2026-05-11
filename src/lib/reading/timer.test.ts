@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AppError } from '@/lib/errors';
-import { read, start, pause, resume, stop, clear, elapsedMs } from './reading-timer';
+import { read, start, pause, resume, stop, clear, elapsedMs } from './timer';
 
 beforeEach(() => {
   localStorage.clear();

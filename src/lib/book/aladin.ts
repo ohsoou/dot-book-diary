@@ -2,7 +2,7 @@ import 'server-only';
 
 import { AppError } from '@/lib/errors';
 import { serverEnv } from '@/lib/env';
-import { convertIsbn10to13 } from '@/lib/isbn';
+import { convertIsbn10to13 } from '@/lib/book/isbn';
 import { LruCache } from '@/lib/lru-cache';
 import type { BookSearchResult } from '@/types';
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBearState } from './BearStateContext'
-import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
+import { readLampState, writeLampState, type LampState } from '@/lib/room/lamp-state'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'

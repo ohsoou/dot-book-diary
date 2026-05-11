@@ -1,6 +1,6 @@
 'use client'
 
-import { formatElapsed } from '@/lib/bear-state'
+import { formatElapsed } from '@/lib/room/bear-state'
 import { useBearState } from './BearStateContext'
 
 interface LastReadNoteProps {

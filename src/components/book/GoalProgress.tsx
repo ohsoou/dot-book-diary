@@ -1,5 +1,5 @@
 import type { Book, ReadingSession } from '@/types'
-import { computeGoal } from '@/lib/goal'
+import { computeGoal } from '@/lib/reading/goal'
 
 interface GoalProgressProps {
   book: Book

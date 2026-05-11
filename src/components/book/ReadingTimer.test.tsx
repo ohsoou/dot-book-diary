@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { ReadingTimer } from './ReadingTimer'
-import * as timerLib from '@/lib/reading-timer'
+import * as timerLib from '@/lib/reading/timer'
 
-vi.mock('@/lib/reading-timer')
+vi.mock('@/lib/reading/timer')
 
 const makeRunning = (bookId = 'book1'): timerLib.TimerState => ({
   bookId,

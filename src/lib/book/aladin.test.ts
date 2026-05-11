@@ -9,14 +9,14 @@ vi.mock('@/lib/env', () => ({
 }));
 
 // isbn mock (real implementation is fine, but mock to isolate)
-vi.mock('@/lib/isbn', async (importOriginal) => {
-  return await importOriginal<typeof import('@/lib/isbn')>();
+vi.mock('@/lib/book/isbn', async (importOriginal) => {
+  return await importOriginal<typeof import('@/lib/book/isbn')>();
 });
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const { searchByKeyword, fetchByIsbn, __resetAladinCaches } = await import('@/lib/aladin');
+const { searchByKeyword, fetchByIsbn, __resetAladinCaches } = await import('@/lib/book/aladin');
 
 function makeAladinResponse(items: object[]): Response {
   return new Response(JSON.stringify({ item: items }), {

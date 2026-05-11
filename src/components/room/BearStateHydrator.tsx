@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 import { useStore } from '@/lib/storage/use-store'
-import { getLastReadAtFromStore } from '@/lib/last-read-store'
+import { getLastReadAtFromStore } from '@/lib/reading/last-read-store'
 import { getPreferences } from '@/lib/storage/preferences'
-import { computeBearState } from '@/lib/bear-state'
-import { getDisplayNickname } from '@/lib/nickname'
+import { computeBearState } from '@/lib/room/bear-state'
+import { getDisplayNickname } from '@/lib/room/nickname'
 import { useSetBearState } from './BearStateContext'
 
 interface BearStateHydratorProps {

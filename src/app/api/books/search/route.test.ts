@@ -7,7 +7,7 @@ vi.mock('@/lib/env', () => ({
 }));
 
 const mockSearchByKeyword = vi.fn();
-vi.mock('@/lib/aladin', () => ({
+vi.mock('@/lib/book/aladin', () => ({
   searchByKeyword: mockSearchByKeyword,
 }));
 

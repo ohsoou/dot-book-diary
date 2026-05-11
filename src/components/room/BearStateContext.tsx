@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState } from 'react'
-import { getDisplayNickname } from '@/lib/nickname'
+import { getDisplayNickname } from '@/lib/room/nickname'
 
 export interface BearStateContextValue {
   bearAsset: string | undefined

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchByKeyword } from '@/lib/aladin';
+import { searchByKeyword } from '@/lib/book/aladin';
 import { AppError } from '@/lib/errors';
 import { applyApiGuard } from '../_guard';
 

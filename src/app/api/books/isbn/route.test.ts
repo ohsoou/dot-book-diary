@@ -7,7 +7,7 @@ vi.mock('@/lib/env', () => ({
 }));
 
 const mockFetchByIsbn = vi.fn();
-vi.mock('@/lib/aladin', () => ({
+vi.mock('@/lib/book/aladin', () => ({
   fetchByIsbn: mockFetchByIsbn,
 }));
 
