@@ -72,6 +72,12 @@ describe('AppError', () => {
     const err = new AppError('WEAK_PASSWORD', '비밀번호는 8자 이상이어야 해요');
     expect(err.code).toBe('WEAK_PASSWORD');
   });
+
+  it('should create RATE_LIMITED error correctly', () => {
+    const err = new AppError('RATE_LIMITED', '잠시 후 다시 시도해 주세요');
+    expect(err.code).toBe('RATE_LIMITED');
+    expect(err.message).toBe('잠시 후 다시 시도해 주세요');
+  });
 });
 
 describe('ActionResult', () => {

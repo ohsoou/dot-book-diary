@@ -1,0 +1,32 @@
+{
+  "project": "dot-book-diary",
+  "phase": "11-book-status-rating",
+  "steps": [
+    {
+      "step": 0,
+      "name": "types-and-migrations",
+      "status": "completed",
+      "started_at": "2026-05-07T13:08:32+0900",
+      "summary": "BookStatus 타입 추가 + Book에 status/rating/finishedAt/memo 필드 추가 + bookSchema 확장 + LocalStore v1→v2 마이그레이션 + SQL 파일 생성(20260507000000_book_status_rating.sql). 사용자가 bun db:migrate 후 bun db:types 실행 후 step 1 진행.",
+      "completed_at": "2026-05-07T13:16:11+0900"
+    },
+    {
+      "step": 1,
+      "name": "store-and-actions",
+      "status": "completed",
+      "started_at": "2026-05-07T13:16:11+0900",
+      "summary": "LocalStore.updateBook + RemoteStore.updateBook에 auto-finishedAt 로직 추가 (status='finished' && finishedAt 미지정 시 오늘 날짜 자동 세팅). updateBookAction에 bookSchema.partial() 검증 추가 (rating/status/memo 유효성 검사). LocalStore.test.ts 8 케이스 + RemoteStore.test.ts 8 케이스 + books.test.ts 6 케이스 추가. bun build && bun lint && bun run test 전체 통과 (713 tests).",
+      "completed_at": "2026-05-07T13:27:24+0900"
+    },
+    {
+      "step": 2,
+      "name": "ui-status-tabs-and-rating",
+      "status": "completed",
+      "started_at": "2026-05-07T13:27:24+0900",
+      "summary": "BookGrid에 'use client' + 상태 필터 탭(전체/읽고 싶은/읽는 중/완독) 추가. ReadingSessionForm에 완독 표시/취소 토글 버튼, 별점 1~5(★/☆), 한 줄 메모(onBlur 저장, maxLength=500) 추가. updateBook 실패 시 useToast로 에러 노출. BookGrid.test.tsx 5건 + ReadingSessionForm.test.tsx 6건 추가(724 tests 통과). 별점 0으로 되돌리는 UI는 v1.x에서 다룸.",
+      "completed_at": "2026-05-07T13:38:29+0900"
+    }
+  ],
+  "created_at": "2026-05-07T13:08:32+0900",
+  "completed_at": "2026-05-07T13:38:29+0900"
+}

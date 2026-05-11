@@ -1,0 +1,32 @@
+{
+  "project": "dot-book-diary",
+  "phase": "8-action-server-tests",
+  "steps": [
+    {
+      "step": 0,
+      "name": "books-action-tests",
+      "status": "completed",
+      "started_at": "2026-05-06T14:24:29+0900",
+      "completed_at": "2026-05-06T14:28:53+0900",
+      "summary": "books.ts 4개 액션(listBooksAction/addBookAction/deleteBookAction/updateBookAction)에 대한 테스트 16개 추가, vi.mock으로 getStore·revalidatePath 격리, AppError·UPSTREAM_FAILED·정상 경로·revalidate 호출 검증"
+    },
+    {
+      "step": 1,
+      "name": "diary-entries-action-tests",
+      "status": "completed",
+      "started_at": "2026-05-06T14:28:53+0900",
+      "completed_at": "2026-05-06T14:33:27+0900",
+      "summary": "diary-entries.ts 3개 액션(addDiaryEntryAction/updateDiaryEntryAction/deleteDiaryEntryAction)에 대한 테스트 18개 추가, bookId 빈문자열→undefined 정규화, parseOptionalInt NaN·소수 처리, zod 검증 실패 fieldErrors 매핑, AppError·UPSTREAM_FAILED·revalidatePath 분기 검증"
+    },
+    {
+      "step": 2,
+      "name": "reading-sessions-action-tests",
+      "status": "completed",
+      "started_at": "2026-05-06T14:33:27+0900",
+      "completed_at": "2026-05-06T14:35:46+0900",
+      "summary": "reading-sessions.ts 3개 액션(addReadingSessionAction/updateReadingSessionAction/deleteReadingSessionAction)에 대한 테스트 14개 추가. bookId 미설정 시 빈문자열 락인, parseOptionalInt 빈문자열→undefined·소수 truncate 검증, updateReadingSessionAction patch에 bookId 미포함 락인, 빈 readDate 그대로 전달 락인, AppError·UPSTREAM_FAILED 매핑 검증. phase 8 완료 — 액션 3개 파일 모두 테스트 커버리지 확보, phase 9(client-actions-facade)의 회귀 안전망 역할."
+    }
+  ],
+  "created_at": "2026-05-06T14:24:29+0900",
+  "completed_at": "2026-05-06T14:35:46+0900"
+}

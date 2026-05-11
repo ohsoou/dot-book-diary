@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchByKeyword } from '@/lib/aladin';
+import { searchByKeyword } from '@/lib/book/aladin';
 import { AppError } from '@/lib/errors';
+import { applyApiGuard } from '../_guard';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const guard = applyApiGuard(request, { rate: 30, scope: 'aladin-search' });
+  if (!guard.ok) return guard.response;
+
   const q = request.nextUrl.searchParams.get('q') ?? '';
 
   if (!q.trim()) {

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchByIsbn } from '@/lib/aladin';
+import { fetchByIsbn } from '@/lib/book/aladin';
 import { AppError } from '@/lib/errors';
+import { applyApiGuard } from '../_guard';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const guard = applyApiGuard(request, { rate: 60, scope: 'aladin-isbn' });
+  if (!guard.ok) return guard.response;
+
   const isbn = request.nextUrl.searchParams.get('isbn') ?? '';
 
   if (!isbn.trim()) {

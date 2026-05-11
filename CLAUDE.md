@@ -16,7 +16,7 @@
 - CRITICAL: 비회원(로그인 전) 데이터는 서버로 전송하지 않는다. IndexedDB에만 저장한다. "로그인하면 동기화" 동의는 v1.1 스코프.
 - 데이터 접근은 `src/lib/storage/`의 `Store` 인터페이스 한 곳으로만 한다. 회원=`RemoteStore`(Supabase), 비회원=`LocalStore`(IndexedDB). 상위 레이어는 어떤 구현이 주입됐는지 몰라야 한다.
 - 컴포넌트는 `src/components/`, 타입은 `src/types/`, 외부 API 래퍼는 `src/services/` 또는 `src/lib/` 하위에 분리한다.
-- 서버 전용 모듈(`lib/aladin.ts`, `lib/supabase/server.ts` 등)은 파일 상단에 `import 'server-only'` 추가. 클라이언트 번들 포함 방지.
+- 서버 전용 모듈(`lib/book/aladin.ts`, `lib/supabase/server.ts` 등)은 파일 상단에 `import 'server-only'` 추가. 클라이언트 번들 포함 방지.
 - UI: `rounded-*`, `backdrop-blur`, `gradient`, box-shadow blur, 보라/인디고 색상 금지. 이유는 `docs/UI_GUIDE.md` 참조.
 
 ## 모듈 의존성 계층 (위→아래만 허용, 역방향 금지)
@@ -29,7 +29,7 @@ lib/actions/ (Server Actions)
   ↓
 lib/storage/ (Store 인터페이스 + LocalStore + RemoteStore)
   ↓
-lib/ (유틸: date, isbn, escape, errors, validation, env)
+lib/ (유틸: date, escape, errors, validation, env + book/, reading/, room/ 도메인 서브디렉토리)
   ↓
 types/ (순수 타입 정의)
 ```

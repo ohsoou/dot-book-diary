@@ -7,7 +7,7 @@ vi.mock('@/components/ui/Toast', () => ({
   useToast: () => ({ addToast: mockAddToast }),
 }))
 
-vi.mock('@/lib/barcode', () => ({
+vi.mock('@/lib/book/barcode', () => ({
   startScanner: vi.fn(),
   stopScanner: vi.fn(),
 }))

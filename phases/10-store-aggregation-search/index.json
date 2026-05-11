@@ -1,0 +1,32 @@
+{
+  "project": "dot-book-diary",
+  "phase": "10-store-aggregation-search",
+  "steps": [
+    {
+      "step": 0,
+      "name": "store-types-and-interface",
+      "status": "completed",
+      "started_at": "2026-05-07T09:55:59+0900",
+      "summary": "ReadingStatsPeriod/ReadingStats/ReadingStreak/DiarySearchQuery/SessionsByDate 타입 5종을 types/index.ts에 추가하고, Store 인터페이스에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드를 추가, LocalStore·RemoteStore에 throw stub으로 구현 완료",
+      "completed_at": "2026-05-07T09:58:21+0900"
+    },
+    {
+      "step": 1,
+      "name": "local-store-aggregation",
+      "status": "completed",
+      "started_at": "2026-05-07T09:58:21+0900",
+      "completed_at": "2026-05-07T10:04:29+0900",
+      "summary": "LocalStore에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드 구현(메모리 reduce 방식), LocalStore.test.ts에 신규 테스트 24개 추가 — 기존 회귀 없음"
+    },
+    {
+      "step": 2,
+      "name": "remote-store-aggregation",
+      "status": "completed",
+      "started_at": "2026-05-07T10:04:29+0900",
+      "completed_at": "2026-05-07T10:11:56+0900",
+      "summary": "RemoteStore에 getReadingStats/getReadingStreak/listSessionsGroupedByDate/searchDiaryEntries/countBooks 5개 메서드 구현(Supabase 쿼리 + 클라이언트 reduce), escape.ts에 escapeLikePattern 헬퍼 추가, RemoteStore.test.ts에 신규 테스트 25개(총 42개) 추가 — step 1과 결과 형태 일치 검증 완료"
+    }
+  ],
+  "created_at": "2026-05-07T09:55:59+0900",
+  "completed_at": "2026-05-07T10:11:57+0900"
+}

@@ -41,7 +41,44 @@
     },
     {
       "dir": "7-auth-error-code-dispatch",
-      "status": "completed"
+      "status": "completed",
+      "completed_at": "2026-04-30T14:52:32+0900"
+    },
+    {
+      "dir": "8-action-server-tests",
+      "status": "completed",
+      "completed_at": "2026-05-06T14:35:46+0900"
+    },
+    {
+      "dir": "9-client-actions-facade",
+      "status": "completed",
+      "failed_at": "2026-05-06T14:55:35+0900",
+      "completed_at": "2026-05-07T08:26:30+0900"
+    },
+    {
+      "dir": "10-store-aggregation-search",
+      "status": "completed",
+      "completed_at": "2026-05-07T10:11:57+0900"
+    },
+    {
+      "dir": "11-book-status-rating",
+      "status": "completed",
+      "completed_at": "2026-05-07T13:38:29+0900"
+    },
+    {
+      "dir": "12-aladin-route-protection",
+      "status": "completed",
+      "completed_at": "2026-05-08T09:07:51+0900"
+    },
+    {
+      "dir": "13-onboarding-and-bookshelf-cta",
+      "status": "completed",
+      "completed_at": "2026-05-08T15:00:06+0900"
+    },
+    {
+      "dir": "14-docs-and-lib-refactor",
+      "status": "error",
+      "failed_at": "2026-05-08T16:20:47+0900"
     }
   ]
 }

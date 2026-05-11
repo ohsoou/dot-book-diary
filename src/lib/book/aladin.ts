@@ -2,12 +2,25 @@ import 'server-only';
 
 import { AppError } from '@/lib/errors';
 import { serverEnv } from '@/lib/env';
-import { convertIsbn10to13 } from '@/lib/isbn';
+import { convertIsbn10to13 } from '@/lib/book/isbn';
+import { LruCache } from '@/lib/lru-cache';
 import type { BookSearchResult } from '@/types';
 
 const ALADIN_BASE_URL = 'https://www.aladin.co.kr/ttb/api';
 const TIMEOUT_MS = 5_000;
 const MAX_ATTEMPTS = 2;
+
+const SEARCH_CACHE = new LruCache<string, BookSearchResult[]>({ max: 200, ttlMs: 10 * 60 * 1000 });
+const ISBN_CACHE = new LruCache<string, BookSearchResult | null>({ max: 500, ttlMs: 60 * 60 * 1000 });
+
+function normalizeKeyword(query: string): string {
+  return query.trim().toLowerCase();
+}
+
+export function __resetAladinCaches(): void {
+  SEARCH_CACHE.__reset();
+  ISBN_CACHE.__reset();
+}
 
 type AladinItem = {
   title?: string;
@@ -41,7 +54,7 @@ async function fetchWithTimeout(url: string): Promise<Response> {
   try {
     return await fetch(url, {
       signal: controller.signal,
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
   } finally {
     clearTimeout(timer);
@@ -71,6 +84,10 @@ async function fetchAladin(url: string): Promise<Response> {
  * 키워드로 책을 검색한다.
  */
 export async function searchByKeyword(query: string): Promise<BookSearchResult[]> {
+  const key = normalizeKeyword(query);
+  const cached = SEARCH_CACHE.get(key);
+  if (cached !== undefined) return cached;
+
   const params = new URLSearchParams({
     ttbkey: serverEnv.ALADIN_TTB_KEY,
     Query: query,
@@ -90,7 +107,9 @@ export async function searchByKeyword(query: string): Promise<BookSearchResult[]
   }
 
   const json: AladinSearchResponse = await res.json() as AladinSearchResponse;
-  return (json.item ?? []).map(normalizeItem).filter((item): item is BookSearchResult => item !== null);
+  const results = (json.item ?? []).map(normalizeItem).filter((item): item is BookSearchResult => item !== null);
+  SEARCH_CACHE.set(key, results);
+  return results;
 }
 
 /**
@@ -100,6 +119,9 @@ export async function fetchByIsbn(isbn: string): Promise<BookSearchResult | null
   const normalized = /^\d{10}$|^\d{9}X$/i.test(isbn.replace(/[-\s]/g, ''))
     ? (convertIsbn10to13(isbn) ?? isbn)
     : isbn;
+
+  const cached = ISBN_CACHE.get(normalized);
+  if (cached !== undefined) return cached;
 
   const params = new URLSearchParams({
     ttbkey: serverEnv.ALADIN_TTB_KEY,
@@ -118,5 +140,7 @@ export async function fetchByIsbn(isbn: string): Promise<BookSearchResult | null
 
   const json: AladinSearchResponse = await res.json() as AladinSearchResponse;
   const items = (json.item ?? []).map(normalizeItem).filter((item): item is BookSearchResult => item !== null);
-  return items[0] ?? null;
+  const result = items[0] ?? null;
+  ISBN_CACHE.set(normalized, result);
+  return result;
 }

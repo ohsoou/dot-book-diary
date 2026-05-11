@@ -1,0 +1,32 @@
+{
+  "project": "dot-book-diary",
+  "phase": "9-client-actions-facade",
+  "steps": [
+    {
+      "step": 0,
+      "name": "use-book-actions-hook",
+      "status": "completed",
+      "started_at": "2026-05-06T14:40:33+0900",
+      "summary": "useBookActions 훅 신규(src/lib/client-actions/useBookActions.ts), 테스트 12건(useBookActions.test.ts), AddBookTabs를 actions.addBook() 단일 호출로 마이그레이션 — 590 tests passed",
+      "completed_at": "2026-05-06T14:43:31+0900"
+    },
+    {
+      "step": 1,
+      "name": "use-reading-session-actions-hook",
+      "status": "completed",
+      "started_at": "2026-05-06T14:43:31+0900",
+      "summary": "useReadingSessionActions 훅 신규(useReadingSessionActions.ts), 테스트 12건(useReadingSessionActions.test.ts), ReadingSessionForm을 facade 호출로 마이그레이션(server action/LocalStore 직접 호출 제거) — 603 tests passed",
+      "completed_at": "2026-05-06T14:50:36+0900"
+    },
+    {
+      "step": 2,
+      "name": "use-diary-actions-and-finalize",
+      "status": "completed",
+      "started_at": "2026-05-06T14:50:37+0900",
+      "summary": "useDiaryActions 훅 신규(src/lib/client-actions/useDiaryActions.ts), 테스트 13건(useDiaryActions.test.ts), DiaryEntryForm/BookPicker/DiaryListHydrator/DiaryEntryDetailHydrator를 facade 호출로 마이그레이션(new LocalStore 직접 인스턴스화·server action 직접 호출 0건) — 622 tests passed. phase 10에서 Store 인터페이스 확장 시 facade가 흡수할 신규 메서드(검색/통계)를 추가만 하면 컴포넌트 변경 없이 노출 가능.",
+      "completed_at": "2026-05-07T08:26:30+0900"
+    }
+  ],
+  "created_at": "2026-05-06T14:40:33+0900",
+  "completed_at": "2026-05-07T08:26:30+0900"
+}

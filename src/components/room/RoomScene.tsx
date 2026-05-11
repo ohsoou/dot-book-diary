@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useBearState } from './BearStateContext'
-import { readLampState, writeLampState, type LampState } from '@/lib/lamp-state'
+import { readLampState, writeLampState, type LampState } from '@/lib/room/lamp-state'
 
 interface RoomSceneProps {
   theme: 'day' | 'night'
@@ -33,7 +33,7 @@ interface HitboxConfig {
 }
 
 const SPRITE_FILES: Record<string, string> = {
-  background:   'Background_special.png',
+  background:   'Background.png',
   outsideView:  'Outside_view.png',
   window:       'Window.png',
   hangingPlant: 'Hanging_plant.png',

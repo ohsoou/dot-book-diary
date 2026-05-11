@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import type { Book, DiaryEntry } from '@/types'
-import { LocalStore } from '@/lib/storage/LocalStore'
 import { getPreferences } from '@/lib/storage/preferences'
+import { useDiaryActions } from '@/lib/client-actions/useDiaryActions'
+import { useBookActions } from '@/lib/client-actions/useBookActions'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { DiaryEntryDetail } from './DiaryEntryDetail'
 
@@ -12,6 +13,8 @@ interface DiaryEntryDetailHydratorProps {
 }
 
 export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) {
+  const diaryActions = useDiaryActions({ isLoggedIn: false })
+  const bookActions = useBookActions({ isLoggedIn: false })
   const [entry, setEntry] = useState<DiaryEntry | null | undefined>(undefined)
   const [book, setBook] = useState<Book | undefined>(undefined)
 
@@ -21,18 +24,23 @@ export function DiaryEntryDetailHydrator({ id }: DiaryEntryDetailHydratorProps) 
         setEntry(null)
         return
       }
-      const store = new LocalStore()
-      store
-        .getDiaryEntry(id)
-        .then(async (loaded) => {
+      diaryActions
+        .getEntry(id)
+        .then(async (entryResult) => {
+          const loaded = entryResult.ok ? entryResult.data : null
           setEntry(loaded)
           if (loaded?.bookId) {
-            const linkedBook = await store.getBook(loaded.bookId).catch(() => null)
-            setBook(linkedBook ?? undefined)
+            const bookResult = await bookActions.listBooks().catch(() => null)
+            if (bookResult?.ok) {
+              const found = bookResult.data.find((b) => b.id === loaded.bookId)
+              setBook(found)
+            }
           }
         })
         .catch(() => setEntry(null))
     })
+  // facades are stable within the component lifecycle; deps are intentional
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   if (entry === undefined) {

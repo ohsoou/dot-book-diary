@@ -78,13 +78,13 @@ export function ConfirmDialog({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-30 bg-black/60 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center px-4">
       <div
         id={titleId + '-dialog'}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-40 shadow-[2px_2px_0_#1a100a]"
+        className="bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-[70] shadow-[2px_2px_0_#1a100a]"
       >
         <h2 id={titleId} className="text-sm text-[#f4e4c1] mb-2">
           {title}

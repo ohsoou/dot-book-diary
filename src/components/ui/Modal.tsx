@@ -63,13 +63,13 @@ export function Modal({ open, title, onClose, footer, children }: ModalProps) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-30 bg-black/60 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center px-4">
       <div
         id={titleId + '-modal'}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId + '-title'}
-        className="bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-40 shadow-[2px_2px_0_#1a100a] flex flex-col gap-4"
+        className="bg-[#3a2a1a] border border-[#1a100a] p-6 max-w-sm w-full z-[70] shadow-[2px_2px_0_#1a100a] flex flex-col gap-4"
       >
         <h2 id={titleId + '-title'} className="text-sm text-[#f4e4c1]">
           {title}

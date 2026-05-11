@@ -1,9 +1,25 @@
 import { get, set, createStore, type UseStore } from 'idb-keyval';
-import type { Book, ReadingSession, DiaryEntry } from '@/types';
+import type {
+  Book,
+  ReadingSession,
+  DiaryEntry,
+  ReadingStats,
+  ReadingStatsPeriod,
+  ReadingStreak,
+  DiarySearchQuery,
+  SessionsByDate,
+} from '@/types';
 import type { Store } from './Store';
 import { KEYS, CURRENT_SCHEMA_VERSION } from './keys';
 import { bookSchema, readingSessionSchema, diaryEntrySchema } from '@/lib/validation';
 import { AppError } from '@/lib/errors';
+import { formatLocalYmd } from '@/lib/date';
+
+/** YYYY-MM-DD → days since Unix epoch (UTC, DST-safe) */
+function daysSince(ymd: string): number {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return Math.floor(Date.UTC(y!, m! - 1, d!) / 86400000);
+}
 
 function uuid(): string {
   return crypto.randomUUID();
@@ -26,15 +42,14 @@ export class LocalStore implements Store {
   }
 
   private async runMigrations(storedVersion: number): Promise<void> {
-    if (storedVersion < CURRENT_SCHEMA_VERSION) {
-      // 미래 마이그레이션 케이스를 여기에 추가한다.
-      // 현재 버전이 1이므로 아직 마이그레이션 로직 없음.
-      // switch (storedVersion) {
-      //   case 1: // 1 -> 2 마이그레이션 로직
-      //     break;
-      // }
-      await set(KEYS.SCHEMA_VERSION, CURRENT_SCHEMA_VERSION, this.idbStore);
+    if (storedVersion < 2) {
+      // v1 → v2: Book에 status 필드 추가. 기존 책은 'reading'으로 채운다.
+      type LegacyBook = Book & { status?: Book['status'] };
+      const books = (await get<LegacyBook[]>(KEYS.BOOKS, this.idbStore)) ?? [];
+      const migrated: Book[] = books.map((b) => ({ ...b, status: b.status ?? 'reading' }));
+      await set(KEYS.BOOKS, migrated, this.idbStore);
     }
+    await set(KEYS.SCHEMA_VERSION, CURRENT_SCHEMA_VERSION, this.idbStore);
   }
 
   private init(): Promise<void> {
@@ -91,7 +106,13 @@ export class LocalStore implements Store {
     const books = await this.listBooks();
     const idx = books.findIndex((b) => b.id === id);
     if (idx === -1) throw new AppError('NOT_FOUND', `Book ${id} not found`);
-    const updated: Book = { ...books[idx]!, ...patch, id, updatedAt: now() };
+
+    const effectivePatch = { ...patch };
+    if (patch.status === 'finished' && patch.finishedAt === undefined) {
+      effectivePatch.finishedAt = formatLocalYmd(new Date());
+    }
+
+    const updated: Book = { ...books[idx]!, ...effectivePatch, id, updatedAt: now() };
     const next = [...books];
     next[idx] = updated;
     await set(KEYS.BOOKS, next, this.idbStore);
@@ -214,5 +235,128 @@ export class LocalStore implements Store {
   async deleteDiaryEntry(id: string): Promise<void> {
     const entries = await this.listAllEntries();
     await set(KEYS.DIARY_ENTRIES, entries.filter((e) => e.id !== id), this.idbStore);
+  }
+
+  // ── Aggregation & search ───────────────────────────────────────────────────
+
+  async getReadingStats(period?: ReadingStatsPeriod): Promise<ReadingStats> {
+    const sessions = await this.listReadingSessions(
+      period ? { from: period.from, to: period.to } : undefined,
+    );
+
+    const dates = new Set<string>();
+    const bookIds = new Set<string>();
+    let totalMinutes = 0;
+    let totalPagesRead = 0;
+
+    for (const s of sessions) {
+      totalMinutes += s.durationMinutes ?? 0;
+      if (s.startPage !== undefined && s.endPage !== undefined) {
+        totalPagesRead += Math.max(0, s.endPage - s.startPage);
+      }
+      dates.add(s.readDate);
+      bookIds.add(s.bookId);
+    }
+
+    return {
+      totalMinutes,
+      totalSessions: sessions.length,
+      totalPagesRead,
+      daysActive: dates.size,
+      booksTouched: bookIds.size,
+    };
+  }
+
+  async getReadingStreak(): Promise<ReadingStreak> {
+    const sessions = await this.listAll();
+
+    if (sessions.length === 0) {
+      return { current: 0, longest: 0, lastReadDate: null };
+    }
+
+    const dateSet = new Set(sessions.map((s) => s.readDate));
+    const sortedDates = Array.from(dateSet).sort();
+    const lastReadDate = sortedDates[sortedDates.length - 1] ?? null;
+
+    // Longest streak: find max run of consecutive calendar days
+    let longest = 1;
+    let run = 1;
+    for (let i = 1; i < sortedDates.length; i++) {
+      if (daysSince(sortedDates[i]!) - daysSince(sortedDates[i - 1]!) === 1) {
+        run++;
+        if (run > longest) longest = run;
+      } else {
+        run = 1;
+      }
+    }
+
+    // Current streak: count consecutive days backwards from today (today must be in set)
+    const today = formatLocalYmd(new Date());
+    let current = 0;
+    if (dateSet.has(today)) {
+      current = 1;
+      const cursor = new Date();
+      while (true) {
+        cursor.setDate(cursor.getDate() - 1);
+        if (!dateSet.has(formatLocalYmd(cursor))) break;
+        current++;
+      }
+    }
+
+    return { current, longest, lastReadDate };
+  }
+
+  async listSessionsGroupedByDate(period: ReadingStatsPeriod): Promise<SessionsByDate[]> {
+    const sessions = await this.listReadingSessions({ from: period.from, to: period.to });
+
+    const groups = new Map<string, { totalMinutes: number; bookIds: string[] }>();
+
+    for (const s of sessions) {
+      if (!groups.has(s.readDate)) {
+        groups.set(s.readDate, { totalMinutes: 0, bookIds: [] });
+      }
+      const g = groups.get(s.readDate)!;
+      g.totalMinutes += s.durationMinutes ?? 0;
+      if (!g.bookIds.includes(s.bookId)) {
+        g.bookIds.push(s.bookId);
+      }
+    }
+
+    return Array.from(groups.entries())
+      .map(([date, g]) => ({ date, totalMinutes: g.totalMinutes, bookIds: g.bookIds }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async searchDiaryEntries(query: DiarySearchQuery): Promise<DiaryEntry[]> {
+    // cursor is ignored in LocalStore — data volume is small, cursor-based pagination is not needed
+    let entries = await this.listDiaryEntries({
+      bookId: query.bookId,
+      entryType: query.entryType,
+    });
+
+    if (query.q) {
+      const q = query.q.toLowerCase();
+      entries = entries.filter((e) => e.body.toLowerCase().includes(q));
+    }
+
+    if (query.from) {
+      const from = query.from;
+      entries = entries.filter((e) => e.createdAt.slice(0, 10) >= from);
+    }
+
+    if (query.to) {
+      const to = query.to;
+      entries = entries.filter((e) => e.createdAt.slice(0, 10) <= to);
+    }
+
+    entries.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+    const limit = query.limit ?? 50;
+    return entries.slice(0, limit);
+  }
+
+  async countBooks(): Promise<number> {
+    const books = await this.listBooks();
+    return books.length;
   }
 }

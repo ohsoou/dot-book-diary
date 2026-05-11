@@ -11,3 +11,11 @@ export function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;');
 }
+
+/**
+ * SQL LIKE / ILIKE 패턴에서 와일드카드로 해석되는 %, _, \를 이스케이프한다.
+ * ilike(column, `%${escapeLikePattern(userInput)}%`) 형태로 사용한다.
+ */
+export function escapeLikePattern(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}

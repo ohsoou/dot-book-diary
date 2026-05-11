@@ -1,4 +1,13 @@
-import type { Book, ReadingSession, DiaryEntry } from '@/types';
+import type {
+  Book,
+  ReadingSession,
+  DiaryEntry,
+  ReadingStats,
+  ReadingStatsPeriod,
+  ReadingStreak,
+  DiarySearchQuery,
+  SessionsByDate,
+} from '@/types';
 
 export interface Store {
   // Books
@@ -22,4 +31,11 @@ export interface Store {
   addDiaryEntry(input: Omit<DiaryEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<DiaryEntry>;
   updateDiaryEntry(id: string, patch: Partial<Omit<DiaryEntry, 'id' | 'createdAt' | 'updatedAt'>>): Promise<DiaryEntry>;
   deleteDiaryEntry(id: string): Promise<void>;
+
+  // Aggregation & search
+  getReadingStats(period?: ReadingStatsPeriod): Promise<ReadingStats>;
+  getReadingStreak(): Promise<ReadingStreak>;
+  listSessionsGroupedByDate(period: ReadingStatsPeriod): Promise<SessionsByDate[]>;
+  searchDiaryEntries(query: DiarySearchQuery): Promise<DiaryEntry[]>;
+  countBooks(): Promise<number>;
 }

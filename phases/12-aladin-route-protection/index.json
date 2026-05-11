@@ -1,0 +1,32 @@
+{
+  "project": "dot-book-diary",
+  "phase": "12-aladin-route-protection",
+  "steps": [
+    {
+      "step": 0,
+      "name": "rate-limiter-utility",
+      "status": "completed",
+      "started_at": "2026-05-08T08:50:16+0900",
+      "summary": "src/lib/rate-limit.ts 토큰 버킷 유틸 신규(checkAndConsume/__resetRateLimitStore) + rate-limit.test.ts 10개 케이스 + errors.test.ts RATE_LIMITED 케이스 추가",
+      "completed_at": "2026-05-08T08:53:40+0900"
+    },
+    {
+      "step": 1,
+      "name": "apply-to-aladin-routes",
+      "status": "completed",
+      "started_at": "2026-05-08T08:53:40+0900",
+      "completed_at": "2026-05-08T09:01:28+0900",
+      "summary": "_guard.ts(Origin/Referer 화이트리스트+IP 토큰버킷) 신규 + search(rate:30)/isbn(rate:60) 라우트 적용 + _guard.test.ts 8케이스 + route.test.ts 각 3케이스 추가"
+    },
+    {
+      "step": 2,
+      "name": "caching-and-revalidate-tuning",
+      "status": "completed",
+      "started_at": "2026-05-08T09:01:28+0900",
+      "completed_at": "2026-05-08T09:07:51+0900",
+      "summary": "LruCache<K,V>(max/ttlMs, LRU eviction, TTL 만료) 신규 + lru-cache.test.ts 7케이스 + aladin.ts에 SEARCH_CACHE(10분)/ISBN_CACHE(60분) 적용 및 next.revalidate 제거(cache:no-store) + aladin.test.ts 캐시 케이스 5개 추가"
+    }
+  ],
+  "created_at": "2026-05-08T08:50:16+0900",
+  "completed_at": "2026-05-08T09:07:51+0900"
+}

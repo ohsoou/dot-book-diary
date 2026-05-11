@@ -7,7 +7,7 @@ vi.mock('@/lib/storage/use-store', () => ({
   useStore: vi.fn().mockReturnValue({}),
 }))
 
-vi.mock('@/lib/last-read-store', () => ({
+vi.mock('@/lib/reading/last-read-store', () => ({
   getLastReadAtFromStore: vi.fn(),
 }))
 
@@ -36,7 +36,7 @@ function ContextReader() {
 
 describe('BearStateHydrator', () => {
   beforeEach(async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     const { getPreferences } = await import('@/lib/storage/preferences')
     vi.mocked(getLastReadAtFromStore).mockReset()
     vi.mocked(getPreferences).mockReset()
@@ -44,7 +44,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('isGuest=false이면 getLastReadAtFromStore를 호출하지 않는다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
 
     await act(async () => {
       render(
@@ -58,7 +58,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('isGuest=true이고 세션이 없으면 bearAsset=undefined, lastReadAt=null이 된다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
 
     render(
@@ -75,7 +75,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('isGuest=true이고 세션이 7일 이상 경과하면 bearAsset=Bear_sleeping.png가 된다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue('2026-04-14T12:00:00.000Z')
 
     render(
@@ -91,7 +91,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('Context 업데이트 후 label이 렌더된다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue('2026-04-14T12:00:00.000Z')
 
     render(
@@ -107,7 +107,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('preferences에 nickname이 설정된 경우 context.nickname에 해당 값이 들어간다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     const { getPreferences } = await import('@/lib/storage/preferences')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
     vi.mocked(getPreferences).mockResolvedValue({ nickname: '독서왕' })
@@ -125,7 +125,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('preferences에 nickname이 없으면 context.nickname이 책곰이가 된다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
 
     render(
@@ -141,7 +141,7 @@ describe('BearStateHydrator', () => {
   })
 
   it('preferences에 nickname이 빈 문자열이면 context.nickname이 책곰이가 된다', async () => {
-    const { getLastReadAtFromStore } = await import('@/lib/last-read-store')
+    const { getLastReadAtFromStore } = await import('@/lib/reading/last-read-store')
     const { getPreferences } = await import('@/lib/storage/preferences')
     vi.mocked(getLastReadAtFromStore).mockResolvedValue(null)
     vi.mocked(getPreferences).mockResolvedValue({ nickname: '' })

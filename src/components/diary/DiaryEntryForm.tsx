@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DiaryEntry } from '@/types'
 import type { ActionResult } from '@/lib/errors'
@@ -10,12 +10,7 @@ import { useToast } from '@/components/ui/Toast'
 import { Button } from '@/components/ui/Button'
 import { FieldError } from '@/components/ui/FieldError'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import {
-  addDiaryEntryAction,
-  updateDiaryEntryAction,
-  deleteDiaryEntryAction,
-} from '@/lib/actions/diary-entries'
-import { LocalStore } from '@/lib/storage/LocalStore'
+import { useDiaryActions } from '@/lib/client-actions/useDiaryActions'
 import { BookPicker } from './BookPicker'
 
 export type EntryType = 'quote' | 'review'
@@ -53,6 +48,7 @@ export function DiaryEntryForm({
   const router = useRouter()
   const { addToast } = useToast()
   const { setIsDirty } = useUnsavedChanges()
+  const diaryActions = useDiaryActions({ isLoggedIn })
 
   const [entryType, setEntryType] = useState<EntryType>(initialEntryType)
   const [body, setBody] = useState(initialBody)
@@ -65,11 +61,13 @@ export function DiaryEntryForm({
     body: string
     page?: number
   } | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState<string | undefined>()
+  const [isPending, startTransition] = useTransition()
   const [isDeleting, setIsDeleting] = useState(false)
 
   const initialRef = useRef({ entryType: initialEntryType, body: initialBody, page: initialPage, bookId: initialBookId })
 
-  // dirty 감지
   const isDirty =
     entryType !== initialRef.current.entryType ||
     body !== initialRef.current.body ||
@@ -80,11 +78,9 @@ export function DiaryEntryForm({
     setIsDirty(isDirty)
   }, [isDirty, setIsDirty])
 
-  // draft 복원: 마운트 시 1회
   useEffect(() => {
     getDiaryDraft(draftId).then((draft) => {
       if (!draft) return
-      // 현재 폼이 비어 있거나 초기값과 동일할 때만 복원 제안
       setPendingDraft({
         entryType: draft.entryType,
         body: draft.body,
@@ -109,7 +105,6 @@ export function DiaryEntryForm({
     clearDiaryDraft(draftId)
   }, [draftId])
 
-  // 30초 autosave
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isDirty) return
@@ -123,46 +118,57 @@ export function DiaryEntryForm({
     return () => clearInterval(interval)
   }, [draftId, entryType, body, page, bookId, isDirty])
 
-  // Server Action 바인딩
-  const boundUpdateAction = entryId
-    ? updateDiaryEntryAction.bind(null, entryId)
-    : null
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      setFieldErrors({})
+      setFormError(undefined)
 
-  const [state, formAction, isPending] = useActionState<ActionResult<DiaryEntry> | null, FormData>(
-    entryId ? boundUpdateAction! : addDiaryEntryAction,
-    null,
+      const pageNum = page !== '' ? Math.trunc(Number(page)) : undefined
+
+      startTransition(async () => {
+        let result: ActionResult<DiaryEntry>
+        if (entryId) {
+          result = await diaryActions.updateEntry(entryId, {
+            entryType,
+            body,
+            bookId: bookId || undefined,
+            page: pageNum,
+          })
+        } else {
+          result = await diaryActions.addEntry({
+            entryType,
+            body,
+            bookId: bookId || undefined,
+            page: pageNum,
+          })
+        }
+
+        if (result.ok) {
+          setIsDirty(false)
+          clearDiaryDraft(draftId)
+          addToast({ message: entryId ? '수정했어요' : '저장했어요', variant: 'success' })
+          onSuccess?.(result.data)
+          if (!onSuccess) {
+            router.push('/diary')
+          }
+        } else {
+          if (result.error.fieldErrors) {
+            setFieldErrors(result.error.fieldErrors)
+          } else {
+            setFormError(result.error.message)
+          }
+        }
+      })
+    },
+    [diaryActions, entryId, entryType, body, bookId, page, draftId, addToast, setIsDirty, onSuccess, router],
   )
 
-  const fieldErrors = state?.ok === false ? (state.error.fieldErrors ?? {}) : {}
-  const formError = state?.ok === false && !state.error.fieldErrors ? state.error.message : undefined
-
-  // 성공 처리
-  useEffect(() => {
-    if (!state?.ok) return
-    setIsDirty(false)
-    clearDiaryDraft(draftId)
-    addToast({ message: entryId ? '수정했어요' : '저장했어요', variant: 'success' })
-    onSuccess?.(state.data)
-    if (!onSuccess) {
-      router.push('/diary')
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state])
-
   const handleDelete = useCallback(async () => {
+    if (!entryId) return
     setIsDeleting(true)
     try {
-      let result: ActionResult<void>
-      if (isLoggedIn && entryId) {
-        result = await deleteDiaryEntryAction(entryId)
-      } else if (entryId) {
-        const store = new LocalStore()
-        await store.deleteDiaryEntry(entryId)
-        result = { ok: true, data: undefined }
-      } else {
-        result = { ok: false, error: { code: 'NOT_FOUND', message: '삭제할 항목이 없어요' } }
-      }
-
+      const result = await diaryActions.deleteEntry(entryId)
       if (result.ok) {
         setIsDirty(false)
         clearDiaryDraft(draftId)
@@ -176,65 +182,11 @@ export function DiaryEntryForm({
       setIsDeleting(false)
       setShowDeleteConfirm(false)
     }
-  }, [entryId, isLoggedIn, draftId, addToast, setIsDirty, onDelete, router])
-
-  const handleClientSubmit = useCallback(
-    async (formData: FormData) => {
-      if (isLoggedIn) return // Server Action이 처리
-      const store = new LocalStore()
-      try {
-        const rawPage = formData.get('page')
-        const pageNum =
-          rawPage && String(rawPage).trim() !== ''
-            ? Math.trunc(Number(rawPage))
-            : undefined
-        const rawBookId = formData.get('bookId')
-        const bookId =
-          rawBookId && String(rawBookId).trim() !== '' ? String(rawBookId) : undefined
-
-        let entry: DiaryEntry
-        if (entryId) {
-          entry = await store.updateDiaryEntry(entryId, {
-            entryType: formData.get('entryType') as EntryType,
-            body: String(formData.get('body') ?? ''),
-            bookId,
-            page: pageNum,
-          })
-        } else {
-          entry = await store.addDiaryEntry({
-            entryType: formData.get('entryType') as EntryType,
-            body: String(formData.get('body') ?? ''),
-            bookId,
-            page: pageNum,
-          })
-        }
-
-        setIsDirty(false)
-        clearDiaryDraft(draftId)
-        addToast({ message: entryId ? '수정했어요' : '저장했어요', variant: 'success' })
-        onSuccess?.(entry)
-        if (!onSuccess) router.push('/diary')
-      } catch {
-        addToast({ message: '저장에 실패했어요', variant: 'error' })
-      }
-    },
-    [isLoggedIn, entryId, draftId, addToast, setIsDirty, onSuccess, router],
-  )
-
-  const handleFormAction = useCallback(
-    (formData: FormData) => {
-      if (isLoggedIn) {
-        formAction(formData)
-      } else {
-        handleClientSubmit(formData)
-      }
-    },
-    [isLoggedIn, formAction, handleClientSubmit],
-  )
+  }, [diaryActions, entryId, draftId, addToast, setIsDirty, onDelete, router])
 
   return (
     <>
-      <form action={handleFormAction} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* entryType 토글 */}
         <div>
           <p className="text-xs text-[#a08866] mb-2">종류</p>

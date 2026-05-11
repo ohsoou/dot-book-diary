@@ -5,6 +5,7 @@ import { getStore } from '@/lib/storage'
 import type { ActionResult } from '@/lib/errors'
 import type { Book, BookSearchResult } from '@/types'
 import { AppError } from '@/lib/errors'
+import { bookSchema } from '@/lib/validation'
 
 export async function listBooksAction() : Promise<ActionResult<Book[]>>{
   try {
@@ -49,6 +50,7 @@ export async function addBookAction(
       publisher: input.publisher,
       coverUrl: input.coverUrl,
       totalPages: input.totalPages,
+      status: 'reading',
     })
 
     revalidatePath('/bookshelf')
@@ -93,6 +95,25 @@ export async function updateBookAction(
   bookId: string,
   patch: Partial<Omit<Book, 'id' | 'createdAt' | 'updatedAt'>>,
 ): Promise<ActionResult<Book>> {
+  const validation = bookSchema.partial().safeParse(patch)
+  if (!validation.success) {
+    const fieldErrors: Record<string, string> = {}
+    const messages: string[] = []
+    for (const issue of validation.error.issues) {
+      const field = issue.path.join('.')
+      if (field) fieldErrors[field] = issue.message
+      messages.push(issue.message)
+    }
+    return {
+      ok: false,
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: messages[0] ?? '입력이 올바르지 않습니다',
+        ...(Object.keys(fieldErrors).length > 0 && { fieldErrors }),
+      },
+    }
+  }
+
   try {
     const store = await getStore()
     const book = await store.updateBook(bookId, patch)

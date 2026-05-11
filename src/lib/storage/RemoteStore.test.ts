@@ -375,3 +375,458 @@ describe('RemoteStore', () => {
     });
   });
 });
+
+// ── step 1: status/rating/finishedAt/memo 매핑 & auto-finishedAt ─────────────
+
+describe('RemoteStore — Books status/rating/finishedAt/memo (step 1)', () => {
+  const fullBookRow = {
+    id: 'book-1',
+    user_id: 'user-1',
+    isbn: '9791234567890',
+    title: '테스트 책',
+    author: '홍길동',
+    publisher: '테스트 출판사',
+    cover_url: null,
+    total_pages: 300,
+    target_date: null,
+    status: 'finished',
+    rating: 4,
+    finished_at: '2026-05-01',
+    memo: '좋은 책이었어요',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  };
+
+  it('listBooks: status/rating/finishedAt/memo가 camelCase로 올바르게 매핑된다', async () => {
+    const { supabase, query } = makeMockSupabase({ data: [fullBookRow], error: null });
+    query.order.mockResolvedValue({ data: [fullBookRow], error: null });
+
+    const store = new RemoteStore(supabase);
+    const books = await store.listBooks();
+    expect(books[0]).toMatchObject({
+      status: 'finished',
+      rating: 4,
+      finishedAt: '2026-05-01',
+      memo: '좋은 책이었어요',
+    });
+  });
+
+  it('rowToBook: status가 null이면 reading 폴백을 적용한다', async () => {
+    const rowWithNullStatus = { ...fullBookRow, status: null as unknown as string };
+    const { supabase, query } = makeMockSupabase({ data: [rowWithNullStatus], error: null });
+    query.order.mockResolvedValue({ data: [rowWithNullStatus], error: null });
+
+    const store = new RemoteStore(supabase);
+    const books = await store.listBooks();
+    expect(books[0]?.status).toBe('reading');
+  });
+
+  it('rowToBook: rating/finishedAt/memo가 null이면 undefined로 변환된다', async () => {
+    const rowWithNulls = { ...fullBookRow, rating: null, finished_at: null, memo: null };
+    const { supabase, query } = makeMockSupabase({ data: [rowWithNulls], error: null });
+    query.order.mockResolvedValue({ data: [rowWithNulls], error: null });
+
+    const store = new RemoteStore(supabase);
+    const books = await store.listBooks();
+    expect(books[0]?.rating).toBeUndefined();
+    expect(books[0]?.finishedAt).toBeUndefined();
+    expect(books[0]?.memo).toBeUndefined();
+  });
+
+  it('updateBook: status=finished이고 finishedAt 미지정 시 today를 finished_at으로 전송한다', async () => {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const returnedRow = { ...fullBookRow, status: 'finished', finished_at: today };
+
+    let capturedPayload: Record<string, unknown> = {};
+    const chainObj = {
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: returnedRow, error: null }),
+    };
+    const supabase = {
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }) },
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+          capturedPayload = payload;
+          return chainObj;
+        }),
+      }),
+    } as unknown as import('@supabase/supabase-js').SupabaseClient;
+
+    const store = new RemoteStore(supabase);
+    const result = await store.updateBook('book-1', { status: 'finished' });
+
+    expect(result.finishedAt).toBe(today);
+    expect(capturedPayload).toMatchObject({ status: 'finished', finished_at: today });
+  });
+
+  it('updateBook: status=finished이고 finishedAt 명시 시 명시값을 우선한다', async () => {
+    const explicitDate = '2026-01-01';
+    const returnedRow = { ...fullBookRow, status: 'finished', finished_at: explicitDate };
+
+    let capturedPayload: Record<string, unknown> = {};
+    const chainObj = {
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: returnedRow, error: null }),
+    };
+    const supabase = {
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }) },
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+          capturedPayload = payload;
+          return chainObj;
+        }),
+      }),
+    } as unknown as import('@supabase/supabase-js').SupabaseClient;
+
+    const store = new RemoteStore(supabase);
+    const result = await store.updateBook('book-1', { status: 'finished', finishedAt: explicitDate });
+
+    expect(result.finishedAt).toBe(explicitDate);
+    expect(capturedPayload).toMatchObject({ finished_at: explicitDate });
+  });
+
+  it('updateBook: status가 finished가 아닐 때 finishedAt을 자동으로 비우지 않는다', async () => {
+    const returnedRow = { ...fullBookRow, status: 'reading', finished_at: '2026-01-01' };
+
+    let capturedPayload: Record<string, unknown> = {};
+    const chainObj = {
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: returnedRow, error: null }),
+    };
+    const supabase = {
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }) },
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+          capturedPayload = payload;
+          return chainObj;
+        }),
+      }),
+    } as unknown as import('@supabase/supabase-js').SupabaseClient;
+
+    const store = new RemoteStore(supabase);
+    await store.updateBook('book-1', { status: 'reading' });
+
+    // finished_at을 패치에서 보내지 않아야 한다 (DB가 기존 값을 유지)
+    expect(capturedPayload).not.toHaveProperty('finished_at');
+  });
+
+  it('addBook: status/rating/finished_at/memo를 올바르게 insert한다', async () => {
+    const returnedRow = { ...fullBookRow };
+    const { supabase, query } = makeMockSupabase({ data: returnedRow, error: null });
+    query.single.mockResolvedValue({ data: returnedRow, error: null });
+
+    const store = new RemoteStore(supabase);
+    const book = await store.addBook({
+      title: '테스트 책',
+      isbn: '9791234567890',
+      author: '홍길동',
+      publisher: '테스트 출판사',
+      totalPages: 300,
+      status: 'finished',
+      rating: 4,
+      finishedAt: '2026-05-01',
+      memo: '좋은 책이었어요',
+    });
+
+    expect(book.status).toBe('finished');
+    expect(book.rating).toBe(4);
+    expect(book.finishedAt).toBe('2026-05-01');
+    expect(book.memo).toBe('좋은 책이었어요');
+  });
+
+  it('findBookByIsbn: status가 finished인 책도 정상적으로 반환한다', async () => {
+    const { supabase, query } = makeMockSupabase({ data: fullBookRow, error: null });
+    query.maybeSingle.mockResolvedValue({ data: fullBookRow, error: null });
+
+    const store = new RemoteStore(supabase);
+    const book = await store.findBookByIsbn('9791234567890');
+    expect(book).not.toBeNull();
+    expect(book?.status).toBe('finished');
+  });
+});
+
+// ── Aggregation & search 테스트 ───────────────────────────────────────────────
+
+/**
+ * Supabase 쿼리 빌더를 흉내내는 thenable 모킹 객체.
+ * 모든 체인 메서드가 자기 자신을 반환하므로 임의 길이의 체인을 await할 수 있다.
+ */
+function makeAggregationQuery(resolvedValue: { data: unknown; error: unknown; count?: number | null }) {
+  const q = {
+    select: vi.fn(),
+    eq: vi.fn(),
+    gte: vi.fn(),
+    lte: vi.fn(),
+    ilike: vi.fn(),
+    order: vi.fn(),
+    limit: vi.fn(),
+    then: (
+      resolve: (v: { data: unknown; error: unknown; count?: number | null }) => unknown,
+      reject?: (e: unknown) => unknown,
+    ) => Promise.resolve(resolvedValue).then(resolve, reject),
+    catch: (reject: (e: unknown) => unknown) => Promise.resolve(resolvedValue).catch(reject),
+  };
+  q.select.mockReturnValue(q);
+  q.eq.mockReturnValue(q);
+  q.gte.mockReturnValue(q);
+  q.lte.mockReturnValue(q);
+  q.ilike.mockReturnValue(q);
+  q.order.mockReturnValue(q);
+  q.limit.mockReturnValue(q);
+  return q;
+}
+
+function makeAggregationSupabase(
+  resolvedValue: { data: unknown; error: unknown; count?: number | null },
+  userId = 'user-1',
+) {
+  const q = makeAggregationQuery(resolvedValue);
+  const supabase = {
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: { id: userId } } }),
+    },
+    from: vi.fn().mockReturnValue(q),
+  } as unknown as SupabaseClient;
+  return { supabase, q };
+}
+
+describe('RemoteStore — aggregation & search', () => {
+  describe('getReadingStats', () => {
+    it('세션이 없으면 모두 0을 반환한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      const stats = await store.getReadingStats();
+      expect(stats).toEqual({
+        totalMinutes: 0,
+        totalSessions: 0,
+        totalPagesRead: 0,
+        daysActive: 0,
+        booksTouched: 0,
+      });
+    });
+
+    it('period 없을 때 gte/lte를 호출하지 않는다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.getReadingStats();
+      expect(q.gte).not.toHaveBeenCalled();
+      expect(q.lte).not.toHaveBeenCalled();
+    });
+
+    it('period 있을 때 gte/lte를 올바른 값으로 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.getReadingStats({ from: '2024-01-01', to: '2024-01-31' });
+      expect(q.gte).toHaveBeenCalledWith('read_date', '2024-01-01');
+      expect(q.lte).toHaveBeenCalledWith('read_date', '2024-01-31');
+    });
+
+    it('세션 목록을 정확히 집계한다', async () => {
+      const rows = [
+        { duration_minutes: 30, start_page: 10, end_page: 50, read_date: '2024-01-01', book_id: 'b1' },
+        { duration_minutes: 60, start_page: null, end_page: null, read_date: '2024-01-01', book_id: 'b1' },
+        { duration_minutes: 20, start_page: 100, end_page: 120, read_date: '2024-01-02', book_id: 'b2' },
+      ];
+      const { supabase } = makeAggregationSupabase({ data: rows, error: null });
+      const store = new RemoteStore(supabase);
+      const stats = await store.getReadingStats();
+      expect(stats.totalMinutes).toBe(110);
+      expect(stats.totalSessions).toBe(3);
+      expect(stats.totalPagesRead).toBe(60); // 40 + 20
+      expect(stats.daysActive).toBe(2);
+      expect(stats.booksTouched).toBe(2);
+    });
+
+    it('Supabase 에러 발생 시 UPSTREAM_FAILED를 throw한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: null, error: { message: 'DB 오류' } });
+      const store = new RemoteStore(supabase);
+      await expect(store.getReadingStats()).rejects.toMatchObject({ code: 'UPSTREAM_FAILED' });
+    });
+  });
+
+  describe('getReadingStreak', () => {
+    it('세션이 없으면 current/longest 0, lastReadDate null을 반환한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      const streak = await store.getReadingStreak();
+      expect(streak).toEqual({ current: 0, longest: 0, lastReadDate: null });
+    });
+
+    it('order 메서드를 read_date desc로 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.getReadingStreak();
+      expect(q.order).toHaveBeenCalledWith('read_date', { ascending: false });
+    });
+
+    it('연속 날짜로 최장 연속 독서일을 계산한다', async () => {
+      const rows = [
+        { read_date: '2024-01-01' },
+        { read_date: '2024-01-02' },
+        { read_date: '2024-01-03' },
+        { read_date: '2024-01-10' },
+      ];
+      const { supabase } = makeAggregationSupabase({ data: rows, error: null });
+      const store = new RemoteStore(supabase);
+      const streak = await store.getReadingStreak();
+      expect(streak.longest).toBe(3);
+      expect(streak.lastReadDate).toBe('2024-01-10');
+    });
+  });
+
+  describe('listSessionsGroupedByDate', () => {
+    it('period에 따라 gte/lte를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.listSessionsGroupedByDate({ from: '2024-01-01', to: '2024-01-31' });
+      expect(q.gte).toHaveBeenCalledWith('read_date', '2024-01-01');
+      expect(q.lte).toHaveBeenCalledWith('read_date', '2024-01-31');
+    });
+
+    it('같은 날짜의 세션을 그룹화하고 totalMinutes를 합산한다', async () => {
+      const rows = [
+        { read_date: '2024-01-01', duration_minutes: 30, book_id: 'b1' },
+        { read_date: '2024-01-01', duration_minutes: 20, book_id: 'b1' },
+        { read_date: '2024-01-02', duration_minutes: 45, book_id: 'b2' },
+      ];
+      const { supabase } = makeAggregationSupabase({ data: rows, error: null });
+      const store = new RemoteStore(supabase);
+      const result = await store.listSessionsGroupedByDate({ from: '2024-01-01', to: '2024-01-02' });
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ date: '2024-01-01', totalMinutes: 50, bookIds: ['b1'] });
+      expect(result[1]).toMatchObject({ date: '2024-01-02', totalMinutes: 45, bookIds: ['b2'] });
+    });
+
+    it('결과를 날짜 오름차순으로 반환한다', async () => {
+      const rows = [
+        { read_date: '2024-01-03', duration_minutes: 10, book_id: 'b1' },
+        { read_date: '2024-01-01', duration_minutes: 10, book_id: 'b1' },
+        { read_date: '2024-01-02', duration_minutes: 10, book_id: 'b1' },
+      ];
+      const { supabase } = makeAggregationSupabase({ data: rows, error: null });
+      const store = new RemoteStore(supabase);
+      const result = await store.listSessionsGroupedByDate({ from: '2024-01-01', to: '2024-01-03' });
+      expect(result.map((r) => r.date)).toEqual(['2024-01-01', '2024-01-02', '2024-01-03']);
+    });
+
+    it('동일 날짜 내 bookId 중복을 제거한다', async () => {
+      const rows = [
+        { read_date: '2024-01-01', duration_minutes: 10, book_id: 'b1' },
+        { read_date: '2024-01-01', duration_minutes: 10, book_id: 'b1' },
+        { read_date: '2024-01-01', duration_minutes: 10, book_id: 'b2' },
+      ];
+      const { supabase } = makeAggregationSupabase({ data: rows, error: null });
+      const store = new RemoteStore(supabase);
+      const result = await store.listSessionsGroupedByDate({ from: '2024-01-01', to: '2024-01-01' });
+      expect(result[0]!.bookIds).toEqual(['b1', 'b2']);
+    });
+  });
+
+  describe('searchDiaryEntries', () => {
+    const entryRow = {
+      id: 'e1',
+      book_id: 'b1',
+      entry_type: 'quote' as const,
+      body: '테스트 문장',
+      page: null,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    it('q가 있을 때 ilike를 올바른 패턴으로 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [entryRow], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ q: '테스트' });
+      expect(q.ilike).toHaveBeenCalledWith('body', '%테스트%');
+    });
+
+    it('q에 % 가 포함되면 이스케이프하여 ilike를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ q: '50%' });
+      expect(q.ilike).toHaveBeenCalledWith('body', '%50\\%%');
+    });
+
+    it('q가 없을 때 ilike를 호출하지 않는다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({});
+      expect(q.ilike).not.toHaveBeenCalled();
+    });
+
+    it('bookId 필터가 있으면 eq(book_id, ...)를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ bookId: 'b1' });
+      expect(q.eq).toHaveBeenCalledWith('book_id', 'b1');
+    });
+
+    it('limit을 지정하면 limit()를 해당 값으로 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ limit: 10 });
+      expect(q.limit).toHaveBeenCalledWith(10);
+    });
+
+    it('limit 미지정 시 기본값 50으로 limit()를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({});
+      expect(q.limit).toHaveBeenCalledWith(50);
+    });
+
+    it('from 필터가 있으면 gte(created_at, ...)를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ from: '2024-01-01' });
+      expect(q.gte).toHaveBeenCalledWith('created_at', '2024-01-01T00:00:00');
+    });
+
+    it('to 필터가 있으면 lte(created_at, ...)를 호출한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: [], error: null });
+      const store = new RemoteStore(supabase);
+      await store.searchDiaryEntries({ to: '2024-01-31' });
+      expect(q.lte).toHaveBeenCalledWith('created_at', '2024-01-31T23:59:59');
+    });
+
+    it('DiaryEntry 배열로 매핑하여 반환한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: [entryRow], error: null });
+      const store = new RemoteStore(supabase);
+      const result = await store.searchDiaryEntries({});
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ id: 'e1', bookId: 'b1', entryType: 'quote', body: '테스트 문장' });
+    });
+  });
+
+  describe('countBooks', () => {
+    it('책 수를 반환한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: null, error: null, count: 5 });
+      const store = new RemoteStore(supabase);
+      const count = await store.countBooks();
+      expect(count).toBe(5);
+    });
+
+    it('count가 null이면 0을 반환한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: null, error: null, count: null });
+      const store = new RemoteStore(supabase);
+      const count = await store.countBooks();
+      expect(count).toBe(0);
+    });
+
+    it('select에 count exact + head: true 옵션을 전달한다', async () => {
+      const { supabase, q } = makeAggregationSupabase({ data: null, error: null, count: 3 });
+      const store = new RemoteStore(supabase);
+      await store.countBooks();
+      expect(q.select).toHaveBeenCalledWith('*', { count: 'exact', head: true });
+    });
+
+    it('Supabase 에러 발생 시 UPSTREAM_FAILED를 throw한다', async () => {
+      const { supabase } = makeAggregationSupabase({ data: null, error: { message: 'DB 오류' }, count: null });
+      const store = new RemoteStore(supabase);
+      await expect(store.countBooks()).rejects.toMatchObject({ code: 'UPSTREAM_FAILED' });
+    });
+  });
+});

@@ -1,5 +1,5 @@
 import type { Book, ReadingSession } from '@/types';
-import { formatLocalYmd } from './date';
+import { formatLocalYmd } from '@/lib/date';
 
 export type GoalStatus = 'none' | 'on-track' | 'behind' | 'overdue';
 

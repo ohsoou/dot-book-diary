@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/lib/storage/preferences', () => ({
-  getPreferences: vi.fn().mockResolvedValue({ guestBannerDismissed: false }),
+  getPreferences: vi.fn().mockResolvedValue({ guestBannerDismissed: false, homeGuideDismissed: true }),
   updatePreferences: vi.fn(),
 }))
 
